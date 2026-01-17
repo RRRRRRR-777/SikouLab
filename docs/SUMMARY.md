@@ -8,3 +8,6 @@
 * docs/er_diagram.md
   * 概要: データベース設計（ER図）。users, plans, articles, news, likes, stocks, stock_news, polls, poll_options, poll_votes の各テーブル定義と
     それらのリレーション（Mermaid形式のER図）を記載。
+* docs/development_guidelines.md
+  * 概要: 開発に関する技術的なガイドライン。技術スタック（Next.js + Go）、リポジトリ構成（モノレポ）、インフラ（Google Cloud）、外部サービス連携（OAuth, Stripe, Metabase）を定義。
+    テスト方針、CI/CD、コーディング規約、ブランチ戦略などは今後策定予定。
