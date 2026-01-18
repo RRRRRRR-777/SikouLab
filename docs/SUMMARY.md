@@ -3,10 +3,32 @@
 ## プロジェクト管理ドキュメント
 * docs/development_guidelines.md
   * 概要: 開発に関する技術的なガイドライン。技術スタック（Next.js + Go）、リポジトリ構成（モノレポ）、インフラ（Google Cloud）、外部サービス連携（OAuth, Stripe, Metabase）を定義。
-    テスト方針、CI/CD、ブランチ戦略、バージョニング戦略を記載。使用ライブラリ（shadcn/ui, Tailwind CSS, ORM等）の検討事項を含む。
+    テスト方針、CI/CD、ブランチ戦略、バージョニング戦略、デプロイフローを記載。
 * docs/documentation_guidelines.md
   * 概要: ドキュメント作成・管理・運用の方針を定義。ディレクトリ構成、ファイル命名規則、更新ルール、ドキュメント種別を記載。
     SUMMARY.md更新ルールやAIエージェント向けガイドラインを含む。
+
+## ADR（Architecture Decision Records）
+技術選定の意思決定記録。選定理由と検討した選択肢を記載。
+
+* docs/adr/001-ui-library.md
+  * 概要: UIライブラリの選定。shadcn/ui + Tailwind CSS + Figma Kitを採用。
+    カスタマイズ自由度とFigma連携を重視した選定理由を記載。
+* docs/adr/002-form-management.md
+  * 概要: フォーム管理ライブラリの選定。React Hook Form + Zodを採用。
+    プロジェクトで想定されるフォーム一覧と選定理由を記載。
+* docs/adr/003-data-fetching.md
+  * 概要: データフェッチライブラリの選定。TanStack Queryを採用。
+    無限スクロール、楽観的更新、リアルタイム更新の要件を満たす選定理由を記載。
+* docs/adr/004-backend-database.md
+  * 概要: バックエンドDBアクセス・マイグレーションの選定。sqlx + golang-migrateを採用。
+    SQL重視のアプローチとSQLファイル管理の選定理由を記載。
+* docs/adr/005-staging-environment.md
+  * 概要: staging環境の方針。初期は構築せず、必要に応じて後から追加。
+    dev → prod直接のフローと、staging追加を検討するタイミングを記載。
+* docs/adr/006-deploy-flow.md
+  * 概要: デプロイフローの選定。GitHub Environment承認を採用。
+    トリガー、承認プロセス、ロールバック方針を記載。
 
 ## バージョン別ドキュメント（versions/）
 * docs/versions/1_0_0/requirements_definition_document.md
