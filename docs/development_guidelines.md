@@ -11,6 +11,7 @@
   - モック確認用環境:
     - 第一候補: Vercel（個人利用無料、自動デプロイ）
     - 第二候補: ラズパイ + Cloudflare（コスト最小化）
+    - 第三候補: 無理に工数をかける必要もないので、その場合は採用しないものとする
 - **使用ライブラリ**: → [ADR-001](./adr/001-ui-library.md), [ADR-002](./adr/002-form-management.md), [ADR-003](./adr/003-data-fetching.md)
   - UIコンポーネント: shadcn/ui + Figma Kit
   - CSSフレームワーク: Tailwind CSS
