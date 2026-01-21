@@ -14,7 +14,7 @@ description: バージョン単位の要件定義書を作成するSkill。Why/W
 ```
 /requirements（要件定義）
   ↓ What/Why を定義
-/basic-design（基本設計）
+/system-design（基本設計）
   ↓ 機能分解・構成を定義
 /feature-spec（機能設計）
   ↓ 詳細仕様を定義

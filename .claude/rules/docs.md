@@ -71,7 +71,7 @@ paths:
 | ドキュメント名 | ファイルパス | 概要 |
 |---|---|---|
 | **要件定義書** | `docs/versions/<version>/requirements.md` | Why/What を定義。背景・目的・成功基準・機能一覧 |
-| **基本設計書** | `docs/versions/<version>/basic-design.md` | How（外部設計）を定義。機能相関・画面設計・データ設計・権限 |
+| **基本設計書** | `docs/versions/<version>/system-design.md` | How（外部設計）を定義。機能相関・画面設計・データ設計・権限 |
 | **詳細設計書** | `docs/functions/<大機能>/<中機能>.md` | How（内部設計）を定義。機能単位の詳細仕様・シーケンス図 |
 
 ### ファイル相関図
@@ -79,7 +79,7 @@ paths:
 ```
 要件定義書 (requirements.md)
     ↓↑ 常に同期
-基本設計書 (basic-design.md)
+基本設計書 (system-design.md)
     ↓↑ フィードバック
 詳細設計書 (docs/functions/<大機能>/<中機能>.md)
 ```
@@ -88,7 +88,7 @@ paths:
 
 #### 1. `requirements.md` を編集した場合
 
-**確認・修正対象**: `docs/versions/1_0_0/basic-design.md`
+**確認・修正対象**: `docs/versions/1_0_0/system-design.md`
 
 影響を受ける箇所：
 - 2.1 機能階層 - 機能の追加/削除/優先度変更
@@ -99,7 +99,7 @@ paths:
 - 6. 権限マトリクス - ロール・権限の変更
 - 7. 制約・前提 - ビジネス制約・プラン構成
 
-#### 2. `basic-design.md` を編集した場合
+#### 2. `system-design.md` を編集した場合
 
 **確認・修正対象**:
 1. `docs/versions/1_0_0/requirements.md`
@@ -117,7 +117,7 @@ paths:
 
 #### 3. `docs/functions/<大機能>/<中機能>.md` を編集した場合
 
-**確認・修正対象**: `docs/versions/1_0_0/basic-design.md`
+**確認・修正対象**: `docs/versions/1_0_0/system-design.md`
 
 影響を受ける箇所：
 - 2.1 機能階層 - ステータス・詳細設計リンクの更新
@@ -128,10 +128,10 @@ paths:
 
 ### 相関関係マトリクス
 
-| 編集ファイル | requirements.md | basic-design.md | functions/ |
+| 編集ファイル | requirements.md | system-design.md | functions/ |
 |---|:---:|:---:|:---:|
 | requirements.md | - | ○ 必ず修正 | ○ 間接的に確認 |
-| basic-design.md | ○ 必ず修正 | - | ○ 必ず修正 |
+| system-design.md | ○ 必ず修正 | - | ○ 必ず修正 |
 | functions/ | ✓ フィードバック | ✓ フィードバック | - |
 
 凡例：
