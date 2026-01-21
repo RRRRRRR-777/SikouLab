@@ -8,7 +8,6 @@
 * **v1.0.0**
   * [要件定義書](versions/1_0_0/requirements.md)
   * [基本設計書](versions/1_0_0/system-design.md)
-  * [ER図](versions/1_0_0/er_diagram.md)
 
 ## 機能別詳細仕様
 * TBD: 今後機能実装時に追加予定
