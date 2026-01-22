@@ -79,7 +79,28 @@
 
 ## 3. CI/CD
 
-### 3.1 CI（Continuous Integration）
+### 3.1 Pre-commit（ローカル）
+
+コミット前にlint/formatを自動実行し、CIでの失敗を未然に防ぐ。
+
+| 対象 | 項目 | ツール |
+|------|------|--------|
+| Frontend | lint | ESLint |
+| Frontend | format | Prettier |
+| Backend | lint | golangci-lint（未導入時は go vet） |
+| Backend | format | gofmt |
+
+**セットアップ**
+```bash
+./scripts/setup-hooks.sh
+```
+
+**スキップ方法**（緊急時のみ）
+```bash
+git commit --no-verify
+```
+
+### 3.2 CI（Continuous Integration）
 
 | 項目 | ticket | dev | main |
 |------|--------|-----|------|
@@ -90,7 +111,7 @@
 | E2Eテスト | - | - | ✓ |
 | VRT | - | - | ✓ |
 
-### 3.2 CD（Continuous Deployment）
+### 3.3 CD（Continuous Deployment）
 → [ADR-006](./adr/006-deploy-flow.md)
 - **トリガー**: GitHub Environment承認
 - **承認**: Environment Protection Rulesで承認者指定
