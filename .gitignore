@@ -68,3 +68,5 @@ go.work.sum
 
 .history/
 TODO.md
+tmp/
+
