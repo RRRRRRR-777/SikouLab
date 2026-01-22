@@ -23,4 +23,26 @@
 
 ---
 
+## 開発ルール（.claude/）
+
+### プロジェクト指針
+* [CLAUDE.md](../.claude/CLAUDE.md)
+
+### rules
+* [workflow.md](../.claude/rules/workflow.md) - 開発ワークフロー
+* [docs.md](../.claude/rules/docs.md) - docsディレクトリルール
+* [frontend.md](../.claude/rules/frontend.md) - フロントエンド規約
+* [backend.md](../.claude/rules/backend.md) - バックエンド規約
+
+### skills
+* [commit](../.claude/skills/commit/SKILL.md) - Git commit conventions
+* [feature-spec](../.claude/skills/feature-spec/SKILL.md) - 機能仕様書作成
+* [frontend-design](../.claude/skills/frontend-design/SKILL.md) - フロントエンドデザイン
+* [go-standards](../.claude/skills/go-standards/SKILL.md) - Go coding standards
+* [nextjs-15](../.claude/skills/nextjs-15/SKILL.md) - Next.js 15 assistant
+* [requirements](../.claude/skills/requirements/SKILL.md) - 要件定義書作成
+* [system-design](../.claude/skills/system-design/SKILL.md) - 基本設計書作成
+
+---
+
 [ドキュメント一覧](SUMMARY.md)
