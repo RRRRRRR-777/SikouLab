@@ -30,3 +30,24 @@ paths:
 * エラーハンドリングは境界（ユーザー入力、外部API）でのみ
 * 内部のコード・フレームワークは信頼する
 * 使われていないコードは完全削除（後方互換性ハック不要）
+
+## Next.js 15 必須ルール
+
+### Breaking Changes（必ず守る）
+* `params`, `searchParams`, `cookies()`, `headers()` は **async** で取得
+  ```typescript
+  // ✅ 正しい
+  export default async function Page({ params }) {
+    const { id } = await params;
+  }
+  ```
+* `useFormState` → `useActionState`（`react` からimport）
+* `fetch()` はデフォルトでキャッシュされない（明示的に設定が必要）
+
+### 基本原則
+* Server Components をデフォルトとし、Client Components は必要時のみ
+* データ取得はサーバーで行い、クライアントでの `useEffect` + `fetch` は避ける
+* Server Actions でミューテーションを実装
+
+### 詳細リファレンス
+コード例やパターンの詳細が必要な場合は `/nextjs-15` スキルを呼び出してください。
