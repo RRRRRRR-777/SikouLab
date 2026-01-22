@@ -29,6 +29,9 @@
 * docs/adr/006-deploy-flow.md
   * 概要: デプロイフローの選定。GitHub Environment承認を採用。
     トリガー、承認プロセス、ロールバック方針を記載。
+* docs/adr/007-log-monitoring.md
+  * 概要: ログ監視方式の選定。Cloud Logging + Cloud Monitoring（GCP完結）を採用。
+    障害発生時のフロー、通知先（Cloud Consoleアプリ）、将来拡張（LLM分析）を記載。
 
 ## バージョン別ドキュメント（versions/）
 * docs/versions/1_0_0/requirements.md

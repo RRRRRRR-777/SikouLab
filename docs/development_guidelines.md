@@ -48,6 +48,11 @@
   - 用途: 本番環境用画像、VRTベースライン画像
   - バケット/ディレクトリで用途を分離
 - **CDN**: Cloud CDN（画像配信用）
+- **ログ監視**: → [ADR-007](./adr/007-log-monitoring.md)
+  - ログ収集: Cloud Logging
+  - 監視・アラート: Cloud Monitoring
+  - 通知先: Cloud Consoleアプリ（iOSプッシュ通知）
+  - 検知対象: 500エラー、サービスダウン、外部API通信失敗
 
 ### 1.5 環境構成
 → [ADR-005](./adr/005-staging-environment.md)
