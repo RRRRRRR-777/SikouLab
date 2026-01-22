@@ -75,9 +75,10 @@
 * Figma URL: https://www.figma.com/design/KLDR5porwKHiMz5EWp3ABs/Web%E3%82%A2%E3%83%97%E3%83%AA%E9%96%8B%E7%99%BA%E3%80%80%E3%82%B7%E3%82%B3%E3%82%A6%E3%83%A9%E3%83%9C%E6%A0%AA%E5%BC%8F%E4%BC%9A%E7%A4%BE
 * File Key: KLDR5porwKHiMz5EWp3ABs
 
-## ドメイン別詳細ルール
-ドメイン別の詳細なルールは `.claude/rules/` 配下のファイルを参照してください。
+## 詳細ルール
+詳細なルールは `.claude/rules/` 配下のファイルを参照してください。
 
+* @.claude/rules/workflow.md - 開発ワークフロー（設計→実装→テストの流れ）
 * @.claude/rules/docs.md - docsディレクトリ関連ルール
 * @.claude/rules/frontend.md - frontendディレクトリ関連ルール
 * @.claude/rules/backend.md - backendディレクトリ関連ルール

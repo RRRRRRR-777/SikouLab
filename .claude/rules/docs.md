@@ -28,6 +28,14 @@ paths:
 * 階層は深くしすぎない（最大3階層推奨）
 * 技術的詳細よりも「なぜそうするか」を重視
 
+## ファイル・ディレクトリ命名規則
+* **ファイル名・ディレクトリ名は英語**（ケバブケース推奨）
+* 内容（本文）は日本語でOK
+* 例:
+  * ○ `docs/functions/auth/login.md`
+  * ○ `docs/functions/article/create-edit.md`
+  * × `docs/functions/認証/ログイン.md`
+
 ## デザイン・UI参照
 画面の設計を行う際は、以下のFigmaを参照すること。
 
@@ -53,7 +61,8 @@ paths:
 
 ### 2. 詳細設計（/feature-spec）
 * **目的**: 機能単位の詳細仕様を作成
-* **出力先**: `docs/functions/<大機能>/<中機能>.md`
+* **出力先**: `docs/functions/<feature-category>/<feature-name>.md`（英語ケバブケース）
+  * 例: `docs/functions/auth/login.md`, `docs/functions/article/create-edit.md`
 * **前提条件**: 基本設計の機能一覧に記載されていること（推奨）
 * **内容**:
   * 機能概要・目的・権限
@@ -68,7 +77,7 @@ paths:
        └─ 機能一覧に機能を定義
             ↓
 /feature-spec
-  └─ docs/functions/<大機能>/<中機能>.md
+  └─ docs/functions/<feature-category>/<feature-name>.md
        └─ 機能一覧のステータス・リンクを更新
             ↓
 実装
@@ -87,7 +96,8 @@ paths:
 |---|---|---|
 | **要件定義書** | `docs/versions/<version>/requirements.md` | Why/What を定義。背景・目的・成功基準・機能一覧 |
 | **基本設計書** | `docs/versions/<version>/system-design.md` | How（外部設計）を定義。機能相関・画面設計・データ設計・権限 |
-| **詳細設計書** | `docs/functions/<大機能>/<中機能>.md` | How（内部設計）を定義。機能単位の詳細仕様・シーケンス図 |
+| **E2Eシナリオ** | `docs/versions/<version>/test_scenarios.md` | ユーザーストーリー・画面遷移に基づくE2Eテストシナリオ |
+| **詳細設計書** | `docs/functions/<feature-category>/<feature-name>.md` | How（内部設計）を定義。機能単位の詳細仕様・シーケンス図 |
 
 ### ファイル相関図
 
@@ -95,8 +105,11 @@ paths:
 要件定義書 (requirements.md)
     ↓↑ 常に同期
 基本設計書 (system-design.md)
+    │
+    ├─→ E2Eシナリオ (test_scenarios.md)
+    │
     ↓↑ フィードバック
-詳細設計書 (docs/functions/<大機能>/<中機能>.md)
+詳細設計書 (docs/functions/<feature-category>/<feature-name>.md)
 ```
 
 ### 編集時の影響範囲
@@ -130,7 +143,7 @@ paths:
 - **データ設計の変更** → 対応する詳細設計ファイルの関連テーブルセクションを更新
 - **権限マトリクスの変更** → 対応する詳細設計ファイルの権限セクションを更新
 
-#### 3. `docs/functions/<大機能>/<中機能>.md` を編集した場合
+#### 3. `docs/functions/<feature-category>/<feature-name>.md` を編集した場合
 
 **確認・修正対象**: `docs/versions/1_0_0/system-design.md`
 

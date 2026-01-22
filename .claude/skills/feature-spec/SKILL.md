@@ -7,7 +7,7 @@ description: 機能仕様ページを作成するSkill。設計段階で新規�
 
 ## 概要
 
-新規機能の設計段階で、機能仕様ページを `docs/functions/{大機能}/{中機能}.md` に作成するSkillです。
+新規機能の設計段階で、機能仕様ページを `docs/functions/{feature-category}/{feature-name}.md` に作成するSkillです。
 
 **設計方針**: アジャイル的に進めるため、ブロッカーになる箇所は早期に決定し、影響範囲が小さい箇所は比較検討案を記載してTBDとする。
 
@@ -33,12 +33,15 @@ description: 機能仕様ページを作成するSkill。設計段階で新規�
 
 ```
 docs/functions/
-└── {大機能}/
-    └── {中機能}.md
+└── {feature-category}/
+    └── {feature-name}.md
 ```
 
+**命名規則**: 英語ケバブケース
+
 例：
-- `docs/functions/articles/creation.md`（記事作成機能）
+- `docs/functions/article/create-edit.md`（記事作成・編集機能）
+- `docs/functions/auth/login.md`（ログイン機能）
 - `docs/functions/news/translation.md`（ニュース翻訳機能）
 
 ## 出力テンプレート
@@ -233,3 +236,13 @@ Frontend --> User: 表示
   - ユースケース: ユーザー視点の利用シナリオを表現
 - 🟢後回し項目は「比較検討案を箇条書き＋決定TBD」の形式で記載
 - 影響範囲は機能（他機能への影響）を早期決定、コードは後回し可
+
+## OpenAPIとの連携（バックエンド機能の場合）
+
+- **シーケンス図がAPI設計の元になる**: シーケンス図を参照してOpenAPIを作成
+- **OpenAPI配置先**: `backend/api/openapi.yaml`
+- **フロー**:
+  1. feature-spec作成時にシーケンス図でAPI呼び出しを設計
+  2. シーケンス図を参照してOpenAPIを更新
+  3. OpenAPI記載時に決定した詳細（レスポンス形式など）はfeature-specに反映
+- **不明点があれば必ずユーザーに確認する**
