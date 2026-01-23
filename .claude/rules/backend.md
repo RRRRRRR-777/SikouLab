@@ -75,5 +75,55 @@ paths:
 * table-driven tests を基本とする
 * カバレッジ80%以上を目標
 
+## コード内ドキュメンテーション
+
+### 基本方針
+- **設計に関するドキュメントはコード内に完結**
+- feature-specには実装仕様・テストケースのみ記載
+- エクスポートされる関数・型には必ずgodoc形式のコメント
+
+### godoc必須ルール
+
+#### 対象
+- エクスポートされる全ての関数・メソッド
+- エクスポートされる型・構造体・インターフェース
+- 定数（パッケージ外から参照されるもの）
+
+#### 記述内容
+```go
+// PackageName はパッケージの概要を提供する。
+//
+// 補足説明が必要な場合に記述。
+package packagename
+
+// TypeName は型の概要を提供する。
+//
+// 詳細な説明が必要な場合に記述。why（なぜそうするか）を中心に。
+type TypeName struct {
+    // FieldName フィールドの説明
+    FieldName string
+}
+
+// FunctionName は関数の概要を提供する。
+//
+// 詳細説明。パラメータや戻り値の制約、重要な副作用についても記述。
+//
+// パラメータと戻り値の説明は本文中に自然に組み込む。
+func FunctionName(param string) (string, error) {
+    // ...
+}
+```
+
+#### ルール
+- **WhatよりもWhy** - コードから自明な「何をするか」より、意図や制約を説明
+- 完全な文で書く（文末にピリオド）
+- エクスポートされる名前の直前にコメントを配置
+- パッケージコメントは `doc.go` に分離しても可
+
 ### 詳細リファレンス
 パターンやコード例の詳細が必要な場合は `/go-standards` スキルを呼び出してください。
+
+### 参考情報
+- [Go Doc Comments（公式）](https://go.dev/doc/comment)
+- [Godoc: documenting Go code（公式ブログ）](https://go.dev/blog/godoc)
+- [Go Comments: A Complete Guide](https://medium.com/@TechnologyDiaries/go-comments-a-complete-guide-baaa3d52eedf)

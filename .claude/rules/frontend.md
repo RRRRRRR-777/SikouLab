@@ -49,5 +49,47 @@ paths:
 * データ取得はサーバーで行い、クライアントでの `useEffect` + `fetch` は避ける
 * Server Actions でミューテーションを実装
 
+## コード内ドキュメンテーション
+
+### 基本方針
+- **設計に関するドキュメントはコード内に完結**
+- feature-specには実装仕様・テストケースのみ記載
+- エクスポートされる関数・コンポーネント・型には必ずドキュメント
+
+### JSDoc必須ルール
+
+#### 対象
+- エクスポートされる全ての関数・コンポーネント
+- エクスポートされる型・インターフェース
+- 複雑なロジックを含む関数
+
+#### 記述内容
+```typescript
+/**
+ * 関数の概要（1行で「何をするか」）
+ *
+ * 補足説明が必要な場合に記述。why（なぜそうするか）を中心に。
+ *
+ * @param paramName - パラメータの説明
+ * @returns 戻り値の説明
+ * @throws {Error} 例外の条件
+ *
+ * @example
+ * ```ts
+ * const result = functionName(arg);
+ * ```
+ */
+```
+
+#### ルール
+- **WhatよりもWhy** - コードから自明な「何をするか」より、意図や制約を説明
+- 完全な文で書く（文末にピリオド）
+- パラメータ・戻り値は必ず記述
+- 使い方が自明でない場合は `@example` を追加
+
 ### 詳細リファレンス
 コード例やパターンの詳細が必要な場合は `/nextjs-15` スキルを呼び出してください。
+
+### 参考情報
+- [JSDoc Reference - TypeScript](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html)
+- [JSDoc & TypeDoc Guide](https://dev.to/mirzaleka/learn-how-to-document-javascripttypescript-code-using-jsdoc-typedoc-359h)
