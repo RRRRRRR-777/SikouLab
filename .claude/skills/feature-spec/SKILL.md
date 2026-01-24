@@ -164,6 +164,12 @@ docs/functions/
 - 案1: {アーキテクチャ案1} → {影響するモジュール}
 - 案2: {アーキテクチャ案2} → {影響するモジュール}
 - **決定: TBD**（実装時に確定）
+
+## 作業見積もり
+🟢 **後回し可**
+
+作業見積もりが必要な場合は `/feature-spec-estimate-cost` skillを使用してこのセクションを追加してください。
+
 ```
 
 ## 図表記法
@@ -244,10 +250,11 @@ Frontend --> User: 表示
 | ドキュメント | 責務 | 配置 |
 |-------------|------|------|
 | feature-spec | 実装仕様・テストケース・設計意図・影響範囲 | `docs/functions/<category>/<name>.md` |
+| feature-spec-estimate-cost | 作業見積もり（ストーリーポイント・三点見積もり） | feature-spec内のセクションとして追加 |
 | OpenAPI | REST APIの仕様 | `backend/api/openapi.yaml` |
 | コード内ドキュメント | 関数・型の仕様・Why（意図・制約） | `frontend/**/*.ts`, `backend/**/*.go` |
 
-**原則**: 設計に関するドキュメントはコード内に完結させ、feature-specには実装仕様とテストケースのみ記載する。
+**原則**: 設計に関するドキュメントはコード内に完結させ、feature-specには実装仕様とテストケースのみ記載する。作業見積もりが必要な場合は `/feature-spec-estimate-cost` skillを使用して追加する。
 
 ## OpenAPIとの連携（バックエンド機能の場合）
 
