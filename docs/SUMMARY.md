@@ -44,6 +44,9 @@
 * docs/adr/009-frontend-directory-structure.md
   * 概要: Next.js 15（App Router）のベストプラクティスに沿ったフロントエンドディレクトリ構成。
     app/はルーティング専用、components/features/で機能別整理、lib/utils/storesの役割を定義。
+* docs/adr/010-quality-metrics.md
+  * 概要: 品質計測の方針。パフォーマンス（Lighthouse CI + Cloud Monitoring）、可用性（SLA 99.5%、Uptime Check）、
+    リグレッション防止（市場障害・ロールバック、Jira + Metabase）の計測フロー・アラート設定を記載。
 
 ## バージョン別ドキュメント（versions/）
 * docs/versions/1_0_0/requirements.md

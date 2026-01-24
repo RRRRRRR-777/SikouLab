@@ -23,6 +23,7 @@
 * [007: ログ監視](docs/adr/007-log-monitoring.md)
 * [008: API連携](docs/adr/008-api-integration.md)
 * [009: フロントエンドディレクトリ構成](docs/adr/009-frontend-directory-structure.md)
+* [010: 品質計測](docs/adr/010-quality-metrics.md)
 
 ## 機能別詳細仕様
 * TBD: 今後機能実装時に追加予定
