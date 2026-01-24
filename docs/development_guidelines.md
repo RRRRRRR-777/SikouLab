@@ -65,6 +65,43 @@
 - **課金**: Stripe
 - **アナリティクス**: Metabase
 
+### 1.7 API連携
+→ [ADR-008](./adr/008-api-integration.md)
+
+| 項目 | 決定 |
+|------|------|
+| 通信ライブラリ | axios |
+| タイムアウト | 10秒 |
+| リトライ | TanStack Queryに任せる |
+| 環境変数 | `NEXT_PUBLIC_API_BASE_URL` |
+
+- **認証（Web）**: JWT + httpOnly Cookie（SameSite=Lax）
+- **認証（Mobile）**: 将来対応時にGo APIで両対応（Cookie/Header）
+- **型定義**: OpenAPIから手動でTypeScript型作成（camelCase統一）
+- **エラー処理**: 共通ラッパーで一元化（401→ログイン、500→トースト）
+
+### 1.8 フロントエンドディレクトリ構成
+→ [ADR-009](./adr/009-frontend-directory-structure.md)
+
+```
+frontend/
+├── app/                      # ルーティング専用
+├── components/
+│   ├── ui/                  # shadcn/ui
+│   └── features/            # 機能別コンポーネント
+├── hooks/                   # カスタムフック
+├── lib/                     # ライブラリ初期化
+├── utils/                   # 純粋関数
+├── stores/                  # グローバルステート管理
+├── types/                   # 型定義
+└── public/                  # 静的ファイル
+```
+
+- **app/**: ルーティング専用。ビジネスロジックを置かない
+- **components/**: UIコンポーネント。features/で機能別に整理
+- **lib/utils**: libはライブラリ初期化、utilsは純粋関数
+- **stores/**: グローバルステート管理（Zustand等）
+
 ## 2. テスト方針
 
 ### 2.1 バックエンド

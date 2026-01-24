@@ -2,7 +2,7 @@
 
 ## プロジェクト管理ドキュメント
 * docs/development_guidelines.md
-  * 概要: 開発に関する技術的なガイドライン。技術スタック（Next.js + Go）、リポジトリ構成（モノレポ）、インフラ（Google Cloud）、外部サービス連携（OAuth, Stripe, Metabase）を定義。
+  * 概要: 開発に関する技術的なガイドライン。技術スタック（Next.js + Go）、リポジトリ構成（モノレポ）、インフラ（Google Cloud）、外部サービス連携（OAuth, Stripe, Metabase）、API連携方針、フロントエンドディレクトリ構成を定義。
     テスト方針、CI/CD、ブランチ戦略、バージョニング戦略、デプロイフローを記載。
 * docs/documentation_guidelines.md
   * 概要: ドキュメント作成・管理・運用の方針を定義。ディレクトリ構成、ファイル命名規則、更新ルール、ドキュメント種別を記載。
@@ -32,6 +32,12 @@
 * docs/adr/007-log-monitoring.md
   * 概要: ログ監視方式の選定。Cloud Logging + Cloud Monitoring（GCP完結）を採用。
     障害発生時のフロー、通知先（Cloud Consoleアプリ）、将来拡張（LLM分析）を記載。
+* docs/adr/008-api-integration.md
+  * 概要: フロントエンドとバックエンドのAPI連携方針。axios + httpOnly Cookie（SameSite=Lax）を採用。
+    認証方式、型定義管理、エラーハンドリング、将来のモバイル対応方針を記載。
+* docs/adr/009-frontend-directory-structure.md
+  * 概要: Next.js 15（App Router）のベストプラクティスに沿ったフロントエンドディレクトリ構成。
+    app/はルーティング専用、components/features/で機能別整理、lib/utils/storesの役割を定義。
 
 ## バージョン別ドキュメント（versions/）
 * docs/versions/1_0_0/requirements.md

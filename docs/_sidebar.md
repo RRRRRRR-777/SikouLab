@@ -17,6 +17,8 @@
 * [005: staging環境](docs/adr/005-staging-environment.md)
 * [006: デプロイフロー](docs/adr/006-deploy-flow.md)
 * [007: ログ監視](docs/adr/007-log-monitoring.md)
+* [008: API連携](docs/adr/008-api-integration.md)
+* [009: フロントエンドディレクトリ構成](docs/adr/009-frontend-directory-structure.md)
 
 ## 機能別詳細仕様
 * TBD: 今後機能実装時に追加予定
