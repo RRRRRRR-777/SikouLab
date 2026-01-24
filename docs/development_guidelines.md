@@ -160,8 +160,19 @@ git commit --no-verify
 | format | ✓ | ✓ | ✓ |
 | 単体テスト | ✓ | ✓ | ✓ |
 | docker build（FE/BE） | ✓ | ✓ | ✓ |
+| パフォーマンス（Lighthouse CI） | - | - | ✓ |
 | E2Eテスト | - | - | ✓ |
 | VRT | - | - | ✓ |
+
+#### パフォーマンス（Lighthouse CI）
+
+- **目的**: リリース前にフロントエンドのパフォーマンス劣化を検知
+- **計測指標**: LCP、FCP、CLS、TBT、Speed Index
+- **閾値**: LCP 2.5秒未満でCI失敗または警告
+- **結果出力**: PRコメントに詳細レポート
+- **コスト**: 無料（GitHub Actions内で実行）
+
+**詳細**: [docs/service.md](./service.md) サービス品質セクション
 
 ### 3.3 CD（Continuous Deployment）
 → [ADR-006](./adr/006-deploy-flow.md)

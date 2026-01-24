@@ -1,5 +1,8 @@
 # SikouLab ドキュメント
 
+## サービス定義
+* [サービス定義書](docs/service.md)
+
 ## プロジェクト管理
 * [環境構築ガイド](docs/setup.md)
 * [開発ガイドライン](docs/development_guidelines.md)
