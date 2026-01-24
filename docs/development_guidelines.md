@@ -1,5 +1,11 @@
 # 開発ガイドライン
 
+## 0. 環境構築
+
+→ [環境構築ガイド](./setup.md)
+
+必須ツール、初期化手順、環境変数、ローカル起動方法はこちらを参照。
+
 ## 1. 技術スタック
 
 ### 1.1 フロントエンド
@@ -33,10 +39,14 @@
 ### 1.3 リポジトリ構成
 - **構成管理**: モノレポ
   ```
-  /frontend   - Next.jsアプリケーション
-  /backend    - Goアプリケーション
-  /docs       - 要件定義書、設計書、ガイドライン
+  /frontend          - Next.jsアプリケーション
+  /backend           - Goアプリケーション
+  /docs              - 要件定義書、設計書、ガイドライン
+  docker-compose.yml - ローカルDB定義（PostgreSQL）
   ```
+- **ビルド管理**: 各ディレクトリに Makefile を配置
+  - `frontend/Makefile`: dev, build, lint, fmt, test, test-e2e, test-vrt, docker-build
+  - `backend/Makefile`: run, build, lint, fmt, test, migrate-up, migrate-down, docker-build
 
 ### 1.4 インフラ
 - **クラウドプラットフォーム**: Google Cloud
@@ -129,7 +139,7 @@ frontend/
 |------|------|--------|
 | Frontend | lint | ESLint |
 | Frontend | format | Prettier |
-| Backend | lint | golangci-lint（未導入時は go vet） |
+| Backend | lint | golangci-lint |
 | Backend | format | gofmt |
 
 **セットアップ**
@@ -149,7 +159,7 @@ git commit --no-verify
 | lint | ✓ | ✓ | ✓ |
 | format | ✓ | ✓ | ✓ |
 | 単体テスト | ✓ | ✓ | ✓ |
-| docker build（BE） | ✓ | ✓ | ✓ |
+| docker build（FE/BE） | ✓ | ✓ | ✓ |
 | E2Eテスト | - | - | ✓ |
 | VRT | - | - | ✓ |
 
@@ -219,7 +229,7 @@ mainブランチへのマージ時に自動生成・デプロイする。
 → [ADR-006](./adr/006-deploy-flow.md)
 
 ```
-1. ticket → dev マージ（CI実行: lint, format, 単体テスト, docker build）
+1. ticket → dev マージ（CI実行: lint, format, 単体テスト, docker build（FE/BE））
 2. dev → main のPRを作成
 3. PRマージ（CI実行: 上記 + E2E, VRT）
 4. GitHub Actionsが `environment: production` に到達

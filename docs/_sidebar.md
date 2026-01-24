@@ -1,6 +1,7 @@
 # SikouLab ドキュメント
 
 ## プロジェクト管理
+* [環境構築ガイド](docs/setup.md)
 * [開発ガイドライン](docs/development_guidelines.md)
 * [ドキュメントガイドライン](docs/documentation_guidelines.md)
 

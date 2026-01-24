@@ -95,6 +95,53 @@ paths:
 ### 詳細リファレンス
 コード例やパターンの詳細が必要な場合は `/nextjs-15` スキルを呼び出してください。
 
+## Makefile コマンド
+
+`frontend/Makefile` で定義されたターゲットを使用する。
+
+### 開発
+
+```bash
+# 開発サーバー起動
+cd frontend && make dev
+
+# 本番ビルド
+cd frontend && make build
+
+# 本番サーバー起動（ビルド後）
+cd frontend && make start
+```
+
+### コード品質
+
+```bash
+# ESLint 実行
+cd frontend && make lint
+
+# Prettier フォーマット
+cd frontend && make fmt
+
+# 単体テスト
+cd frontend && make test
+```
+
+### E2E / VRT
+
+```bash
+# E2Eテスト（frontend/backend 起動済み前提）
+cd frontend && make test-e2e
+
+# VRT（frontend/backend 起動済み前提）
+cd frontend && make test-vrt
+```
+
+### Docker
+
+```bash
+# Dockerイメージビルド
+cd frontend && make docker-build
+```
+
 ### 参考情報
 - [JSDoc Reference - TypeScript](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html)
 - [JSDoc & TypeDoc Guide](https://dev.to/mirzaleka/learn-how-to-document-javascripttypescript-code-using-jsdoc-typedoc-359h)

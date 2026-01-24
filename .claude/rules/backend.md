@@ -128,6 +128,50 @@ func FunctionName(param string) (string, error) {
 ### 詳細リファレンス
 パターンやコード例の詳細が必要な場合は `/go-standards` スキルを呼び出してください。
 
+## Makefile コマンド
+
+`backend/Makefile` で定義されたターゲットを使用する。
+
+### 開発
+
+```bash
+# 開発サーバー起動
+cd backend && make run
+
+# バイナリビルド
+cd backend && make build
+```
+
+### コード品質
+
+```bash
+# 静的解析
+cd backend && make lint
+
+# フォーマット
+cd backend && make fmt
+
+# 単体テスト
+cd backend && make test
+```
+
+### マイグレーション
+
+```bash
+# マイグレーション適用
+cd backend && make migrate-up
+
+# マイグレーション戻し
+cd backend && make migrate-down
+```
+
+### Docker
+
+```bash
+# Dockerイメージビルド
+cd backend && make docker-build
+```
+
 ### 参考情報
 - [Go Doc Comments（公式）](https://go.dev/doc/comment)
 - [Godoc: documenting Go code（公式ブログ）](https://go.dev/blog/godoc)
