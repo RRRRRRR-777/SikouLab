@@ -37,6 +37,7 @@
 ### skills
 * [commit](.claude/skills/commit/SKILL.md)
 * [feature-spec](.claude/skills/feature-spec/SKILL.md)
+* [feature-spec-estimate-cost](.claude/skills/feature-spec-estimate-cost/SKILL.md)
 * [frontend-design](.claude/skills/frontend-design/SKILL.md)
 * [go-standards](.claude/skills/go-standards/SKILL.md)
 * [nextjs-15](.claude/skills/nextjs-15/SKILL.md)
