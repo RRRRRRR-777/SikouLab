@@ -1,8 +1,9 @@
-.PHONY: run build test lint fmt migrate-up migrate-down docker-build help
+.PHONY: dev run build test lint fmt migrate-up migrate-down docker-build help
 
 # デフォルトターゲット
 help:
 	@echo "Available targets:"
+	@echo "  dev          - Start development server with hot reload"
 	@echo "  run          - Start development server"
 	@echo "  build        - Build binary"
 	@echo "  test         - Run unit tests"
@@ -11,6 +12,10 @@ help:
 	@echo "  migrate-up   - Apply migrations"
 	@echo "  migrate-down - Rollback migrations"
 	@echo "  docker-build - Build Docker image"
+
+# 開発サーバー起動（ホットリロード）
+dev:
+	air
 
 # 開発サーバー起動
 run:
