@@ -12,5 +12,18 @@
   ],
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": false
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__atlassian__createJiraIssue",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "⚠️ Jiraチケット作成時の必須項目:\n\n- プロジェクトキー: \"KAN\"\n- ストーリーポイント: additional_fields.customfield_10071\n- 担当者: assignee_account_id\n\n不足があればユーザーに確認してください。"
+          }
+        ]
+      }
+    ]
   }
 }
