@@ -31,6 +31,11 @@ docker system prune -f
 - Jira MCPツールを使用
 - タスク進行の詳細は @.claude/rules/workflow.md の「タスク実行フロー」を参照
 
+**Jiraチケット作成時の必須項目**
+- **プロジェクトキー**: `KAN`
+- **ストーリーポイント**: `additional_fields.customfield_10071`で設定
+- **担当者**: `assignee_account_id`で設定（省略時はユーザーに確認）
+
 **チケットテンプレート**
 
 | 項目 | エピック | 子チケット |
