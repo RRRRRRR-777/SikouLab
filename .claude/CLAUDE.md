@@ -53,6 +53,25 @@ docker system prune -f
 - **Figma**: https://www.figma.com/design/KLDR5porwKHiMz5EWp3ABs
 - **File Key**: KLDR5porwKHiMz5EWp3ABs
 
+### Figma画面ノードID一覧
+
+特定画面のみを高速取得する場合は、以下のノードIDを`mcp__figma__get_figma_data`の`nodeId`パラメータに指定してください。
+
+| 画面名 | ノードID |
+|--------|----------|
+| 記事ホーム画面 | `3:839` |
+| 記事詳細画面 | `1:4191` |
+| ニュース画面 | `185:651` |
+| アンケート画面 | `11:762` |
+| 個別銘柄画面 | `64:918` |
+| 設定画面 | `21:359` |
+
+**使用例**:
+```bash
+# 記事ホーム画面のみを取得
+mcp__figma__get_figma_data(fileKey="KLDR5porwKHiMz5EWp3ABs", nodeId="3:839")
+```
+
 ## カラーコード
 
 Figmaデザインに基づくカラーコード定義。
