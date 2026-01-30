@@ -458,7 +458,7 @@ flowchart LR
         MassiveAPI[Massive API]
     end
 
-    subgraph AI・通知
+    subgraph AI通知
         TranslateAPI[翻訳API/LLM]
         EmailAPI[メール配信API]
     end
@@ -472,15 +472,15 @@ flowchart LR
     Backend <--> XAuth
     Backend <--> Stripe
 
-    Backend --> NewsAPI
-    Backend --> StockAPI
-    Backend --> FundaAPI
-    Backend --> InsiderAPI
-    Backend --> UOAAPI
-    Backend --> RatingAPI
-    Backend --> MassiveAPI
-    Backend --> TranslateAPI
-    Backend --> EmailAPI
+    Backend <--> NewsAPI
+    Backend <--> StockAPI
+    Backend <--> FundaAPI
+    Backend <--> InsiderAPI
+    Backend <--> UOAAPI
+    Backend <--> RatingAPI
+    Backend <--> MassiveAPI
+    Backend <--> TranslateAPI
+    Backend <--> EmailAPI
 ```
 
 ## 6. 権限マトリクス
