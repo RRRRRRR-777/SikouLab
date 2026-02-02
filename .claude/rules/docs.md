@@ -59,23 +59,18 @@ paths:
 
 機能の設計・開発は以下の順序で進める。
 
-### 1. 基本設計（/requirements）
-* **目的**: バージョン単位の要件定義と機能一覧を作成
+### 1. 要件定義（/requirements）
+* **Skill**: `/requirements`
 * **出力先**: `docs/versions/<version>/requirements.md`
-* **内容**:
-  * 背景・目的・成功基準
-  * スコープ（対応範囲・対応外の明示）
-  * 機能一覧（優先度・ステータス・詳細設計リンク）
 
-### 2. 詳細設計（/feature-spec）
-* **目的**: 機能単位の詳細仕様を作成
+### 2. 基本設計（/system-design）
+* **Skill**: `/system-design`
+* **出力先**: `docs/versions/<version>/system-design.md`
+
+### 3. 詳細設計（/feature-spec）
+* **Skill**: `/feature-spec`
 * **出力先**: `docs/functions/<feature-category>/<feature-name>.md`（英語ケバブケース）
   * 例: `docs/functions/auth/login.md`, `docs/functions/article/create-edit.md`
-* **前提条件**: 基本設計の機能一覧に記載されていること（推奨）
-* **内容**:
-  * 機能概要・目的・権限
-  * 画面設計図・関連テーブル・シーケンス図
-  * 機能要件・非機能要件・影響範囲
 
 ### ワークフロー図
 
