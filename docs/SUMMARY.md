@@ -47,6 +47,10 @@
 * docs/adr/010-quality-metrics.md
   * 概要: 品質計測の方針。パフォーマンス（Lighthouse CI + Cloud Monitoring）、可用性（SLA 99.5%、Uptime Check）、
     リグレッション防止（市場障害・ロールバック、Jira + Metabase）の計測フロー・アラート設定を記載。
+* docs/adr/011-rbac-vs-abac.md
+  * 概要: 権限モデルの選定。RBAC（ロールベース）を採用。
+    何も決まっていない状態から選択し、プロダクトの要件に最適な方式を検討。
+    RBAC/ABAC/ハイブリッドの比較、RBACからABACへの移行工数（160時間）を記載。
 
 ## バージョン別ドキュメント（versions/）
 * docs/versions/1_0_0/requirements.md
