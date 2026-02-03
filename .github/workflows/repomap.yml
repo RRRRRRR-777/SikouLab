@@ -1,0 +1,47 @@
+name: Update Repo Map
+
+on:
+  push:
+    paths:
+      - 'backend/**/*.go'
+      - 'frontend/**/*.ts'
+      - 'frontend/**/*.tsx'
+      - 'tools/repomap/**'
+    branches:
+      - main
+      - 'feature/**'
+  pull_request:
+    paths:
+      - 'backend/**/*.go'
+      - 'frontend/**/*.ts'
+      - 'frontend/**/*.tsx'
+      - 'tools/repomap/**'
+
+jobs:
+  update-repomap:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.3'
+
+      - name: Generate Backend Repo Map
+        working-directory: tools/repomap
+        run: go run . --target=backend --root=${{ github.workspace }}
+
+      - name: Generate Frontend Repo Map
+        working-directory: tools/repomap
+        run: go run . --target=frontend --root=${{ github.workspace }}
+
+      - name: Commit and push if changed
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update REPO_MAP.md [skip ci]"
+          file_pattern: "*/REPO_MAP.md"
+          commit_user_name: github-actions[bot]
+          commit_user_email: github-actions[bot]@users.noreply.github.com

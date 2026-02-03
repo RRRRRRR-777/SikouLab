@@ -89,6 +89,12 @@ Figmaデザインに基づくカラーコード定義。
 - ティッカー色（`#63B7E2`）は銘柄コード表示に使用
 - CSS変数として定義し、テーマ切り替え時に一括適用
 
+## Repo Map（AI向けコード索引）
+実装を探す前に必ずREPO_MAP.mdを参照すること。
+
+- `backend/REPO_MAP.md` - バックエンド構造索引
+- `frontend/REPO_MAP.md` - フロントエンド構造索引
+
 ## 詳細ルール
 @.claude/rules/workflow.md - 開発フロー（設計→実装→テスト）
 @.claude/rules/docs.md - ドキュメント規約
