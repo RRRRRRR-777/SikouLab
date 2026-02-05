@@ -7,7 +7,7 @@
 ## 目的
 
 - 専門家が思考プロセスを記事として発信できるようにする
-- 予約投稿により継続的な発信をサポートする
+- 予約投稿により継続的な発信をサポートする（バッチ処理の詳細は [schedule.md](./schedule.md)）
 
 ## 機能条件
 
@@ -93,8 +93,9 @@ erDiagram
         uuid author_id FK
         string title
         text body
-        string status
-        datetime published_at
+        string status "draft/scheduled/published/publish_failed"
+        datetime scheduled_at "予約日時（ユーザー指定）"
+        datetime published_at "実際の公開日時"
         datetime created_at
         datetime updated_at
     }
@@ -165,18 +166,9 @@ flowchart TD
     K -->|未チェック| M[公開完了]
     L --> M
 
-    %% 予約公開フロー
+    %% 予約公開フロー（バッチ処理の詳細は schedule.md 参照）
     I --> N[status=scheduledで保存]
     N --> J[ジャンル・銘柄紐づけ]
-
-    %% バッチ処理による公開（トランザクション）
-    S[バッチ処理: 定期実行] --> T{予約日時を過ぎた記事あり?}
-    T -->|あり| U[トランザクション開始]
-    U --> V[status=publishedに更新]
-    V --> Y[完了]
-    T -->|なし| W[処理終了]
-    U -->|失敗| Z[ロールバック]
-    Z --> W
 ```
 
 ## シーケンス図
@@ -232,47 +224,7 @@ sequenceDiagram
     API-->>Front: 公開完了
     Front->>User: 記事一覧へ遷移
 
-    %% 予約公開
-    User->>Front: 予約日時を設定
-    User->>Front: 公開ボタンクリック（予約公開）
-    Front->>API: POST /api/articles
-    API->>DB: 記事保存（status=scheduled, published_at=予約日時）
-    API->>DB: ジャンル紐づけ
-    API->>DB: 銘柄紐づけ
-    alt ニュースレター対象
-        API->>DB: ニュースレター配信リストに追加
-    end
-    API-->>Front: 予約完了
-    Front->>User: 記事一覧へ遷移
-```
-
-### バッチ処理（予約公開）
-
-```mermaid
-sequenceDiagram
-    participant Batch as バッチ処理
-    participant DB as データベース
-
-    Note over Batch: 定期実行（例: 1分ごと）
-
-    Batch->>DB: 予約日時を過ぎた記事を検索
-    DB-->>Batch: 該当記事リスト
-
-    alt 該当記事あり
-        Batch->>DB: トランザクション開始
-        loop 各記事
-            Batch->>DB: status=publishedに更新
-        end
-        Batch->>DB: コミット
-        DB-->>Batch: 更新完了
-    else 該当記事なし
-        Note over Batch: 処理終了
-    end
-
-    alt 失敗時
-        Batch->>DB: ロールバック
-        Note over Batch: エラーログ出力
-    end
+    Note over User,DB: 予約公開の詳細フローは schedule.md を参照
 ```
 
 ## 機能要件
@@ -284,7 +236,7 @@ sequenceDiagram
 - ジャンルの選択（複数可）
 - 関連銘柄の検索・選択（複数可）
 - Markdownエディタによるリッチな編集
-- 即時公開・予約公開・下書き保存の選択
+- 即時公開・予約公開・下書き保存の選択（予約公開の詳細は [schedule.md](./schedule.md) 参照）
 - 画像のアップロード・挿入
 - 画像情報のDB保存（記事と画像の紐づけ管理）
 - 自動保存（30秒ごと）
@@ -293,7 +245,6 @@ sequenceDiagram
 **詳細要件（TBD可）**
 - Markdownエディタの具体的な機能: TBD
 - 画像サイズ・フォーマットの制限: TBD
-- 予約投稿のバッチ処理との連携: TBD
 - ニュースレター配信リストの最大件数超過時の挙動: TBD
 
 ## 非機能要件
@@ -340,13 +291,8 @@ sequenceDiagram
 5. 公開ボタンをクリック
 6. 記事が公開される
 
-### シナリオ2: 予約投稿（早期決定）
-1. ユーザーが記事作成画面にアクセス
-2. タイトル、本文を入力
-3. 予約公開を選択
-4. 翌日の日時を設定
-5. 公開ボタンをクリック
-6. 指定日時に自動公開される
+### シナリオ2: 予約投稿
+※ 詳細は [schedule.md](./schedule.md) を参照
 
 ### シナリオ3: 下書き保存
 1. ユーザーが記事作成画面にアクセス
@@ -380,20 +326,16 @@ sequenceDiagram
 | 自動保存 | 30秒経過後に自動保存が実行される | 下書きとして保存される |
 | 画像アップロード | 画像ファイルをアップロード | 画像URLが返される |
 | 即時公開 | status=publishedで記事作成 | 記事が即時公開される |
-| 予約公開 | status=scheduled、published_atを指定して記事作成 | 記事が予約状態で保存される |
+| 予約公開 | status=scheduled、scheduled_atを指定して記事作成 | 記事が予約状態で保存される（バッチ処理のテストは [schedule.md](./schedule.md) 参照） |
 | ニュースレター登録 | ニュースレターチェックONで記事作成 | newsletter_articlesに登録される |
 | 権限チェック（writer） | writerが自分の記事を編集 | 編集可能 |
 | 権限チェック（他人の記事） | writerが他人の記事を編集 | 403エラー |
-| バッチ処理（予約公開） | 予約日時を過ぎた記事がある状態でバッチ実行 | status=publishedに更新される |
-| バッチ処理（該当なし） | 予約日時を過ぎた記事がない状態でバッチ実行 | 何も更新されない |
-| バッチ処理（失敗時） | バッチ処理中にエラー発生 | ロールバックされる |
 
 ### E2Eテスト（実装完了後に記載）
 
 | テストシナリオ | 観点 | 期待値 |
 |----------------|------|--------|
 | 記事作成・公開フロー | 入力→ジャンル選択→銘柄選択→公開→一覧表示 | TBD（実装完了後に記載） |
-| 予約投稿フロー | 入力→予約日時設定→公開→予約記事一覧表示 | TBD（実装完了後に記載） |
 | 自動保存フロー | 入力開始→30秒経過→自動保存通知表示 | TBD（実装完了後に記載） |
 | 画像アップロードフロー | 画像選択→アップロード→本文に挿入 | TBD（実装完了後に記載） |
 
@@ -403,7 +345,7 @@ sequenceDiagram
 
 | 関連機能 | 影響内容 |
 |----------|----------|
-| F-04-2 | 予約設定した記事の自動公開 |
+| F-04-2 | 予約設定した記事の自動公開（[schedule.md](./schedule.md)） |
 | F-12-3 | ニュースレター配信リストに追加 |
 
 ### コード影響範囲
@@ -420,6 +362,15 @@ sequenceDiagram
 ```
 POST /api/articles
 ```
+
+**リクエストボディ（例）**
+- `title`: タイトル
+- `body`: 本文（Markdown）
+- `status`: `draft` | `published` | `scheduled`
+- `scheduled_at`: 予約日時（status=scheduledの場合に指定）
+- `genre_ids`: ジャンルID配列
+- `stock_ids`: 銘柄ID配列
+- `include_newsletter`: ニュースレターに含めるか
 
 ### 記事更新
 ```
@@ -442,7 +393,7 @@ POST /api/articles/images
 
 | 項目 | ストーリーポイント | 目安時間 |
 |------|------------------|----------|
-| **合計** | 49-59sp | 12.25-14.75時間 |
+| **合計** | 44-54sp | 11-13.5時間 |
 
 **目安**: 4sp = 1時間（実装＋単体テスト＋レビューを含む、あくまで参考値）
 
@@ -455,7 +406,6 @@ POST /api/articles/images
 | 下書き保存API（POST /api/articles/:id/save） | 2 | 既存パターンの小拡張 |
 | 画像アップロードAPI（POST /api/articles/images） | 5 | バリデーション＋Storage連携、画像DB保存 |
 | 権限制御ミドルウェア | 3 | admin全件、writer自分のみのロジック |
-| 予約公開バッチ処理 | 5 | 定期実行、トランザクション制御、ロールバック |
 | 記事作成・編集画面（基本UI） | 5 | タイトル入力、ジャンル選択、銘柄選択、公開設定 |
 | Markdownエディタ統合 | 5-8 | ライブラリ選定・ツールバー・プレビュー、不確実性あり |
 | 画像アップロードUI | 3 | エディタ内画像挿入、プログレス表示 |
@@ -464,7 +414,7 @@ POST /api/articles/images
 | 予約公開日時ピッカー | 2 | 日時選択UI |
 | ニュースレターチェックUI | 1 | チェックボックス1つ |
 | openapi.yaml定義 | 2 | 4エンドポイント分のスキーマ定義 |
-| DBマイグレーション | 2 | articles, article_genres, stock_articles, newsletter_articles |
+| DBマイグレーション | 2 | articles（scheduled_at追加、status値拡張）, article_genres, stock_articles, newsletter_articles |
 
 ### リスク要因
 
