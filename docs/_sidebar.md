@@ -26,9 +26,18 @@
 * [009: フロントエンドディレクトリ構成](docs/adr/009-frontend-directory-structure.md)
 * [010: 品質計測](docs/adr/010-quality-metrics.md)
 * [011: 権限モデル](docs/adr/011-rbac-vs-abac.md)
+* [012: Repo Map](docs/adr/012-repo-map.md)
+* [013: Markdownライブラリ](docs/adr/013-markdown-library.md)
 
 ## 機能別詳細仕様
-* TBD: 今後機能実装時に追加予定
+### 認証機能（F-01）
+* [ログイン](docs/functions/auth/login.md)
+
+### 記事機能（F-04）
+* [記事ホーム](docs/functions/article/home.md)
+* [記事詳細](docs/functions/article/detail.md)
+* [記事作成・編集](docs/functions/article/create-edit.md)
+* [予約投稿](docs/functions/article/schedule.md)
 
 ---
 
@@ -44,14 +53,16 @@
 * [backend.md](.claude/rules/backend.md)
 
 ### skills
-* [commit](.claude/skills/commit/SKILL.md)
+* [adr](.claude/skills/adr/SKILL.md)
 * [feature-spec](.claude/skills/feature-spec/SKILL.md)
 * [feature-spec-estimate-cost](.claude/skills/feature-spec-estimate-cost/SKILL.md)
 * [frontend-design](.claude/skills/frontend-design/SKILL.md)
 * [go-standards](.claude/skills/go-standards/SKILL.md)
 * [nextjs-15](.claude/skills/nextjs-15/SKILL.md)
 * [requirements](.claude/skills/requirements/SKILL.md)
+* [review-spec](.claude/skills/review-spec/SKILL.md)
 * [system-design](.claude/skills/system-design/SKILL.md)
+* [workflow](.claude/skills/workflow/SKILL.md)
 
 ---
 
