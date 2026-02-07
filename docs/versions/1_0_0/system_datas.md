@@ -70,8 +70,9 @@ erDiagram
         uuid author_id FK
         string title
         text body
-        string status "draft/scheduled/published"
-        datetime published_at
+        string status "draft/scheduled/published/publish_failed"
+        datetime scheduled_at "予約日時（ユーザー指定）"
+        datetime published_at "実際の公開日時"
         datetime created_at
         datetime updated_at
     }
@@ -244,8 +245,9 @@ erDiagram
         uuid id PK
         string title
         string category
-        string status "draft/scheduled/published"
-        datetime published_at
+        string status "draft/scheduled/published/publish_failed"
+        datetime scheduled_at "予約日時（ユーザー指定）"
+        datetime published_at "実際の公開日時"
         datetime created_at
         datetime updated_at
     }
@@ -473,8 +475,9 @@ erDiagram
 | author_id | uuid | 著者ID | FK, NOT NULL |
 | title | string | タイトル | NOT NULL |
 | body | text | 本文（Markdown） | NOT NULL |
-| status | string | 状態（draft/scheduled/published） | NOT NULL |
-| published_at | datetime | 公開日時 | |
+| status | string | 状態（draft/scheduled/published/publish_failed） | NOT NULL |
+| scheduled_at | datetime | 予約日時（ユーザー指定） | |
+| published_at | datetime | 実際の公開日時（バッチ処理時に設定） | |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
 
@@ -696,8 +699,9 @@ erDiagram
 | id | uuid | 主キー | PK |
 | title | string | タイトル | NOT NULL |
 | category | string | カテゴリ | |
-| status | string | 状態（draft/scheduled/published） | NOT NULL |
-| published_at | datetime | 公開日時 | |
+| status | string | 状態（draft/scheduled/published/publish_failed） | NOT NULL |
+| scheduled_at | datetime | 予約日時（ユーザー指定） | |
+| published_at | datetime | 実際の公開日時（バッチ処理時に設定） | |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
 
