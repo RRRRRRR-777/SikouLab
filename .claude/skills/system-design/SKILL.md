@@ -106,7 +106,7 @@ flowchart LR
 
 ## 3. 画面設計
 
-**Figma**: [{Figmaファイル名}]({FigmaのURL})
+**Pencil**: `docs/versions/1_0_0/SikouLab.pen`
 
 ### 3.1 画面一覧
 

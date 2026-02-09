@@ -45,15 +45,14 @@ paths:
   * × `docs/functions/認証/ログイン.md`
 
 ## デザイン・UI参照
-画面の設計を行う際は、以下のFigmaを参照すること。
+画面の設計を行う際は、以下のPencilファイルを参照すること。
 
-* Figma URL: https://www.figma.com/design/KLDR5porwKHiMz5EWp3ABs/Web%E3%82%A2%E3%83%97%E3%83%AA%E9%96%8B%E7%99%BA%E3%80%80%E3%82%B7%E3%82%B3%E3%82%A6%E3%83%A9%E3%83%9C%E6%A0%AA%E5%BC%8F%E4%BC%9A%E7%A4%BE
-* File Key: KLDR5porwKHiMz5EWp3ABs
+* Pencil: `docs/versions/1_0_0/SikouLab.pen`
 
 **注意事項**
-* Figmaはあくまでモックアップであり、デザインが完全に正しいとは限らない
+* Pencilはあくまでモックアップであり、デザインが完全に正しいとは限らない
 * 一般的なUI/UXのベストプラクティスも意識すること
-* Figmaのデザインとベストプラクティスのどちらを採用すべきか判断に迷う場合は、ユーザーに確認すること
+* Pencilのデザインとベストプラクティスのどちらを採用すべきか判断に迷う場合は、ユーザーに確認すること
 
 ## 設計ドキュメントワークフロー
 

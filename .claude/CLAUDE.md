@@ -50,31 +50,31 @@ docker system prune -f
 
 
 ## 参照情報
-- **Figma**: https://www.figma.com/design/KLDR5porwKHiMz5EWp3ABs
-- **File Key**: KLDR5porwKHiMz5EWp3ABs
+- **Pencil**: `docs/versions/1_0_0/SikouLab.pen`
 
-### Figma画面ノードID一覧
+### Pencil画面ノードID一覧
 
-特定画面のみを高速取得する場合は、以下のノードIDを`mcp__figma__get_figma_data`の`nodeId`パラメータに指定してください。
+特定画面のみを取得する場合は、以下のノードIDを`mcp__pencil__batch_get`の`nodeIds`パラメータに指定してください。
 
 | 画面名 | ノードID |
 |--------|----------|
-| 記事ホーム画面 | `3:839` |
-| 記事詳細画面 | `1:4191` |
-| ニュース画面 | `185:651` |
-| アンケート画面 | `11:762` |
-| 個別銘柄画面 | `64:918` |
-| 設定画面 | `21:359` |
+| ログイン画面 | `h3Lxa` |
+| ダッシュボード | `AwSoL` |
+| 記事一覧 | `YeKnC` |
+| ニュース一覧 | `ZAU4z` |
+| 銘柄詳細 | `0Cn3B` |
+| アンケート一覧 | `OruNZ` |
+| 設定画面 | `kOXOT` |
 
 **使用例**:
 ```bash
-# 記事ホーム画面のみを取得
-mcp__figma__get_figma_data(fileKey="KLDR5porwKHiMz5EWp3ABs", nodeId="3:839")
+# ダッシュボードのみを取得
+mcp__pencil__batch_get(filePath="docs/versions/1_0_0/SikouLab.pen", nodeIds=["AwSoL"])
 ```
 
 ## カラーコード
 
-Figmaデザインに基づくカラーコード定義。
+Pencilデザインに基づくカラーコード定義。
 
 | カテゴリ | ライトモード | ダークモード | 用途 |
 |----------|-------------|-------------|------|

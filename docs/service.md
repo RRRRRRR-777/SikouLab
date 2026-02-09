@@ -216,10 +216,9 @@
 
 ### 7.2 デザイン原則
 
-デザインの詳細は以下のFigmaを正とする。
+デザインの詳細は以下のPencilファイルを正とする。
 
-- **Figma URL**: https://www.figma.com/design/KLDR5porwKHiMz5EWp3ABs
-- **File Key**: KLDR5porwKHiMz5EWp3ABs
+- **Pencil**: `docs/versions/1_0_0/SikouLab.pen`
 
 **基本方針:**
 - 高級感・専門性を損なわないUI/UX（要件定義書より）
