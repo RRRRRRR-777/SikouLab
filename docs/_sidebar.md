@@ -39,6 +39,11 @@
 * [記事作成・編集](docs/functions/article/create-edit.md)
 * [予約投稿](docs/functions/article/schedule.md)
 
+### ニュース機能（F-05）
+* [ニュースホーム](docs/functions/news/home.md)
+* [ニュース自動取得・翻訳](docs/functions/news/fetch.md)
+* [ジャンル詳細ページ](docs/functions/news/genre-detail.md)
+
 ---
 
 ## 開発ルール（.claude/）

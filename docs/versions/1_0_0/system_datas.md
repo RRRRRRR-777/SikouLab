@@ -100,6 +100,7 @@ erDiagram
         string title
         text body
         string original_language
+        string sentiment "POSITIVE/NEGATIVE/NEUTRAL"
         datetime published_at
         datetime created_at
         datetime updated_at
@@ -514,6 +515,7 @@ erDiagram
 | title | string | タイトル | NOT NULL |
 | body | text | 本文 | NOT NULL |
 | original_language | string | 原文言語 | NOT NULL |
+| sentiment | string | センチメント（POSITIVE/NEGATIVE/NEUTRAL） | DEFAULT 'NEUTRAL' |
 | published_at | datetime | 公開日時 | NOT NULL |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
