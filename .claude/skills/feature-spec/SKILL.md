@@ -27,7 +27,7 @@ description: 機能仕様ページを作成するSkill。設計段階で新規�
 - 機能概要・目的
 - 対象ユーザー・ロール
 - 主要な機能要件
-- Figma URL（該当する画面がある場合）
+- Pencil画面ノードID（該当する画面がある場合）
 
 ## 出力ファイル構成
 
@@ -80,7 +80,7 @@ docs/functions/
 ## 画面設計図
 🟡 **中程度**
 
-{Figma MCPから取得した画像を埋め込み}
+{Pencil MCPから取得した画像を埋め込み}
 
 ## 関連テーブル
 🔴 **早期決定**
@@ -165,6 +165,8 @@ docs/functions/
 ### 機能影響範囲
 🔴 **早期決定**
 
+**※ 詳細設計対象の大項目（およびそのサブ機能）を必ず含めること**
+
 | 関連機能 | 影響内容 |
 |----------|----------|
 | {機能名} | {影響}   |
@@ -227,7 +229,7 @@ Frontend --> User: 表示
 ## 実行手順
 
 1. **入力情報の確認**: ユーザーから提供された仕様メモを確認
-2. **Figma画面取得**: Figma URLが提供されている場合、Figma MCPで画面を取得
+2. **Pencil画面取得**: PencilノードIDが提供されている場合、Pencil MCPで画面を取得
 3. **ER図参照**: `docs/versions/<version>/er_diagram.md` から関連テーブルを抽出
    - 存在しない場合は他の場所を探索
    - 見つからない場合はユーザーと質疑応答で決定
@@ -244,7 +246,7 @@ Frontend --> User: 表示
 
 | 項目 | 情報源 |
 |------|--------|
-| 画面設計図 | Figma MCP (`get_screenshot`, `get_design_context`) |
+| 画面設計図 | Pencil MCP (`get_screenshot`, `batch_get`) |
 | 関連テーブル | `docs/versions/<version>/er_diagram.md` → 探索 → 質疑応答 |
 | その他 | ユーザー提供の仕様メモ + 質疑応答 |
 
