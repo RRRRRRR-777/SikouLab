@@ -36,6 +36,9 @@
 ### 銘柄機能（F-03）
 * [個別銘柄ページ](docs/functions/stock/home.md)
 
+### ポートフォリオ機能（F-09）
+* [ポートフォリオ](docs/functions/portfolio/home.md)
+
 ### 記事機能（F-04）
 * [記事ホーム](docs/functions/article/home.md)
 * [記事詳細](docs/functions/article/detail.md)

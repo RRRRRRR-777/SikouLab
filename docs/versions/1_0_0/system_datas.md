@@ -237,6 +237,8 @@ erDiagram
         uuid id PK
         uuid portfolio_id FK
         uuid stock_id FK
+        decimal purchase_price "取得価格"
+        int shares "保有株数"
         datetime created_at
         datetime updated_at
     }
@@ -688,6 +690,8 @@ erDiagram
 | id | uuid | 主キー | PK |
 | portfolio_id | uuid | ポートフォリオID | FK, NOT NULL |
 | stock_id | uuid | 銘柄ID | FK, NOT NULL |
+| purchase_price | decimal | 取得価格 | NOT NULL |
+| shares | int | 保有株数 | NOT NULL |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
 
