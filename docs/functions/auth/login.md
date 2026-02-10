@@ -181,35 +181,41 @@ sequenceDiagram
 ## 機能要件
 🟡 **中程度**
 
-**主要要件（早期決定）**
-- Firebase Authenticationを使用したGoogle / Apple / X によるOAuth認証
-- 初回ログイン時のユーザー自動登録（users、user_settings）
-- 初回ログイン時のStripeカスタマー作成
-- セッション管理（httpOnly Cookie、SameSite=Lax）
-- ログアウト機能
-- 未ログイン時のアクセス制限（保護されたページへリダイレクト）
+### 機能要件1: OAuth認証（F-01）
+- 機能仕様1: Firebase Authenticationを使用したGoogle / Apple / X によるOAuth認証
 
-**詳細要件（TBD可）**
-- CSRFトークンの検証: TBD
-- セッション有効期限: TBD
-- OAuthステートの検証: TBD
-- リメンバーme機能: TBD
+### 機能要件2: ユーザー自動登録（F-01）
+- 機能仕様1: 初回ログイン時のユーザー自動登録（users、user_settings）
+- 機能仕様2: 初回ログイン時のStripeカスタマー作成
+
+### 機能要件3: セッション管理（F-01）
+- 機能仕様1: セッション管理（httpOnly Cookie、SameSite=Lax）
+- 機能仕様2: ログアウト機能
+
+### 機能要件4: アクセス制御（F-01）
+- 機能仕様1: 未ログイン時のアクセス制限（保護されたページへリダイレクト）
+
+### 機能要件5: セキュリティ詳細（F-01）
+- 機能仕様1: CSRFトークンの検証: TBD
+- 機能仕様2: セッション有効期限: TBD
+- 機能仕様3: OAuthステートの検証: TBD
+- 機能仕様4: リメンバーme機能: TBD
 
 ## 非機能要件
 🟢 **後回し可**
 
-### パフォーマンス
-- OAuthリダイレクト: 3秒以内
-- セッション確認: 500ms以内
+### 非機能要件1: パフォーマンス
+- 非機能仕様1: OAuthリダイレクト: 3秒以内
+- 非機能仕様2: セッション確認: 500ms以内
 
-### セキュリティ
-- Firebase Authenticationのセキュリティ機能を活用（OAuth 2.0 / OpenID Connect準拠）
-- ID Token検証によるユーザー認証
-- httpOnly Cookie（SameSite=Lax）
-- セッションハイジャック対策
+### 非機能要件2: セキュリティ
+- 非機能仕様1: Firebase Authenticationのセキュリティ機能を活用（OAuth 2.0 / OpenID Connect準拠）
+- 非機能仕様2: ID Token検証によるユーザー認証
+- 非機能仕様3: httpOnly Cookie（SameSite=Lax）
+- 非機能仕様4: セッションハイジャック対策
 
-### 可用性
-- OAuthプロバイダ障害時: エラーメッセージ表示、リトライ誘導
+### 非機能要件3: 可用性
+- 非機能仕様1: OAuthプロバイダ障害時: エラーメッセージ表示、リトライ誘導
 
 ## ログ
 🟢 **後回し可**
