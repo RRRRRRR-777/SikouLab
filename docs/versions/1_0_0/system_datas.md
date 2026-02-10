@@ -171,7 +171,7 @@ erDiagram
         decimal eps
         decimal market_cap
         decimal pe_ratio
-        date data_date
+        date date
         datetime created_at
         datetime updated_at
     }
@@ -184,7 +184,7 @@ erDiagram
         string transaction_type "buy/sell"
         decimal shares
         decimal price
-        date transaction_date
+        date date
         datetime filed_at
         datetime created_at
         datetime updated_at
@@ -611,7 +611,7 @@ erDiagram
 | eps | decimal | EPS（1株あたり利益） | |
 | market_cap | decimal | 時価総額 | |
 | pe_ratio | decimal | PER（株価収益率） | |
-| data_date | date | データ日付 | NOT NULL |
+| date | date | データ日付 | NOT NULL |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
 
@@ -626,7 +626,7 @@ erDiagram
 | transaction_type | string | 取引種別（buy/sell） | NOT NULL |
 | shares | decimal | 取引株数 | NOT NULL |
 | price | decimal | 取引価格 | NOT NULL |
-| transaction_date | date | 取引日 | NOT NULL |
+| date | date | 取引日 | NOT NULL |
 | filed_at | datetime | 届出日時 | NOT NULL |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
