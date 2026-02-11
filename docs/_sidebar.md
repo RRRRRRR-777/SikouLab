@@ -51,7 +51,7 @@
 - **ブックマーク機能（F-08）**
   - [ブックマーク](docs/functions/bookmark/home.md)
 - **設定機能（F-10）**
-  - [メールアドレス登録](docs/functions/settings/email.md)
+  - [設定画面](docs/functions/settings/home.md)
 - **ニュースレター機能（F-11）**
   - [ニュースレター機能](docs/functions/newsletter/home.md)
   - [ニュースレター管理（管理者）](docs/functions/newsletter/manage.md)
