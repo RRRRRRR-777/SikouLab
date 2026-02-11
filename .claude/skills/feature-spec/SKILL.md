@@ -85,7 +85,9 @@ docs/functions/
 ## 関連テーブル
 🔴 **早期決定**
 
-{Mermaid ER図}
+※ system_datas.mdから関連テーブルの全カラム定義をコピーすること
+
+{Mermaid ER図 - 冒頭に `%% 正: docs/versions/<version>/system_datas.md` を記載}
 
 ## フロー図
 🟡 **中程度**（必要に応じて）
@@ -234,8 +236,9 @@ Frontend --> User: 表示
 
 1. **入力情報の確認**: ユーザーから提供された仕様メモを確認
 2. **Pencil画面取得**: PencilノードIDが提供されている場合、Pencil MCPで画面を取得
-3. **ER図参照**: `docs/versions/<version>/er_diagram.md` から関連テーブルを抽出
-   - 存在しない場合は他の場所を探索
+3. **ER図参照**: `docs/versions/<version>/system_datas.md` から関連テーブルの**全カラム定義**をコピー
+   - ER図冒頭に `%% 正: docs/versions/<version>/system_datas.md` コメントを記載
+   - function docsで独自カラムを定義しない（system_datas.mdに存在しないカラムは先にsystem_datas.mdに追加）
    - 見つからない場合はユーザーと質疑応答で決定
 4. **優先度に応じた質疑応答**:
    - 🔴 早期決定項目 → AskUserQuestionツールで必ず確認・決定
@@ -251,7 +254,7 @@ Frontend --> User: 表示
 | 項目 | 情報源 |
 |------|--------|
 | 画面設計図 | Pencil MCP (`get_screenshot`, `batch_get`) |
-| 関連テーブル | `docs/versions/<version>/er_diagram.md` → 探索 → 質疑応答 |
+| 関連テーブル | `docs/versions/<version>/system_datas.md` → 探索 → 質疑応答 |
 | その他 | ユーザー提供の仕様メモ + 質疑応答 |
 
 ## 注意事項

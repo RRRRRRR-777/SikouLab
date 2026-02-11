@@ -91,6 +91,28 @@ paths:
 * 新規機能は原則として基本設計に追記してから詳細設計を行う
 * 緊急対応など例外的に詳細設計を先行する場合は、後から基本設計に反映する
 
+## ER図同期ルール
+
+### 正の定義
+- **単一正（Single Source of Truth）**: `docs/versions/<version>/system_datas.md`
+- テーブル定義（カラム名・データ型・PK/FK・説明）は全てsystem_datas.mdで管理する
+
+### 詳細設計書（function docs）のER図ルール
+- 詳細設計書のER図は、system_datas.mdから**関連テーブルの全カラム定義をコピー**する
+- リレーションは機能に関連するもののみ記載する
+- ER図の冒頭に正への参照コメントを記載する:
+  ```
+  %% 正: docs/versions/1_0_0/system_datas.md
+  ```
+
+### 同期フロー
+- **system_datas.md → function docs**: system_datas.mdを変更した場合、影響を受ける全てのfunction docsの関連テーブルセクションを更新する
+- **function docs → system_datas.md**: 詳細設計で新規テーブル/カラムが必要になった場合、**先にsystem_datas.mdを更新**してからfunction docsに反映する
+
+### 禁止事項
+- function docsでsystem_datas.mdに存在しないカラムを独自定義すること
+- function docsでカラム名・データ型をsystem_datas.mdと異なる形で記載すること
+
 ## ドキュメント間の相関関係マッピング
 
 ### ドキュメント名とファイルパスの対応
@@ -157,13 +179,21 @@ paths:
 - 3. 画面設計 - 画面遷移の修正（新規画面追加時）
 - 4. データ設計 - テーブル定義の追加/修正（新規テーブル発見時）
 
+#### 4. `system_datas.md` を編集した場合
+
+**確認・修正対象**: `docs/functions/` 配下の**関連する全ての詳細設計ファイル**
+
+影響を受ける箇所：
+- 関連テーブルセクション - テーブル定義・カラム・リレーションの更新
+
 ### 相関関係マトリクス
 
-| 編集ファイル | requirements.md | system-design.md | functions/ |
-|---|:---:|:---:|:---:|
-| requirements.md | - | ○ 必ず修正 | ○ 間接的に確認 |
-| system-design.md | ○ 必ず修正 | - | ○ 必ず修正 |
-| functions/ | ✓ フィードバック | ✓ フィードバック | - |
+| 編集ファイル | requirements.md | system-design.md | system_datas.md | functions/ |
+|---|:---:|:---:|:---:|:---:|
+| requirements.md | - | ○ 必ず修正 | - | ○ 間接的に確認 |
+| system-design.md | ○ 必ず修正 | - | - | ○ 必ず修正 |
+| system_datas.md | - | - | - | ○ 必ず修正 |
+| functions/ | ✓ フィードバック | ✓ フィードバック | ✓ 新規テーブル時 | - |
 
 凡例：
 - ○: 確認・修正が必要
