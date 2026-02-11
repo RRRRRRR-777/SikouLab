@@ -45,6 +45,8 @@
   - [ジャンル詳細ページ](docs/functions/news/genre-detail.md)
 - **アンケート機能（F-06）**
   - [アンケート](docs/functions/poll/home.md)
+- **ブックマーク機能（F-08）**
+  - [ブックマーク](docs/functions/bookmark/home.md)
 - **設定機能（F-10）**
   - [メールアドレス登録](docs/functions/settings/email.md)
 - **ニュースレター機能（F-11）**
