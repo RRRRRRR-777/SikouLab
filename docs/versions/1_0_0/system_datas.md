@@ -64,6 +64,14 @@ erDiagram
         datetime updated_at
     }
 
+    article_summaries {
+        uuid id PK
+        uuid article_id FK
+        text summary
+        datetime created_at
+        datetime updated_at
+    }
+
     %% コンテンツ
     articles {
         uuid id PK
@@ -362,6 +370,7 @@ erDiagram
     articles ||--o{ article_views : "receives"
     articles ||--o{ stock_articles : "relates"
     articles ||--o{ newsletter_articles : "included"
+    newsletter_articles ||--o{ newsletter_logs : "logged"
 
     news ||--o{ news_likes : "receives"
     news ||--o{ news_bookmarks : "receives"
