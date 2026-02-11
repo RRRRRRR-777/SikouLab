@@ -58,6 +58,9 @@
 * docs/adr/013-markdown-library.md
   * 概要: Markdownライブラリの選定。react-markdown（表示）+ @uiw/react-md-editor（エディタ）を採用。
     記事詳細ページのレンダリング・目次生成と、記事作成・編集のエディタ要件に基づく選定理由を記載。
+* docs/adr/014-search-engine.md
+  * 概要: 検索エンジン方式の選定。PGroonga（PostgreSQL拡張）を採用。
+    LIKE/pg_bigm/PGroonga/Typesense/Elasticsearchを比較し、日本語形態素解析の精度・PG内完結・スコアリング対応を理由に選定。
 
 ## バージョン別ドキュメント（versions/）
 * docs/versions/1_0_0/requirements.md
@@ -128,6 +131,12 @@
   * 概要: アンケート機能（F-06）の詳細設計書。最大9択、1ユーザー1回投票のアンケート機能。
     アンケート一覧表示・投票実行・結果表示の仕様を定義。
     画面設計図・シーケンス図・機能要件・非機能要件・テストケースを含む。
+
+### 検索機能（F-07）
+* docs/functions/search/home.md
+  * 概要: 検索機能（F-07）の詳細設計書。記事・ニュース・銘柄・アンケートの統合検索。
+    グローバル検索バー・検索結果画面（タブ形式で表示）の仕様を定義。
+    シーケンス図・機能要件・非機能要件・テストケースを含む。
 
 ### ブックマーク機能（F-08）
 * docs/functions/bookmark/home.md

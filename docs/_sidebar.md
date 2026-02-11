@@ -28,6 +28,7 @@
 - [011: 権限モデル](docs/adr/011-rbac-vs-abac.md)
 - [012: Repo Map](docs/adr/012-repo-map.md)
 - [013: Markdownライブラリ](docs/adr/013-markdown-library.md)
+- [014: 検索エンジン](docs/adr/014-search-engine.md)
 
 ## 機能別詳細仕様
 - **認証機能（F-01）**
@@ -45,6 +46,8 @@
   - [ジャンル詳細ページ](docs/functions/news/genre-detail.md)
 - **アンケート機能（F-06）**
   - [アンケート](docs/functions/poll/home.md)
+- **検索機能（F-07）**
+  - [検索](docs/functions/search/home.md)
 - **ブックマーク機能（F-08）**
   - [ブックマーク](docs/functions/bookmark/home.md)
 - **設定機能（F-10）**
