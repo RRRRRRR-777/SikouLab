@@ -80,6 +80,7 @@ Pencil: `docs/versions/1_0_0/SikouLab.pen` ノードID: 0Cn3B
 
 ```mermaid
 erDiagram
+    %% 正: docs/versions/1_0_0/system_datas.md
     stocks ||--o{ stock_prices : "has"
     stocks ||--o{ stock_fundamentals : "has"
     stocks ||--o{ stock_insider_trades : "has"
@@ -185,8 +186,11 @@ erDiagram
 
     news {
         uuid id PK
+        string source
         string title
-        text content
+        text body
+        string original_language
+        string sentiment "POSITIVE/NEGATIVE/NEUTRAL"
         datetime published_at
         datetime created_at
         datetime updated_at
@@ -210,9 +214,12 @@ erDiagram
 
     articles {
         uuid id PK
+        uuid author_id FK
         string title
         text body
-        datetime published_at
+        string status "draft/scheduled/published/publish_failed"
+        datetime scheduled_at "予約日時（ユーザー指定）"
+        datetime published_at "実際の公開日時"
         datetime created_at
         datetime updated_at
     }
@@ -237,6 +244,8 @@ erDiagram
         uuid id PK
         uuid portfolio_id FK
         uuid stock_id FK
+        decimal purchase_price "取得価格"
+        int shares "保有株数"
         datetime created_at
         datetime updated_at
     }

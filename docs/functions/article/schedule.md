@@ -93,6 +93,7 @@ Pencil未定義（実装のみ）
 
 ```mermaid
 erDiagram
+    %% 正: docs/versions/1_0_0/system_datas.md
     articles {
         uuid id PK
         uuid author_id FK

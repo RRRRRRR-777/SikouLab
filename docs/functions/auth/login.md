@@ -78,6 +78,7 @@ Pencil未定義（実装のみ）
 
 ```mermaid
 erDiagram
+    %% 正: docs/versions/1_0_0/system_datas.md
     users ||--o| user_settings : "has"
     users ||--o| plans : "subscribes"
 
@@ -99,7 +100,7 @@ erDiagram
     user_settings {
         uuid id PK
         uuid user_id FK
-        boolean sidebar_article_expanded
+        boolean sidebar_article_expanded "記事タブの折りたたみ状態"
         datetime created_at
         datetime updated_at
     }
@@ -107,7 +108,7 @@ erDiagram
     plans {
         uuid id PK
         string name
-        text description
+        string description
         boolean is_active
         datetime created_at
         datetime updated_at

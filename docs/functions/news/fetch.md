@@ -43,6 +43,7 @@
 
 ```mermaid
 erDiagram
+    %% 正: docs/versions/1_0_0/system_datas.md
     news ||--o{ news_genres : "has"
     genres ||--o{ news_genres : "belongs"
     news ||--o{ stock_news : "relates"
@@ -55,6 +56,7 @@ erDiagram
         string title
         text body
         string original_language
+        string sentiment "POSITIVE/NEGATIVE/NEUTRAL"
         datetime published_at
         datetime created_at
         datetime updated_at
@@ -66,7 +68,9 @@ erDiagram
         string language
         string title
         text body
-        string translation_status
+        string translation_status "pending/translated/reviewed"
+        uuid edited_by FK
+        uuid reviewed_by FK
         datetime created_at
         datetime updated_at
     }

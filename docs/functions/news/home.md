@@ -63,6 +63,7 @@ Pencil: `docs/versions/1_0_0/SikouLab.pen` ノードID: `HaPem`（サイドバ�
 
 ```mermaid
 erDiagram
+    %% 正: docs/versions/1_0_0/system_datas.md
     news ||--o{ news_genres : "has"
     genres ||--o{ news_genres : "belongs"
     news ||--o{ news_translations : "has"
@@ -79,6 +80,7 @@ erDiagram
         string title
         text body
         string original_language
+        string sentiment "POSITIVE/NEGATIVE/NEUTRAL"
         datetime published_at
         datetime created_at
         datetime updated_at
@@ -158,6 +160,8 @@ erDiagram
         uuid id PK
         uuid portfolio_id FK
         uuid stock_id FK
+        decimal purchase_price "取得価格"
+        int shares "保有株数"
         datetime created_at
         datetime updated_at
     }

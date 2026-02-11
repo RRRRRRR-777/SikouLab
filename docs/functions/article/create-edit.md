@@ -82,6 +82,7 @@ Pencil未定義（実装のみ）
 
 ```mermaid
 erDiagram
+    %% 正: docs/versions/1_0_0/system_datas.md
     articles ||--o{ article_genres : "has"
     genres ||--o{ article_genres : "belongs"
     articles ||--o{ stock_articles : "relates"

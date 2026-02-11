@@ -122,6 +122,7 @@ Pencil: `docs/versions/1_0_0/SikouLab.pen` ノードID: `OruNZ`
 
 ```mermaid
 erDiagram
+    %% 正: docs/versions/1_0_0/system_datas.md
     polls ||--o{ poll_options : "has"
     polls ||--o{ poll_votes : "receives"
     polls ||--o{ poll_bookmarks : "receives"

@@ -108,6 +108,7 @@ Pencil: 未定義（実装時に確定）
 
 ```mermaid
 erDiagram
+    %% 正: docs/versions/1_0_0/system_datas.md
     news ||--o{ news_genres : "has"
     genres ||--o{ news_genres : "belongs"
     news ||--o{ news_translations : "has"

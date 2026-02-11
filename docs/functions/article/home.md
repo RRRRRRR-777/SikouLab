@@ -86,6 +86,7 @@ Pencil: `docs/versions/1_0_0/SikouLab.pen` ノードID: `OkU4H`
 
 ```mermaid
 erDiagram
+    %% 正: docs/versions/1_0_0/system_datas.md
     articles ||--o{ article_genres : "has"
     genres ||--o{ article_genres : "belongs"
     articles ||--o{ article_views : "receives"
@@ -95,9 +96,9 @@ erDiagram
         uuid author_id FK
         string title
         text body
-        string status
-        datetime scheduled_at
-        datetime published_at
+        string status "draft/scheduled/published/publish_failed"
+        datetime scheduled_at "予約日時（ユーザー指定）"
+        datetime published_at "実際の公開日時"
         datetime created_at
         datetime updated_at
     }
@@ -113,7 +114,7 @@ erDiagram
     genres {
         uuid id PK
         string name
-        string type
+        string type "article/news"
         int display_order
         datetime created_at
         datetime updated_at

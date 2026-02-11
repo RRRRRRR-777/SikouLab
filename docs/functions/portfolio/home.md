@@ -114,6 +114,7 @@
 
 ```mermaid
 erDiagram
+    %% 正: docs/versions/1_0_0/system_datas.md
     users ||--o{ portfolios : "owns"
     portfolios ||--o{ portfolio_stocks : "contains"
     stocks ||--o{ portfolio_stocks : "included"
@@ -123,8 +124,17 @@ erDiagram
 
     users {
         uuid id PK
+        string oauth_provider
+        string oauth_user_id
         string name
-        string role
+        string display_name
+        string avatar_url
+        string role "admin/writer/user"
+        uuid plan_id FK
+        string stripe_customer_id
+        string subscription_status "active/canceled/past_due"
+        datetime created_at
+        datetime updated_at
     }
 
     portfolios {
@@ -149,25 +159,41 @@ erDiagram
         uuid id PK
         string symbol
         string name
+        datetime created_at
+        datetime updated_at
     }
 
     stock_prices {
         uuid id PK
         uuid stock_id FK
-        decimal close "終値"
+        decimal open
+        decimal high
+        decimal low
+        decimal close
+        bigint volume
         date price_date
+        datetime created_at
+        datetime updated_at
     }
 
     stock_news {
         uuid id PK
         uuid stock_id FK
         uuid news_id FK
+        datetime created_at
+        datetime updated_at
     }
 
     news {
         uuid id PK
+        string source
         string title
+        text body
+        string original_language
+        string sentiment "POSITIVE/NEGATIVE/NEUTRAL"
         datetime published_at
+        datetime created_at
+        datetime updated_at
     }
 ```
 
