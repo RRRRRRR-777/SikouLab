@@ -50,6 +50,9 @@
 * [ニュース自動取得・翻訳](docs/functions/news/fetch.md)
 * [ジャンル詳細ページ](docs/functions/news/genre-detail.md)
 
+### アンケート機能（F-06）
+* [アンケート](docs/functions/poll/home.md)
+
 ---
 
 ## 開発ルール（.claude/）
