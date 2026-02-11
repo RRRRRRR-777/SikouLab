@@ -214,22 +214,21 @@ flowchart TD
     B -->|No| D[処理B]
 ```
 
-### シーケンス図 → PlantUML
+### シーケンス図 → Mermaid
 
-```plantuml
-@startuml
-actor User
-participant Frontend
-participant Backend
-database DB
+```mermaid
+sequenceDiagram
+    actor User as user
+    participant Frontend as frontend
+    participant Backend as backend
+    database DB as db
 
-User -> Frontend: 操作
-Frontend -> Backend: APIリクエスト
-Backend -> DB: クエリ
-DB --> Backend: 結果
-Backend --> Frontend: レスポンス
-Frontend --> User: 表示
-@enduml
+    user->>frontend: 操作
+    frontend->>backend: APIリクエスト
+    backend->>db: クエリ
+    db-->>backend: 結果
+    backend-->>frontend: レスポンス
+    frontend-->>user: 表示
 ```
 
 ## 実行手順
