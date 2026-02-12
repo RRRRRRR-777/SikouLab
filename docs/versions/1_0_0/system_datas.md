@@ -72,10 +72,22 @@ erDiagram
         datetime updated_at
     }
 
+    %% 投稿ユーザー（表示著者）
+    posting_users {
+        uuid id PK
+        string name "表示名"
+        string avatar_url "アバター画像URL"
+        boolean is_active "有効フラグ"
+        uuid created_by FK "作成者（usersへのFK）"
+        datetime created_at
+        datetime updated_at
+    }
+
     %% コンテンツ
     articles {
         uuid id PK
-        uuid author_id FK
+        uuid author_id FK "操作者（ログインユーザー）"
+        uuid posting_user_id FK "表示著者（投稿ユーザー）"
         string title
         text body
         string status "draft/scheduled/published/publish_failed"
@@ -104,12 +116,19 @@ erDiagram
 
     news {
         uuid id PK
-        string source
+        string origin "取得元区分（api/manual）"
+        string source "ソースURL（手動投稿時はNULL）"
+        uuid author_id FK "操作者（手動投稿時のログインユーザー）"
+        uuid posting_user_id FK "表示著者（投稿ユーザー）"
         string title
         text body
         string original_language
         string sentiment "POSITIVE/NEGATIVE/NEUTRAL"
+        string status "draft/scheduled/published/publish_failed"
+        datetime scheduled_at "予約日時（手動投稿時）"
         datetime published_at
+        boolean is_pinned "トレンドニュースへのピン固定"
+        int pin_order "ピン固定時の表示順序"
         datetime created_at
         datetime updated_at
     }
@@ -362,6 +381,7 @@ erDiagram
     %% リレーション
     plans ||--o{ users : "subscribed"
     users ||--o| user_settings : "has"
+    users ||--o{ posting_users : "creates"
     users ||--o{ articles : "writes"
     users ||--o{ portfolios : "owns"
     users ||--o{ poll_votes : "votes"
@@ -372,8 +392,12 @@ erDiagram
     users ||--o{ poll_bookmarks : "creates"
     users ||--o{ article_views : "records"
     users ||--o{ news_views : "records"
+    users ||--o{ news : "writes_manual"
     users ||--o{ announcements : "creates"
     users ||--o{ newsletter_subscriptions : "subscribes"
+
+    posting_users ||--o{ articles : "displayed_as"
+    posting_users ||--o{ news : "displayed_as"
 
     articles ||--o{ article_genres : "has"
     genres ||--o{ article_genres : "belongs"
@@ -419,6 +443,7 @@ erDiagram
 | users | ユーザー情報・認証・課金状態 | F-01, F-10-2 |
 | user_settings | ユーザー個別設定（サイドバー状態等） | 共通UI |
 | plans | サブスクリプションプラン定義 | F-10-2 |
+| posting_users | 投稿用ユーザー（表示著者） | F-12-7 |
 | articles | 記事コンテンツ | F-04 |
 | article_genres | 記事ジャンル中間テーブル | F-04-3 |
 | genres | ジャンルマスタ | F-04-3, F-05-4 |
@@ -492,12 +517,25 @@ erDiagram
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
 
+**posting_users** - 投稿用ユーザー（表示著者）
+
+| カラム名 | データ型 | 説明 | 制約 |
+|---------|---------|------|------|
+| id | uuid | 主キー | PK |
+| name | string | 表示名 | NOT NULL |
+| avatar_url | string | アバター画像URL | |
+| is_active | boolean | 有効フラグ | DEFAULT true |
+| created_by | uuid | 作成者（usersへのFK） | FK, NOT NULL |
+| created_at | datetime | 作成日時 | NOT NULL |
+| updated_at | datetime | 更新日時 | NOT NULL |
+
 **articles** - 記事コンテンツ
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
 | id | uuid | 主キー | PK |
-| author_id | uuid | 著者ID | FK, NOT NULL |
+| author_id | uuid | 操作者ID（ログインユーザー） | FK, NOT NULL |
+| posting_user_id | uuid | 表示著者ID（投稿ユーザー） | FK |
 | title | string | タイトル | NOT NULL |
 | body | text | 本文（Markdown） | NOT NULL |
 | status | string | 状態（draft/scheduled/published/publish_failed） | NOT NULL |
@@ -535,12 +573,19 @@ erDiagram
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
 | id | uuid | 主キー | PK |
-| source | string | ソースURL | NOT NULL |
+| origin | string | 取得元区分（api/manual） | NOT NULL, DEFAULT 'api' |
+| source | string | ソースURL（手動投稿時はNULL） | |
+| author_id | uuid | 操作者ID（手動投稿時のログインユーザー） | FK |
+| posting_user_id | uuid | 表示著者ID（投稿ユーザー） | FK |
 | title | string | タイトル | NOT NULL |
 | body | text | 本文 | NOT NULL |
 | original_language | string | 原文言語 | NOT NULL |
 | sentiment | string | センチメント（POSITIVE/NEGATIVE/NEUTRAL） | DEFAULT 'NEUTRAL' |
-| published_at | datetime | 公開日時 | NOT NULL |
+| status | string | 状態（draft/scheduled/published/publish_failed） | NOT NULL, DEFAULT 'published' |
+| scheduled_at | datetime | 予約日時（手動投稿時にユーザー指定） | |
+| published_at | datetime | 公開日時 | |
+| is_pinned | boolean | トレンドニュースへのピン固定 | DEFAULT false |
+| pin_order | int | ピン固定時の表示順序（小さいほど上位） | |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
 

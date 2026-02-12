@@ -2,7 +2,7 @@
 
 ## 機能概要
 
-記事投稿権限を持つユーザーが、専門家の知見を記事として作成・編集・公開できる機能。Markdownエディタ、ジャンル選択、関連銘柄選択、即時/予約公開を提供する。
+記事投稿権限を持つユーザーが、専門家の知見を記事として作成・編集・公開できる機能。Markdownエディタ、ジャンル選択、投稿ユーザー選択、関連銘柄選択、即時/予約公開を提供する。
 
 ## 目的
 
@@ -55,6 +55,9 @@ Pencil未定義（実装のみ）
 │ ジャンル選択                                              │
 │ [ジャンル1] [ジャンル2] [ジャンル3] ...                   │
 │                                                           │
+│ 投稿ユーザー                                              │
+│ [▼ 投稿ユーザーを選択 ] （有効な投稿ユーザーのみ表示）     │
+│                                                           │
 │ Markdownエディタ                                          │
 │ ┌────────────────────────────────────────────────────┐  │
 │ │ [H1] [H2] [H3] [B] [I] [リンク] [画像] [コード]    │  │
@@ -83,15 +86,27 @@ Pencil未定義（実装のみ）
 ```mermaid
 erDiagram
     %% 正: docs/versions/1_0_0/system_datas.md
+    posting_users ||--o{ articles : "displayed_as"
     articles ||--o{ article_genres : "has"
     genres ||--o{ article_genres : "belongs"
     articles ||--o{ stock_articles : "relates"
     stocks ||--o{ stock_articles : "has"
     articles ||--o{ newsletter_articles : "included"
 
+    posting_users {
+        uuid id PK
+        string name "表示名"
+        string avatar_url
+        boolean is_active
+        uuid created_by FK
+        datetime created_at
+        datetime updated_at
+    }
+
     articles {
         uuid id PK
-        uuid author_id FK
+        uuid author_id FK "操作者"
+        uuid posting_user_id FK "表示著者"
         string title
         text body
         string status "draft/scheduled/published/publish_failed"
@@ -161,7 +176,8 @@ flowchart TD
     E -->|予約公開| I[予約日時を設定]
 
     %% 即時公開フロー
-    H --> J[ジャンル・銘柄紐づけ]
+    H --> H1[投稿ユーザー紐づけ]
+    H1 --> J[ジャンル・銘柄紐づけ]
     J --> K{ニュースレター?}
     K -->|チェック| L[配信リストに追加]
     K -->|未チェック| M[公開完了]
@@ -214,9 +230,15 @@ sequenceDiagram
     Front->>User: 画像挿入
 
     %% 即時公開
+    User->>Front: 投稿ユーザーを選択
+    Front->>API: GET /api/posting-users?is_active=true
+    API->>DB: 有効な投稿ユーザー取得
+    DB-->>API: 投稿ユーザーリスト
+    API-->>Front: 投稿ユーザー選択肢
     User->>Front: 公開ボタンクリック（即時公開）
     Front->>API: POST /api/articles
-    API->>DB: 記事保存（status=published）
+    Note over Front,API: posting_user_id を含む
+    API->>DB: 記事保存（status=published, posting_user_id）
     API->>DB: ジャンル紐づけ
     API->>DB: 銘柄紐づけ
     alt ニュースレター対象
@@ -237,7 +259,7 @@ sequenceDiagram
 - 機能仕様3: Markdownエディタによるリッチな編集
   - Markdownエディタの具体的な機能: TBD
 
-### 機能要件2: ジャンル・銘柄選択（F-04-1）
+### 機能要件2: ジャンル・銘柄・投稿ユーザー選択（F-04-1）
 - 機能仕様1: ジャンルの選択（複数可）
 - 機能仕様2: 既存ジャンルから選択、または新規ジャンルを追加する
   - 新規ジャンル追加ボタンでジャンル名を入力
@@ -245,6 +267,12 @@ sequenceDiagram
   - 新規ジャンルは`genres`テーブルに自動作成される
   - タイプは自動的に"article"に設定
 - 機能仕様3: 関連銘柄の検索・選択（複数可）
+- 機能仕様4: 投稿ユーザーを選択する
+  - `posting_users`テーブルの`is_active=true`のユーザーのみ選択肢に表示
+  - ドロップダウンで1名を選択（必須）
+  - 選択した投稿ユーザーが記事の表示著者（バイライン）となる
+  - `posting_user_id`として記事に紐づけ
+  - 編集時は現在の投稿ユーザーがプリセットされる
 
 ### 機能要件3: 公開設定（F-04-1）
 - 機能仕様1: 即時公開・予約公開・下書き保存の選択（予約公開の詳細は [schedule.md](./schedule.md) 参照）
@@ -301,9 +329,10 @@ sequenceDiagram
 1. ユーザーが記事作成画面にアクセス
 2. タイトル、本文を入力
 3. ジャンルを選択
-4. 関連銘柄を検索・選択
-5. 公開ボタンをクリック
-6. 記事が公開される
+4. 投稿ユーザーを選択（バイライン）
+5. 関連銘柄を検索・選択
+6. 公開ボタンをクリック
+7. 記事が公開される（選択した投稿ユーザー名が著者として表示される）
 
 ### シナリオ2: 予約投稿
 ※ 詳細は [schedule.md](./schedule.md) を参照
@@ -342,6 +371,9 @@ sequenceDiagram
 | 即時公開 | status=publishedで記事作成 | 記事が即時公開される |
 | 予約公開 | status=scheduled、scheduled_atを指定して記事作成 | 記事が予約状態で保存される（バッチ処理のテストは [schedule.md](./schedule.md) 参照） |
 | ニュースレター登録 | ニュースレターチェックONで記事作成 | newsletter_articlesに登録される |
+| 投稿ユーザー選択 | 有効な投稿ユーザーを選択して記事作成 | posting_user_idが紐づく |
+| 投稿ユーザー選択肢 | is_active=falseの投稿ユーザー | 選択肢に表示されない |
+| 投稿ユーザー未選択 | 投稿ユーザーを選択せずに公開 | バリデーションエラー |
 | 権限チェック（writer） | writerが自分の記事を編集 | 編集可能 |
 | 権限チェック（他人の記事） | writerが他人の記事を編集 | 403エラー |
 
@@ -365,6 +397,7 @@ sequenceDiagram
 | F-04-4 | 作成した記事が人気記事算出の対象 |
 | F-04-5 | 作成した記事が詳細ページで表示される |
 | F-12-3 | ニュースレター配信リストに追加 |
+| F-12-7（投稿ユーザー管理） | 投稿ユーザーの作成・管理。記事作成時の選択肢データソース |
 
 ### コード影響範囲
 🟢 **後回し可**
@@ -384,6 +417,7 @@ POST /api/articles
 **リクエストボディ（例）**
 - `title`: タイトル
 - `body`: 本文（Markdown）
+- `posting_user_id`: 投稿ユーザーID（必須）
 - `status`: `draft` | `published` | `scheduled`
 - `scheduled_at`: 予約日時（status=scheduledの場合に指定）
 - `genre_ids`: ジャンルID配列
@@ -411,7 +445,7 @@ POST /api/articles/images
 
 | 項目 | ストーリーポイント | 目安時間 |
 |------|------------------|----------|
-| **合計** | 52-55sp | 13-13.75時間 |
+| **合計** | 55-58sp | 13.75-14.5時間 |
 
 **目安**: 4sp = 1時間（実装＋単体テスト＋レビューを含む、あくまで参考値）
 
@@ -428,7 +462,8 @@ POST /api/articles/images
 | openapi.yaml定義 | 2 | 4エンドポイント分のスキーマ定義 |
 | DBマイグレーション | 2 | articles（scheduled_at追加、status値拡張）, article_genres, stock_articles, newsletter_articles |
 | **フロントエンド** | | |
-| 記事作成・編集画面（基本UI） | 5 | タイトル入力、ジャンル選択、銘柄選択、公開設定 |
+| 記事作成・編集画面（基本UI） | 5 | タイトル入力、ジャンル選択、投稿ユーザー選択、銘柄選択、公開設定 |
+| 投稿ユーザー選択UI | 2 | ドロップダウン（is_active=trueのみ）、API連携 |
 | Markdownエディタ統合 | 5-8 | ライブラリ選定・ツールバー・プレビュー、不確実性あり |
 | 画像アップロードUI | 3 | エディタ内画像挿入、プログレス表示 |
 | 自動保存機能（FE） | 3 | 30秒タイマー、インジケーター、離脱防止 |
@@ -451,4 +486,6 @@ POST /api/articles/images
 - openapi.yaml定義 → API実装の前提
 - 画像保存先の決定（TBD） → 画像アップロードAPI実装
 - 記事作成API → 記事作成・編集画面UI
+- 投稿ユーザーAPI（GET /api/posting-users） → 投稿ユーザー選択UI
+- F-12-7（投稿ユーザー管理）で投稿ユーザーが作成済みであること → 記事作成時の選択
 - Markdownエディタライブラリ選定 → Markdownエディタ統合
