@@ -33,6 +33,8 @@
 ## 機能別詳細仕様
 - **認証機能（F-01）**
   - [ログイン](docs/functions/auth/login.md)
+- **ダッシュボード機能（F-02）**
+  - [ダッシュボード](docs/functions/dashboard/home.md)
 - **銘柄機能（F-03）**
   - [個別銘柄ページ](docs/functions/stock/home.md)
 - **記事機能（F-04）**

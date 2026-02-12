@@ -262,6 +262,18 @@ erDiagram
         datetime updated_at
     }
 
+    %% 異常検出
+    stock_anomalies {
+        uuid id PK
+        uuid stock_id FK
+        string anomaly_type "price_surge/volume_surge/volatility_surge"
+        decimal value "検出値（変動率%、出来高倍率等）"
+        decimal threshold "検出閾値"
+        datetime detected_at "検出日時"
+        datetime created_at
+        datetime updated_at
+    }
+
     %% ポートフォリオ
     portfolios {
         uuid id PK
@@ -424,6 +436,7 @@ erDiagram
     stocks ||--o{ stock_uoa : "has"
     stocks ||--o{ stock_ratings : "has"
     stocks ||--o{ analyst_ratings : "has"
+    stocks ||--o{ stock_anomalies : "detected"
     stocks ||--o{ portfolio_stocks : "included"
 
     portfolios ||--o{ portfolio_stocks : "contains"
@@ -459,6 +472,7 @@ erDiagram
 | stock_uoa | Unusual Option Activity | F-03-5 |
 | stock_ratings | 証券会社レーティング | F-03-6 |
 | analyst_ratings | アナリスト格付け | F-03-9 |
+| stock_anomalies | 銘柄異常検出結果 | F-02-5 |
 | portfolios | ポートフォリオ | F-09 |
 | portfolio_stocks | ポートフォリオ×銘柄 | F-09 |
 | polls | アンケート | F-06 |
@@ -737,6 +751,19 @@ erDiagram
 | grade | string | 格付け | NOT NULL |
 | comment | text | コメント | |
 | rated_at | datetime | 格付け日時 | NOT NULL |
+| created_at | datetime | 作成日時 | NOT NULL |
+| updated_at | datetime | 更新日時 | NOT NULL |
+
+**stock_anomalies** - 銘柄異常検出結果
+
+| カラム名 | データ型 | 説明 | 制約 |
+|---------|---------|------|------|
+| id | uuid | 主キー | PK |
+| stock_id | uuid | 銘柄ID | FK, NOT NULL |
+| anomaly_type | string | 異常種別（price_surge/volume_surge/volatility_surge） | NOT NULL |
+| value | decimal | 検出値（変動率%、出来高倍率等） | NOT NULL |
+| threshold | decimal | 検出閾値 | NOT NULL |
+| detected_at | datetime | 検出日時 | NOT NULL |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
 
