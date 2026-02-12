@@ -1,6 +1,6 @@
 ---
 name: feature-spec
-description: 機能仕様ページを作成するSkill。設計段階で新規機能の詳細仕様をドキュメント化します。
+description: "【詳細設計書の新規作成・大幅修正時に必須】機能仕様ページを作成するSkill。docs/functions/配下のドキュメントを作成・修正する際は、必ずこのskillを呼び出してテンプレートとセルフチェックリストをロードすること。"
 ---
 
 # Feature Spec Skill

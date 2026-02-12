@@ -1,6 +1,6 @@
 ---
 name: requirements
-description: バージョン単位の要件定義書を作成するSkill。Why/Whatを明確にし、基本設計書・機能設計書への橋渡しとなるドキュメントを作成します。
+description: "【要件定義書の新規作成・大幅修正時に必須】バージョン単位の要件定義書を作成するSkill。docs/versions/配下のrequirements.mdを作成・修正する際は、必ずこのskillを呼び出してテンプレートをロードすること。"
 ---
 
 # Requirements Skill

@@ -17,22 +17,23 @@ description: 開発ワークフローの詳細手順。1機能の開発フロー
 1つの機能を開発し、devブランチにマージするまでの流れ。
 
 ```
-1. 要件定義確認
+1. 要件定義確認（新規作成・大幅修正時は /requirements skill必須）
    └─ docs/versions/<version>/requirements.md を確認
    └─ 対象機能が機能一覧に存在することを確認
 
-2. 基本設計確認
+2. 基本設計確認（新規作成・大幅修正時は /system-design skill必須）
    └─ docs/versions/<version>/system-design.md を確認
    └─ 機能依存関係・画面設計・データ設計を確認
 
-3. 詳細設計 (/feature-spec)
+3. 詳細設計（/feature-spec skill必須）
+   └─ ⚠ /feature-spec skillを呼び出してテンプレートをロード
    └─ docs/functions/<feature-category>/<feature-name>.md を作成
    └─ テストケースセクション含む（単体テスト用）
    └─ API設計（バックエンド機能の場合）:
       ├─ feature-specを参照して backend/api/openapi.yaml を更新
       ├─ 不明点があればユーザーに確認
       └─ OpenAPI記載時に決定した内容はfeature-specに反映
-   └─ 全セクション記載 → 自己レビュー → コミット
+   └─ 全セクション記載 → セルフチェック → 自己レビュー → コミット
 
 4. 実装（TDD）
    └─ 設計書のテストケースを先に実装 (Red)

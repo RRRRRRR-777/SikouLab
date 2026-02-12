@@ -1,6 +1,6 @@
 ---
 name: system-design
-description: バージョン単位の基本設計書を作成するSkill。機能構成・相関・画面遷移・データ設計など、外部設計を定義します。
+description: "【基本設計書の新規作成・大幅修正時に必須】バージョン単位の基本設計書を作成するSkill。docs/versions/配下のsystem-design.mdを作成・修正する際は、必ずこのskillを呼び出してテンプレートをロードすること。"
 ---
 
 # System Design Skill
