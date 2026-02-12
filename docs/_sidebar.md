@@ -54,9 +54,10 @@
   - [設定画面](docs/functions/settings/home.md)
 - **ニュースレター機能（F-11）**
   - [ニュースレター機能](docs/functions/newsletter/home.md)
-  - [ニュースレター管理（管理者）](docs/functions/newsletter/manage.md)
 - **ポートフォリオ機能（F-09）**
   - [ポートフォリオ](docs/functions/portfolio/home.md)
+- **管理者機能（F-12）**
+  - [管理者ページ](docs/functions/admin/home.md)
 
 ---
 

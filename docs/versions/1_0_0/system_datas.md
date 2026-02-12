@@ -114,6 +114,17 @@ erDiagram
         datetime updated_at
     }
 
+    announcements {
+        uuid id PK
+        string title
+        text body
+        string category "maintenance/update/news/other"
+        string target "all/subscribers"
+        uuid created_by FK
+        datetime created_at
+        datetime updated_at
+    }
+
     news_translations {
         uuid id PK
         uuid news_id FK
@@ -361,6 +372,7 @@ erDiagram
     users ||--o{ poll_bookmarks : "creates"
     users ||--o{ article_views : "records"
     users ||--o{ news_views : "records"
+    users ||--o{ announcements : "creates"
     users ||--o{ newsletter_subscriptions : "subscribes"
 
     articles ||--o{ article_genres : "has"
@@ -438,6 +450,7 @@ erDiagram
 | newsletter_articles | ニュースレター配信記事リスト | F-12-3 |
 | newsletter_logs | ニュースレター配信履歴 | F-11-2 |
 | system_settings | システム設定値 | F-12-4 |
+| announcements | お知らせ通知 | F-12-6 |
 
 ### 2.2 カラム定義
 
@@ -870,5 +883,18 @@ erDiagram
 | key | string | 設定キー | NOT NULL, UNIQUE |
 | value | text | 設定値 | |
 | description | string | 説明 | |
+| created_at | datetime | 作成日時 | NOT NULL |
+| updated_at | datetime | 更新日時 | NOT NULL |
+
+**announcements** - お知らせ通知
+
+| カラム名 | データ型 | 説明 | 制約 |
+|---------|---------|------|------|
+| id | uuid | 主キー | PK |
+| title | string | お知らせタイトル | NOT NULL |
+| body | text | お知らせ本文 | NOT NULL |
+| category | string | カテゴリ（maintenance/update/news/other） | NOT NULL |
+| target | string | 対象（all/subscribers） | NOT NULL |
+| created_by | uuid | 作成者（usersへのFK） | FK, NOT NULL |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
