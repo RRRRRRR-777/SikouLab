@@ -90,7 +90,7 @@ Pencil: `docs/versions/1_0_0/SikouLab.pen` ノードID: `AwSoL`
 
 ```mermaid
 erDiagram
-    %% 正: docs/versions/1_0_0/system_datas.md
+    %% 正: docs/versions/1_0_0/data-model.md
 
     %% F-02-2: 記事・ニュースハイライト
     articles ||--o{ article_genres : "has"

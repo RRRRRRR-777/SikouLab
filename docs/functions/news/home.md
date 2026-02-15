@@ -63,7 +63,7 @@ Pencil: `docs/versions/1_0_0/SikouLab.pen` ノードID: `HaPem`（サイドバ�
 
 ```mermaid
 erDiagram
-    %% 正: docs/versions/1_0_0/system_datas.md
+    %% 正: docs/versions/1_0_0/data-model.md
     news ||--o{ news_genres : "has"
     genres ||--o{ news_genres : "belongs"
     news ||--o{ news_translations : "has"

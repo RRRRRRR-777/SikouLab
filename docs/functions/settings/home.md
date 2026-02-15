@@ -120,7 +120,7 @@
 
 ## 関連テーブル
 
-%% 正: docs/versions/1_0_0/system_datas.md
+%% 正: docs/versions/1_0_0/data-model.md
 
 ```mermaid
 erDiagram

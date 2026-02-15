@@ -263,7 +263,7 @@ Pencil未定義（S-18〜S-22全て未定義）
 
 ```mermaid
 erDiagram
-    %% 正: docs/versions/1_0_0/system_datas.md
+    %% 正: docs/versions/1_0_0/data-model.md
 
     users ||--o{ articles : "writes"
     users ||--o{ news : "writes_manual"

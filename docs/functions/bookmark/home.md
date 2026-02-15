@@ -60,11 +60,11 @@
 
 ## 関連テーブル
 
-※ 正: docs/versions/1_0_0/system_datas.md
+※ 正: docs/versions/1_0_0/data-model.md
 
 ```mermaid
 erDiagram
-    %% 正: docs/versions/1_0_0/system_datas.md
+    %% 正: docs/versions/1_0_0/data-model.md
     users ||--o{ article_bookmarks : "creates"
     users ||--o{ news_bookmarks : "creates"
     users ||--o{ poll_bookmarks : "creates"

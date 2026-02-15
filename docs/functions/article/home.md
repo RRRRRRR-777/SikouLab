@@ -86,7 +86,7 @@ Pencil: `docs/versions/1_0_0/SikouLab.pen` ノードID: `OkU4H`
 
 ```mermaid
 erDiagram
-    %% 正: docs/versions/1_0_0/system_datas.md
+    %% 正: docs/versions/1_0_0/data-model.md
     articles ||--o{ article_genres : "has"
     genres ||--o{ article_genres : "belongs"
     articles ||--o{ article_views : "receives"

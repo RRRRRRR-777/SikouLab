@@ -12,7 +12,7 @@
 - **v1.0.0**
   - [要件定義書](docs/versions/1_0_0/requirements.md)
   - [基本設計書](docs/versions/1_0_0/system-design.md)
-  - [データ設計書](docs/versions/1_0_0/system_datas.md)
+  - [データ設計書](docs/versions/1_0_0/data-model.md)
 
 ## ADR（技術選定記録）
 - [001: UIライブラリ](docs/adr/001-ui-library.md)

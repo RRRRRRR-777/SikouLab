@@ -80,7 +80,7 @@ Pencil: `docs/versions/1_0_0/SikouLab.pen` ノードID: 0Cn3B
 
 ```mermaid
 erDiagram
-    %% 正: docs/versions/1_0_0/system_datas.md
+    %% 正: docs/versions/1_0_0/data-model.md
     stocks ||--o{ stock_prices : "has"
     stocks ||--o{ stock_fundamentals : "has"
     stocks ||--o{ stock_insider_trades : "has"
