@@ -451,9 +451,7 @@ flowchart TD
 | 翻訳API/LLM | ニュース日本語化・記事要約 | F-05-2, F-11-1 | ニュース取得時/配信時 |
 | メール配信API | ニュースレター送信 | F-11-2 | 毎日朝7:30 |
 | Stripe API | 決済・サブスク管理 | F-10-2 | イベント駆動 |
-| Google OAuth | 認証 | F-01 | リクエスト時 |
-| Apple OAuth | 認証 | F-01 | リクエスト時 |
-| X OAuth | 認証 | F-01 | リクエスト時 |
+| Firebase Authentication | 認証基盤（Google / Apple / X OAuth） | F-01 | リクエスト時 |
 
 ### 5.2 外部システム連携図
 
@@ -467,9 +465,7 @@ flowchart LR
     end
 
     subgraph 認証
-        Google[Google OAuth]
-        Apple[Apple OAuth]
-        XAuth[X OAuth]
+        FirebaseAuth[Firebase Authentication<br/>（Google / Apple / X OAuth）]
     end
 
     subgraph 決済
@@ -495,9 +491,7 @@ flowchart LR
     Backend <--> DB
     Metabase --> DB
 
-    Backend <--> Google
-    Backend <--> Apple
-    Backend <--> XAuth
+    Backend <--> FirebaseAuth
     Backend <--> Stripe
 
     Backend <--> NewsAPI
