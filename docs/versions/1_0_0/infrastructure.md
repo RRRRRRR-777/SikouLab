@@ -620,11 +620,162 @@ Cloud Scheduler（cron式でトリガー）
 
 ---
 
+## 11. 環境別差分
+
+> 参照: [ADR-005: 環境戦略](../../adr/005-staging-environment.md)
+
+本設計書の§1〜§10はprod環境を基準に記載している。本セクションではdev環境の差分を定義する。
+
+### 11.1 環境一覧
+
+| 環境 | 用途 | ライフサイクル | ドメイン |
+|------|------|--------------|---------|
+| prod | 本番 | 常時稼働 | `sikoulab.com`（TBD） |
+| dev | 開発・検証 | オンデマンド（CD管理） | `dev.sikoulab.com`（TBD） |
+
+> staging環境は初期では構築しない（[ADR-005](../../adr/005-staging-environment.md)）。
+
+### 11.2 リソース名規則
+
+同一GCPプロジェクト内で環境プレフィックスにより分離する。
+
+| リソース | prod | dev |
+|---------|------|-----|
+| Cloud Run（FE） | `sikoulab-frontend` | `sikoulab-frontend-dev` |
+| Cloud Run（BE） | `sikoulab-api` | `sikoulab-api-dev` |
+| Cloud Run Jobs | `sikoulab-jobs` | `sikoulab-jobs-dev` |
+| Cloud SQL | `sikoulab-db` | `sikoulab-db-dev` |
+| Cloud Storage | `sikoulab-assets-prod` | `sikoulab-assets-dev` |
+| Cloud Armor | `sikoulab-armor` | `sikoulab-armor-dev` |
+| Secret Manager | `database-url` 等 | `dev-database-url` 等 |
+
+### 11.3 コンピュート差分（Cloud Run）
+
+| 設定項目 | prod | dev | 差分理由 |
+|---------|------|-----|---------|
+| FE min-instances | 1 | **0** | 常時待機不要 |
+| BE min-instances | 0 | 0 | 同じ |
+| FE/BE max-instances | 3 | **1** | 負荷テスト不要 |
+| FE Startup CPU Boost | 無効 | 無効 | 同じ |
+| BE Startup CPU Boost | 有効 | 有効 | 同じ |
+| concurrency | FE=80, BE=100 | 同左 | prod同等を維持 |
+
+### 11.4 データベース差分（Cloud SQL）
+
+| 設定項目 | prod | dev | 差分理由 |
+|---------|------|-----|---------|
+| マシンタイプ | db-f1-micro | db-f1-micro | 同じ |
+| ストレージ | SSD 10GB | SSD 10GB | 同じ |
+| PITR | 有効 | **無効** | テストデータに復旧保証不要 |
+| バックアップ保持期間 | 7日 | **3日** | コスト削減 |
+| メンテナンスウィンドウ | 日曜 03:00-04:00 JST | 同左 | 同じ |
+
+### 11.5 ネットワーク・セキュリティ差分
+
+| 設定項目 | prod | dev | 差分理由 |
+|---------|------|-----|---------|
+| Cloud LB | あり | **あり** | prod同等構成を維持 |
+| SSL | Google Managed | Google Managed | 同じ |
+| Cloud Armor ポリシー | フル（レート制限・地域制限・OWASP CRS） | **最小限（レート制限のみ）** | WAF・地域制限はprodで検証すれば十分 |
+
+**dev環境 Cloud Armorポリシー**:
+
+| ポリシー | 内容 | 優先度 |
+|---------|------|--------|
+| レート制限 | 1 IPあたり100リクエスト/分 | 1 |
+| デフォルトルール | 許可 | 2147483647 |
+
+### 11.6 監視・アラート差分
+
+| 設定項目 | prod | dev | 差分理由 |
+|---------|------|-----|---------|
+| Cloud Logging | 構造化ログ、7日保持 | 同左 | prod同等を維持 |
+| ダッシュボード | フル | **なし** | 手動確認で十分 |
+| Uptime Check | あり | **なし** | 常時監視不要 |
+
+**devアラートポリシー**（最小限）:
+
+| アラート名 | 条件 | 通知先 |
+|-----------|------|--------|
+| サービスダウン | 5xxエラーが5分間で10件以上 | Cloud Console アプリ |
+| バッチ処理失敗 | Cloud Run Jobs失敗 | Cloud Console アプリ |
+
+### 11.7 コスト差分
+
+| 項目 | prod（月額USD） | dev（稼働時） | dev（停止時） |
+|------|---------------|-------------|-------------|
+| Cloud Run（FE） | $10-20 | $0-5 | $0 |
+| Cloud Run（BE） | $5-15 | $0-5 | $0 |
+| Cloud LB | $18-20 | $18-20 | $0 |
+| Cloud Armor | $5 | $5 | $0 |
+| Cloud SQL | $10 | $10 | $0 |
+| Cloud Storage | $1-3 | $0-1 | $0 |
+| Cloud Logging | $0-2 | $0-1 | $0 |
+| Egress | $5-15 | $0-2 | $0 |
+| **合計** | **$54-91** | **$33-49** | **$0** |
+
+**dev予算アラート**:
+
+| 閾値 | アクション |
+|------|----------|
+| 50%（~$20） | メール通知 |
+| 80%（~$32） | メール通知 |
+| 100%（$40） | メール通知 + Cloud Consoleアプリ通知 |
+
+### 11.8 CI/CD差分
+
+prod環境のワークフロー（§8.1）に加え、dev環境用ワークフローを追加する。
+
+| ワークフロー | トリガー | 実行内容 |
+|------------|---------|---------:|
+| `dev-up.yml` | 手動実行 or devブランチpush | GCPリソース作成 → Dockerビルド → デプロイ |
+| `dev-down.yml` | 手動実行 | dev環境のGCPリソース全削除 |
+
+**`dev-up.yml` のステップ**:
+```
+1. チェックアウト
+2. Google Cloud 認証（Workload Identity Federation）
+3. Cloud SQL インスタンス作成（存在しない場合）
+4. Cloud SQL マイグレーション実行
+5. Docker イメージビルド（FE/BE）
+6. Artifact Registry へ push
+7. Cloud Run デプロイ（FE/BE）
+8. Cloud LB + Cloud Armor 設定（存在しない場合）
+9. ヘルスチェック確認
+```
+
+**`dev-down.yml` のステップ**:
+```
+1. チェックアウト
+2. Google Cloud 認証（Workload Identity Federation）
+3. Cloud Run サービス削除（FE/BE/Jobs）
+4. Cloud LB 関連リソース削除（Backend Service, NEG, URL Map, 転送ルール, SSL証明書）
+5. Cloud Armor ポリシー削除
+6. Cloud SQL インスタンス削除
+7. 完了通知
+```
+
+> Cloud Storage バケット・Secret Manager・Artifact Registry・DNS設定は環境の起動/停止に関わらず保持する（再作成コストが高い or データ保持が必要なため）。
+
+### 11.9 構築工数見積もり（dev環境追加分）
+
+| 作業項目 | 工数（時間） |
+|---------|------------|
+| `dev-up.yml` ワークフロー作成 | 4-6h |
+| `dev-down.yml` ワークフロー作成 | 2-3h |
+| 環境別Secret Manager登録 | 1h |
+| dev用Cloud Armorポリシー作成 | 0.5h |
+| DNS設定（dev.sikoulab.com） | 0.5h |
+| 動作検証 | 2-3h |
+| **合計** | **10-14h** |
+
+---
+
 ## 関連ドキュメント
 
 | ドキュメント | パス | 内容 |
 |------------|------|------|
-| ADR-005: staging環境 | [005-staging-environment.md](../../adr/005-staging-environment.md) | 環境構成（prod/dev） |
+| ADR-005: 環境戦略 | [005-staging-environment.md](../../adr/005-staging-environment.md) | 環境構成（prod/dev）、dev環境オンデマンド方式、見直しトリガー |
 | ADR-006: デプロイフロー | [006-deploy-flow.md](../../adr/006-deploy-flow.md) | デプロイフロー、ロールバック |
 | ADR-007: ログ監視 | [007-log-monitoring.md](../../adr/007-log-monitoring.md) | ログ監視方式、障害対応フロー |
 | ADR-010: 品質計測 | [010-quality-metrics.md](../../adr/010-quality-metrics.md) | SLA目標、パフォーマンス指標 |
