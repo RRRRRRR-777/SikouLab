@@ -50,7 +50,10 @@
 
 ### 1.4 インフラ
 - **クラウドプラットフォーム**: Google Cloud
-- **デプロイ先**: Cloud Run vs GKE（費用対効果計算後に決定）
+- **インフラ設計書**: → [インフラ設計書](./versions/1_0_0/infrastructure.md)（GCPリソース構成・設定・運用の全体像）
+- **デプロイ先**: Cloud Run → [ADR-015](./adr/015-deploy-platform.md)
+  - FE（Next.js）+ BE（Go API）両方を Cloud Run にデプロイ
+  - min-instances=1（コールドスタート防止）
   - 想定ユーザー数:
     - 現在: 1200人（アクティブユーザー800人）
     - 3年後: 2400人

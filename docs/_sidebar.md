@@ -13,6 +13,7 @@
   - [要件定義書](docs/versions/1_0_0/requirements.md)
   - [基本設計書](docs/versions/1_0_0/system-design.md)
   - [データ設計書](docs/versions/1_0_0/data-model.md)
+  - [インフラ設計書](docs/versions/1_0_0/infrastructure.md)
 
 ## ADR（技術選定記録）
 - [001: UIライブラリ](docs/adr/001-ui-library.md)
@@ -29,6 +30,7 @@
 - [012: Repo Map](docs/adr/012-repo-map.md)
 - [013: Markdownライブラリ](docs/adr/013-markdown-library.md)
 - [014: 検索エンジン](docs/adr/014-search-engine.md)
+- [015: インフラ環境構築](docs/adr/015-deploy-platform.md)
 
 ## 機能別詳細仕様
 - **認証機能（F-01）**

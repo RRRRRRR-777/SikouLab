@@ -44,9 +44,11 @@
 
 ```
 1. 問題発生を検知
-2. Cloud Run / GKE で前バージョンのコンテナイメージにリビジョン切り替え
+2. Cloud Run で前バージョンのリビジョンにトラフィック切り替え
 3. 原因調査 → 修正 → 通常のデプロイフローで再デプロイ
 ```
+
+※ デプロイプラットフォームの選定は [ADR-015](./015-deploy-platform.md) を参照
 
 ## 影響
 - GitHub Repositoryの Settings > Environments で `production` 環境を作成

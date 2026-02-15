@@ -61,6 +61,10 @@
 * docs/adr/014-search-engine.md
   * 概要: 検索エンジン方式の選定。PGroonga（PostgreSQL拡張）を採用。
     LIKE/pg_bigm/PGroonga/Typesense/Elasticsearchを比較し、日本語形態素解析の精度・PG内完結・スコアリング対応を理由に選定。
+* docs/adr/015-deploy-platform.md
+  * 概要: インフラ環境構築。Cloud Runを採用。Cloud Run/GKE Autopilot/GKE Standardを比較し、コスト最適・運用負荷最小・一人運用適合性を理由に選定。
+    スケール設計の前提・根拠（DAU・同時接続数・日次リクエスト数の算出）、エッジ構成の最適化（LB最小構成採用、CDN不採用、Cloud Armor採用）、
+    リソース最適化（BE min=0、max=3、PITR有効維持）の決定と根拠を含む。
 
 ## バージョン別ドキュメント（versions/）
 * docs/versions/1_0_0/requirements.md
@@ -76,6 +80,11 @@
     要件定義書のID体系（F-01〜F-12）に準拠。管理者ページ（F-12、画面S-18〜S-23）、インサイダー取引（F-03-4）、ニュースレター関連テーブル、user_settingsテーブル追加。
 * docs/versions/1_0_0/data-model.md
   * 概要: v1.0.0のデータ設計書。ER図（全35テーブルのリレーション）、テーブル一覧、カラム定義（全テーブルの詳細なカラム仕様）を定義。
+* docs/versions/1_0_0/infrastructure.md
+  * 概要: v1.0.0のインフラ設計書。GCPリソース構成の全体像を定義。
+    コンピュート（Cloud Run FE/BE/Jobs）、データベース（Cloud SQL PostgreSQL）、ストレージ・CDN、ネットワーク・セキュリティ（Cloud Armor, Secret Manager）、
+    監視・ログ・アラート（Cloud Logging/Monitoring）、バッチ処理（Cloud Scheduler + Cloud Run Jobs）、CI/CD（GitHub Actions）、
+    コスト試算（$37-66/月）、構築工数見積もり（42-58h）を記載。
 
 ## 機能別詳細仕様（functions/）
 ### ダッシュボード機能（F-02）
