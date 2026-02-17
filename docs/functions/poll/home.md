@@ -28,7 +28,7 @@
 ## 画面設計図
 🟡 **中程度**
 
-Pencil: `docs/versions/1_0_0/SikouLab.pen` ノードID: `OruNZ`
+Pencil: `docs/versions/1_0_0/SicouLab.pen` ノードID: `OruNZ`
 
 ### S-14 アンケート一覧画面
 

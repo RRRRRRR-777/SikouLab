@@ -219,7 +219,7 @@ flowchart TB
 
 ## 3. 画面設計
 
-**Pencil**: `docs/versions/1_0_0/SikouLab.pen`
+**Pencil**: `docs/versions/1_0_0/SicouLab.pen`
 
 ### 3.1 画面一覧
 
@@ -259,7 +259,7 @@ flowchart TB
 **ノードIDの使用例**
 ```bash
 # ダッシュボードのみを取得
-mcp__pencil__batch_get(filePath="docs/versions/1_0_0/SikouLab.pen", nodeIds=["AwSoL"])
+mcp__pencil__batch_get(filePath="docs/versions/1_0_0/SicouLab.pen", nodeIds=["AwSoL"])
 ```
 
 ### 3.2 画面遷移図
@@ -457,7 +457,7 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    subgraph SikouLab
+    subgraph SicouLab
         Frontend[Next.js Frontend]
         Backend[Go Backend]
         DB[(PostgreSQL)]

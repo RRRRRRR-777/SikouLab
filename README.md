@@ -1,4 +1,4 @@
-# SikouLab
+# SicouLab
 
 シコウラボ式会社のWebアプリケーション。
 
@@ -43,4 +43,4 @@
 
 ## ライセンス
 
-Copyright (c) 2025 SikouLab
+Copyright (c) 2025 SicouLab

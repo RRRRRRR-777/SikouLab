@@ -47,4 +47,4 @@ test-vrt:
 
 # Dockerイメージビルド
 docker-build:
-	docker build -t sikoulab-web .
+	docker build -t sicoulab-web .

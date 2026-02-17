@@ -17,7 +17,7 @@ paths:
 * 3回同じパターンが現れたら抽象化を検討
 
 ## Pencil定義
-* **配置場所**: `docs/versions/1_0_0/SikouLab.pen`
+* **配置場所**: `docs/versions/1_0_0/SicouLab.pen`
 * **作成タイミング**: 詳細設計（/feature-spec）フェーズで作成・更新
 * **フロー**:
   1. feature-specでUI仕様を設計

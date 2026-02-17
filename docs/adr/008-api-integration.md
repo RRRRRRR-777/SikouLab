@@ -70,14 +70,14 @@
 | 環境 | 設定ファイル | API URL |
 |------|-------------|---------|
 | 開発 | `.env.local` | `http://localhost:8080` |
-| 本番 | `.env.production` | `https://api.sikoulab.com` |
+| 本番 | `.env.production` | `https://api.sicoulab.com` |
 
 ```bash
 # frontend/.env.local（開発環境）
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
 
 # frontend/.env.production（本番環境）
-NEXT_PUBLIC_API_BASE_URL=https://api.sikoulab.com
+NEXT_PUBLIC_API_BASE_URL=https://api.sicoulab.com
 ```
 
 ### ファイル配置
@@ -164,7 +164,7 @@ http.SetCookie(w, &http.Cookie{
 ### CORS設定（Go）
 
 ```go
-w.Header().Set("Access-Control-Allow-Origin", "https://sikoulab.com")
+w.Header().Set("Access-Control-Allow-Origin", "https://sicoulab.com")
 w.Header().Set("Access-Control-Allow-Credentials", "true")
 w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")

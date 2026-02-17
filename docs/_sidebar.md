@@ -1,4 +1,4 @@
-# SikouLab ドキュメント
+# SicouLab ドキュメント
 
 ## サービス定義
 - [サービス定義書](docs/service.md)

@@ -4,7 +4,7 @@
 
 | 項目 | 内容 |
 |---|---|
-| サービス名 | SikouLab |
+| サービス名 | SicouLab |
 | 読み方 | シコウラボ |
 | タグライン | TBD |
 | 名前の由来 | TBD |
@@ -218,7 +218,7 @@
 
 デザインの詳細は以下のPencilファイルを正とする。
 
-- **Pencil**: `docs/versions/1_0_0/SikouLab.pen`
+- **Pencil**: `docs/versions/1_0_0/SicouLab.pen`
 
 **基本方針:**
 - 高級感・専門性を損なわないUI/UX（要件定義書より）

@@ -47,4 +47,4 @@ migrate-down:
 
 # Dockerイメージビルド
 docker-build:
-	docker build -t sikoulab-api .
+	docker build -t sicoulab-api .

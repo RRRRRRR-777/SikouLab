@@ -1,4 +1,4 @@
-module github.com/bokuyamada/SikouLab/backend
+module github.com/bokuyamada/SicouLab/backend
 
 go 1.25.3
 

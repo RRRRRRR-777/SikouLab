@@ -106,7 +106,7 @@ flowchart LR
 
 ## 3. 画面設計
 
-**Pencil**: `docs/versions/1_0_0/SikouLab.pen`
+**Pencil**: `docs/versions/1_0_0/SicouLab.pen`
 
 ### 3.1 画面一覧
 
@@ -167,7 +167,7 @@ erDiagram
 
 ```mermaid
 flowchart LR
-    subgraph "SikouLab"
+    subgraph "SicouLab"
         Backend
         Frontend
     end

@@ -34,7 +34,7 @@
 ## 画面設計図
 🟡 **中程度**
 
-Pencil: `docs/versions/1_0_0/SikouLab.pen` ノードID: 0Cn3B
+Pencil: `docs/versions/1_0_0/SicouLab.pen` ノードID: 0Cn3B
 
 ### レイアウト構成
 

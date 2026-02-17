@@ -26,7 +26,7 @@
 ## 画面設計図
 🟡 **中程度**
 
-Pencil: `docs/versions/1_0_0/SikouLab.pen` ノードID: `HaPem`（サイドバーのみ）
+Pencil: `docs/versions/1_0_0/SicouLab.pen` ノードID: `HaPem`（サイドバーのみ）
 
 ### レイアウト構成（暫定）
 

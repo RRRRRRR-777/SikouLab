@@ -46,7 +46,7 @@ GitHub Actions (PR/マージ時)
 | **アラート** | 閾値超過時にCloud Consoleアプリに通知 |
 
 **確認方法:**
-1. GCPコンソール > Cloud Monitoring > ダッシュボード > 「SikouLab パフォーマンス」
+1. GCPコンソール > Cloud Monitoring > ダッシュボード > 「SicouLab パフォーマンス」
 2. 期間を選択してLCP、API応答時間のトレンドを確認
 
 ### 2. 可用性（SLA）計測

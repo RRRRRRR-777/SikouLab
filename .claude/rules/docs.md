@@ -48,7 +48,7 @@ paths:
 ## デザイン・UI参照
 画面の設計を行う際は、以下のPencilファイルを参照すること。
 
-* Pencil: `docs/versions/1_0_0/SikouLab.pen`
+* Pencil: `docs/versions/1_0_0/SicouLab.pen`
 
 **注意事項**
 * Pencilはあくまでモックアップであり、デザインが完全に正しいとは限らない

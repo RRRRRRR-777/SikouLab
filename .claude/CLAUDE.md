@@ -1,4 +1,4 @@
-# SikouLab プロジェクト指針
+# SicouLab プロジェクト指針
 
 ## プロダクト原則
 - **受動的体験を最優先** - 読む体験が価値の中心
@@ -50,7 +50,7 @@ docker system prune -f
 
 
 ## 参照情報
-- **Pencil**: `docs/versions/1_0_0/SikouLab.pen`
+- **Pencil**: `docs/versions/1_0_0/SicouLab.pen`
 
 ### Pencil画面ノードID一覧
 
@@ -69,7 +69,7 @@ docker system prune -f
 **使用例**:
 ```bash
 # ダッシュボードのみを取得
-mcp__pencil__batch_get(filePath="docs/versions/1_0_0/SikouLab.pen", nodeIds=["AwSoL"])
+mcp__pencil__batch_get(filePath="docs/versions/1_0_0/SicouLab.pen", nodeIds=["AwSoL"])
 ```
 
 ## カラーコード

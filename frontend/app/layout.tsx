@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SikouLab",
-  description: "SikouLab Application",
+  title: "SicouLab",
+  description: "SicouLab Application",
 };
 
 export default function RootLayout({

@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: sikoulab_database_development
+      POSTGRES_DB: sicoulab_database_development
     ports:
       - "5432:5432"
     volumes:

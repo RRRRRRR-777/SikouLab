@@ -47,7 +47,7 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 ```bash
 # クローン
 git clone <repository-url>
-cd SikouLab
+cd SicouLab
 
 # フロントエンド依存インストール
 cd frontend && pnpm install
@@ -61,7 +61,7 @@ cd ../backend && go mod download
 | 変数名 | 用途 | 必須 | 例 |
 |--------|------|------|-----|
 | `NEXT_PUBLIC_API_BASE_URL` | API基底URL | ○ | `http://localhost:8080` |
-| `DATABASE_URL` | PostgreSQL接続 | ○ | `postgres://postgres:postgres@localhost:5432/sikoulab` |
+| `DATABASE_URL` | PostgreSQL接続 | ○ | `postgres://postgres:postgres@localhost:5432/sicoulab` |
 | TBD | TBD | - | - |
 
 **`.env.sample`**: `frontend/.env.sample`, `backend/.env.sample`
@@ -83,7 +83,7 @@ docker compose up -d
 | サービス名 | `postgres` |
 | ポート | 5432 |
 | ユーザー/パスワード | `postgres` / `postgres` |
-| DB名 | `sikoulab` |
+| DB名 | `sicoulab` |
 
 **注意**: `docker-compose.yml` の設定と `backend/.env` の `DATABASE_URL` が一致していること。
 
@@ -127,7 +127,7 @@ TBD（必要に応じて追記）
 | `fmt` | `pnpm format` | Prettierフォーマット |
 | `test-e2e` | `pnpm test:e2e` | E2Eテスト実行 |
 | `test-vrt` | `pnpm test:vrt` | VRT実行 |
-| `docker-build` | `docker build -t sikoulab-web .` | Dockerイメージビルド |
+| `docker-build` | `docker build -t sicoulab-web .` | Dockerイメージビルド |
 
 ### Makefile ターゲット（backend/Makefile）
 
@@ -140,7 +140,7 @@ TBD（必要に応じて追記）
 | `fmt` | `gofmt -w .` | コードフォーマット |
 | `migrate-up` | `migrate -path db/migrations -database "$(DATABASE_URL)" up` | マイグレーション適用 |
 | `migrate-down` | `migrate -path db/migrations -database "$(DATABASE_URL)" down` | マイグレーション戻し |
-| `docker-build` | `docker build -t sikoulab-api .` | Dockerイメージビルド |
+| `docker-build` | `docker build -t sicoulab-api .` | Dockerイメージビルド |
 
 ## 8. E2E / VRT
 
