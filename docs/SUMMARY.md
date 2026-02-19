@@ -85,6 +85,9 @@
     コンピュート（Cloud Run FE/BE/Jobs）、データベース（Cloud SQL PostgreSQL）、ストレージ・CDN、ネットワーク・セキュリティ（Cloud Armor, Secret Manager）、
     監視・ログ・アラート（Cloud Logging/Monitoring）、バッチ処理（Cloud Scheduler + Cloud Run Jobs）、CI/CD（GitHub Actions）、
     コスト試算（$37-66/月）、構築工数見積もり（42-58h）を記載。
+* docs/versions/1_0_0/development-plan.md
+  * 概要: v1.0.0の開発計画書。Phase 0（共通基盤）〜Phase 10（管理者ページ）の実装順序を定義。
+    各フェーズごとにTBD決定事項・リスク要因・作業項目を記載。バックエンド先行で開発する方針。
 
 ## 機能別詳細仕様（functions/）
 ### ダッシュボード機能（F-02）

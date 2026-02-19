@@ -41,7 +41,8 @@
 ## タスク実行フロー
 
 ### 1. チケット開始時
-- 詳細設計書（`./docs/features/xxx.md`）を読み込む
+- `docs/versions/1_0_0/development-plan.md` を確認し、該当Phaseの「実装前の決定事項」がすべて決定済みであることを確認する
+- 詳細設計書（`./docs/functions/xxx.md`）を読み込む
 - 完了条件を確認する
 - 不明点があれば必ずユーザーに質問する
 
