@@ -23,7 +23,36 @@
 
 ## クイックスタート
 
-環境構築の手順は[環境構築ガイド](./docs/setup.md)を参照してください。
+### 全サービスをDockerで起動
+
+`backend/.env` を用意した上で（`backend/.env.sample` 参照）:
+
+```bash
+docker compose -f docker-compose.yml up -d
+```
+
+| サービス | URL |
+|---------|-----|
+| フロントエンド | http://localhost:3000 |
+| バックエンドAPI | http://localhost:8080 |
+| PostgreSQL | localhost:5432 |
+
+### ホストで直接起動
+
+```bash
+cd backend && make run      # バックエンド（:8080）
+cd frontend && make dev     # フロントエンド（:3000）
+```
+
+詳細な手順は [環境構築ガイド](./docs/setup.md) を参照してください。
+
+## Docker Compose ファイル
+
+| ファイル | 用途 |
+|---------|------|
+| `docker-compose.yml` | ローカル開発環境（frontend / backend / postgres） |
+
+> 本番デプロイは Cloud Run + GitHub Actions で行います。
 
 ## ドキュメント
 

@@ -42,7 +42,7 @@
   /frontend          - Next.jsアプリケーション
   /backend           - Goアプリケーション
   /docs              - 要件定義書、設計書、ガイドライン
-  docker-compose.yml - ローカルDB定義（PostgreSQL）
+  docker-compose.yml  - ローカル開発環境（全サービス）
   ```
 - **ビルド管理**: 各ディレクトリに Makefile を配置
   - `frontend/Makefile`: dev, build, lint, fmt, test, test-e2e, test-vrt, docker-build

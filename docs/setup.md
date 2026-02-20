@@ -35,7 +35,7 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 | ファイル | 用途 | 必須スクリプト/ターゲット |
 |----------|------|--------------------------|
-| `docker-compose.yml` | ローカルDB定義 | postgres サービス |
+| `docker-compose.yml` | ローカル開発環境（全サービス） | frontend, backend, postgres |
 | `frontend/Makefile` | FEビルド/開発 | dev, build, lint, fmt, test, test-e2e, test-vrt, docker-build |
 | `backend/Makefile` | BEビルド/開発 | run, build, lint, fmt, test, migrate-up, migrate-down, docker-build |
 | `frontend/package.json` | FE依存管理 | scripts: dev, build, lint, format, test, test:e2e, test:vrt |
@@ -70,22 +70,21 @@ cd ../backend && go mod download
 
 ## 5. ローカルサービス起動
 
-### DB起動
+### サービス起動
 
 ```bash
-docker compose up -d
+docker compose -f docker-compose.yml up -d
 ```
 
 | 項目 | 値 |
 |------|-----|
 | 設定ファイル | `docker-compose.yml`（ルート） |
+| サービス | frontend(3000), backend(8080), postgres(5432) |
 | DB種別 | PostgreSQL |
-| サービス名 | `postgres` |
-| ポート | 5432 |
 | ユーザー/パスワード | `postgres` / `postgres` |
-| DB名 | `sicoulab` |
+| DB名 | `sicoulab_database_development` |
 
-**注意**: `docker-compose.yml` の設定と `backend/.env` の `DATABASE_URL` が一致していること。
+**注意**: `docker-compose.yml` のDB設定と `backend/.env` の `DATABASE_URL` が一致していること。
 
 ### マイグレーション
 
