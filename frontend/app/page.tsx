@@ -4,7 +4,7 @@
  * バックエンドAPIからHello Worldメッセージを取得して表示する。
  */
 async function getHelloMessage(): Promise<{ message: string }> {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+  const apiUrl = process.env.API_URL || "http://localhost:8080";
   const res = await fetch(apiUrl, {
     cache: "no-store",
   });
