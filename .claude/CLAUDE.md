@@ -33,8 +33,17 @@ docker system prune -f
 
 **Jiraチケット作成時の必須項目**
 - **プロジェクトキー**: `KAN`
-- **ストーリーポイント**: `additional_fields.customfield_10071`で設定
+- **ストーリーポイント**: `additional_fields.customfield_10071`で設定（**オブジェクト型**で渡すこと。文字列不可）
 - **担当者**: `assignee_account_id`で設定（省略時はユーザーに確認）
+
+**additional_fields の正しい渡し方**
+```json
+// ✅ 正しい（オブジェクト）
+additional_fields: {"customfield_10071": 3}
+
+// ❌ 誤り（文字列）
+additional_fields: "{\"customfield_10071\": 3}"
+```
 
 **チケットテンプレート**
 
