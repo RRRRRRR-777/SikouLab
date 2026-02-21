@@ -4,11 +4,37 @@
 
 ## Routes (app/)
 
+- frontend/app/(main)/layout.tsx → MainLayout
+- frontend/app/(main)/page.tsx → Home
 - frontend/app/layout.tsx → RootLayout
-- frontend/app/page.tsx → Home
+
+## Components
+
+### frontend/components/layout
+
+- frontend/components/layout/Header.tsx
+  - Header
+- frontend/components/layout/Sidebar.tsx
+  - Sidebar
+### frontend/components/ui
+
+- frontend/components/ui/button.tsx
+  - Button
+  - buttonVariants
+- frontend/components/ui/skeleton.tsx
+  - Skeleton
+- frontend/components/ui/sonner.tsx
+  - Toaster
 
 ## Utilities (lib/)
 
+- frontend/lib/api.ts
+  - apiClient
 - frontend/lib/utils.ts
   - cn
+
+## Other
+
+- frontend/app/providers.tsx
+  - Providers
 
