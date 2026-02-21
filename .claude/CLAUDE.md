@@ -31,6 +31,11 @@ docker system prune -f
 - Jira MCPツールを使用
 - タスク進行の詳細は @.claude/rules/workflow.md の「タスク実行フロー」を参照
 
+**Jira MCP使用時の必須手順**
+- `cloudId` には必ず `mcp__atlassian__getAccessibleAtlassianResources` で取得したUUIDを使う
+- ❌ 誤り: `https://rrrrrrr777.atlassian.net`（URLではなくUUIDが必要）
+- ✅ 正しい: `ca2727d3-32bb-4f76-8fcf-9181d70e7c7c`（getAccessibleAtlassianResourcesで取得）
+
 **Jiraチケット作成時の必須項目**
 - **プロジェクトキー**: `KAN`
 - **ストーリーポイント**: `additional_fields.customfield_10071`で設定（**オブジェクト型**で渡すこと。文字列不可）
