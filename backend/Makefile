@@ -1,4 +1,4 @@
-.PHONY: dev run build test lint fmt migrate-up migrate-down docker-build check-doc help
+.PHONY: dev run build test lint fmt migrate-up migrate-down docker-build check-doc swagger help
 
 # デフォルトターゲット
 help:
@@ -13,6 +13,7 @@ help:
 	@echo "  migrate-down - Rollback migrations"
 	@echo "  docker-build - Build Docker image"
 	@echo "  check-doc    - Check documentation comments"
+	@echo "  swagger      - Start Swagger UI (http://localhost:8081)"
 
 # 開発サーバー起動（ホットリロード）
 dev:
@@ -53,3 +54,7 @@ docker-build:
 # ドキュメントコメントチェック
 check-doc:
 	go run check_doc.go
+
+# Swagger UI 起動
+swagger:
+	docker compose -f ../docker-compose.yml up -d swagger-ui
