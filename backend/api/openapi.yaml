@@ -1,0 +1,76 @@
+openapi: "3.0.3"
+
+info:
+  title: SicouLab API
+  version: 0.1.0
+  description: SicouLab バックエンドAPI
+
+servers:
+  - url: http://localhost:8080
+    description: ローカル開発環境
+
+paths:
+  /health:
+    get:
+      summary: ヘルスチェック
+      tags:
+        - system
+      responses:
+        "200":
+          description: 正常
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: "エラーコード（例: UNAUTHORIZED, NOT_FOUND）"
+        message:
+          type: string
+          description: エラーメッセージ
+
+    PaginationParams:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          default: 1
+          description: ページ番号
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+          description: 1ページあたりの件数
+
+    CursorPaginationResponse:
+      type: object
+      required:
+        - data
+        - has_more
+      properties:
+        data:
+          type: array
+          items: {}
+          description: レスポンスデータ配列
+        next_cursor:
+          type: string
+          nullable: true
+          description: 次ページのカーソル（最終ページの場合はnull）
+        has_more:
+          type: boolean
+          description: 次のページが存在するか
