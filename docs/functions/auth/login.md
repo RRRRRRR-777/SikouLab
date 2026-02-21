@@ -83,14 +83,14 @@ erDiagram
     users ||--o| plans : "subscribes"
 
     users {
-        uuid id PK
+        bigint id PK
         string oauth_provider
         string oauth_user_id
         string name
         string display_name
         string avatar_url
         string role "admin/writer/user"
-        uuid plan_id FK
+        bigint plan_id FK
         string stripe_customer_id
         string subscription_status "active/canceled/past_due"
         datetime created_at
@@ -98,15 +98,15 @@ erDiagram
     }
 
     user_settings {
-        uuid id PK
-        uuid user_id FK
+        bigint id PK
+        bigint user_id FK
         boolean sidebar_article_expanded "記事タブの折りたたみ状態"
         datetime created_at
         datetime updated_at
     }
 
     plans {
-        uuid id PK
+        bigint id PK
         string name
         string description
         boolean is_active

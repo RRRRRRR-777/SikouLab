@@ -82,8 +82,8 @@ erDiagram
     articles ||--o{ article_views : "receives"
 
     articles {
-        uuid id PK
-        uuid author_id FK
+        bigint id PK
+        bigint author_id FK
         string title
         text body
         string status "draft/scheduled/published/publish_failed"
@@ -94,15 +94,15 @@ erDiagram
     }
 
     article_genres {
-        uuid id PK
-        uuid article_id FK
-        uuid genre_id FK
+        bigint id PK
+        bigint article_id FK
+        bigint genre_id FK
         datetime created_at
         datetime updated_at
     }
 
     genres {
-        uuid id PK
+        bigint id PK
         string name
         string type
         int display_order
@@ -111,15 +111,15 @@ erDiagram
     }
 
     stock_articles {
-        uuid id PK
-        uuid stock_id FK
-        uuid article_id FK
+        bigint id PK
+        bigint stock_id FK
+        bigint article_id FK
         datetime created_at
         datetime updated_at
     }
 
     stocks {
-        uuid id PK
+        bigint id PK
         string symbol
         string name
         datetime created_at
@@ -127,25 +127,25 @@ erDiagram
     }
 
     article_likes {
-        uuid id PK
-        uuid user_id FK
-        uuid article_id FK
+        bigint id PK
+        bigint user_id FK
+        bigint article_id FK
         datetime created_at
         datetime updated_at
     }
 
     article_bookmarks {
-        uuid id PK
-        uuid user_id FK
-        uuid article_id FK
+        bigint id PK
+        bigint user_id FK
+        bigint article_id FK
         datetime created_at
         datetime updated_at
     }
 
     article_views {
-        uuid id PK
-        uuid user_id FK
-        uuid article_id FK
+        bigint id PK
+        bigint user_id FK
+        bigint article_id FK
         datetime created_at
         datetime updated_at
     }

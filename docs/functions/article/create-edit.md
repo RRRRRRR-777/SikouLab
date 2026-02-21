@@ -94,19 +94,19 @@ erDiagram
     articles ||--o{ newsletter_articles : "included"
 
     posting_users {
-        uuid id PK
+        bigint id PK
         string name "表示名"
         string avatar_url
         boolean is_active
-        uuid created_by FK
+        bigint created_by FK
         datetime created_at
         datetime updated_at
     }
 
     articles {
-        uuid id PK
-        uuid author_id FK "操作者"
-        uuid posting_user_id FK "表示著者"
+        bigint id PK
+        bigint author_id FK "操作者"
+        bigint posting_user_id FK "表示著者"
         string title
         text body
         string status "draft/scheduled/published/publish_failed"
@@ -117,15 +117,15 @@ erDiagram
     }
 
     article_genres {
-        uuid id PK
-        uuid article_id FK
-        uuid genre_id FK
+        bigint id PK
+        bigint article_id FK
+        bigint genre_id FK
         datetime created_at
         datetime updated_at
     }
 
     genres {
-        uuid id PK
+        bigint id PK
         string name
         string type
         int display_order
@@ -134,15 +134,15 @@ erDiagram
     }
 
     stock_articles {
-        uuid id PK
-        uuid stock_id FK
-        uuid article_id FK
+        bigint id PK
+        bigint stock_id FK
+        bigint article_id FK
         datetime created_at
         datetime updated_at
     }
 
     stocks {
-        uuid id PK
+        bigint id PK
         string symbol
         string name
         datetime created_at
@@ -150,8 +150,8 @@ erDiagram
     }
 
     newsletter_articles {
-        uuid id PK
-        uuid article_id FK
+        bigint id PK
+        bigint article_id FK
         date scheduled_date
         int display_order
         datetime created_at

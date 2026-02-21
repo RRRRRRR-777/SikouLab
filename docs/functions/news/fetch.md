@@ -51,7 +51,7 @@ erDiagram
     news ||--o{ news_translations : "has"
 
     news {
-        uuid id PK
+        bigint id PK
         string source
         string title
         text body
@@ -63,28 +63,28 @@ erDiagram
     }
 
     news_translations {
-        uuid id PK
-        uuid news_id FK
+        bigint id PK
+        bigint news_id FK
         string language
         string title
         text body
         string translation_status "pending/translated/reviewed"
-        uuid edited_by FK
-        uuid reviewed_by FK
+        bigint edited_by FK
+        bigint reviewed_by FK
         datetime created_at
         datetime updated_at
     }
 
     news_genres {
-        uuid id PK
-        uuid news_id FK
-        uuid genre_id FK
+        bigint id PK
+        bigint news_id FK
+        bigint genre_id FK
         datetime created_at
         datetime updated_at
     }
 
     genres {
-        uuid id PK
+        bigint id PK
         string name
         string type "article/news"
         int display_order
@@ -93,15 +93,15 @@ erDiagram
     }
 
     stock_news {
-        uuid id PK
-        uuid stock_id FK
-        uuid news_id FK
+        bigint id PK
+        bigint stock_id FK
+        bigint news_id FK
         datetime created_at
         datetime updated_at
     }
 
     stocks {
-        uuid id PK
+        bigint id PK
         string symbol
         string name
         datetime created_at

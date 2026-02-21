@@ -88,8 +88,8 @@ erDiagram
     newsletter_articles ||--o{ newsletter_logs : "logged"
 
     newsletter_subscriptions {
-        uuid id PK
-        uuid user_id FK
+        bigint id PK
+        bigint user_id FK
         string email
         boolean is_active
         datetime created_at
@@ -97,8 +97,8 @@ erDiagram
     }
 
     newsletter_articles {
-        uuid id PK
-        uuid article_id FK
+        bigint id PK
+        bigint article_id FK
         date scheduled_date
         int display_order
         datetime created_at
@@ -106,7 +106,7 @@ erDiagram
     }
 
     newsletter_logs {
-        uuid id PK
+        bigint id PK
         int recipient_count
         text article_ids
         datetime created_at
@@ -114,16 +114,16 @@ erDiagram
     }
 
     article_summaries {
-        uuid id PK
-        uuid article_id FK
+        bigint id PK
+        bigint article_id FK
         text summary
         datetime created_at
         datetime updated_at
     }
 
     articles {
-        uuid id PK
-        uuid author_id FK
+        bigint id PK
+        bigint author_id FK
         string title
         text body
         string status "draft/scheduled/published/publish_failed"

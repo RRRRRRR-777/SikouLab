@@ -93,8 +93,8 @@
 ```mermaid
 erDiagram
     articles {
-        uuid id PK
-        uuid author_id FK
+        bigint id PK
+        bigint author_id FK
         string title
         text body
         string status "draft/scheduled/published/publish_failed"
@@ -105,7 +105,7 @@ erDiagram
     }
 
     news {
-        uuid id PK
+        bigint id PK
         string source
         string title
         text body
@@ -117,20 +117,20 @@ erDiagram
     }
 
     news_translations {
-        uuid id PK
-        uuid news_id FK
+        bigint id PK
+        bigint news_id FK
         string language
         string title
         text body
         string translation_status "pending/translated/reviewed"
-        uuid edited_by FK
-        uuid reviewed_by FK
+        bigint edited_by FK
+        bigint reviewed_by FK
         datetime created_at
         datetime updated_at
     }
 
     stocks {
-        uuid id PK
+        bigint id PK
         string symbol
         string name
         datetime created_at
@@ -138,7 +138,7 @@ erDiagram
     }
 
     polls {
-        uuid id PK
+        bigint id PK
         string title
         string category
         string status "draft/scheduled/published/publish_failed"

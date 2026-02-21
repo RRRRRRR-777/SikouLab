@@ -73,14 +73,14 @@ erDiagram
     polls ||--o{ poll_bookmarks : "receives"
 
     users {
-        uuid id PK
+        bigint id PK
         string oauth_provider
         string oauth_user_id
         string name
         string display_name
         string avatar_url
         string role "admin/writer/user"
-        uuid plan_id FK
+        bigint plan_id FK
         string stripe_customer_id
         string subscription_status "active/canceled/past_due"
         datetime created_at
@@ -88,8 +88,8 @@ erDiagram
     }
 
     articles {
-        uuid id PK
-        uuid author_id FK
+        bigint id PK
+        bigint author_id FK
         string title
         text body
         string status "draft/scheduled/published/publish_failed"
@@ -100,7 +100,7 @@ erDiagram
     }
 
     news {
-        uuid id PK
+        bigint id PK
         string source
         string title
         text body
@@ -112,7 +112,7 @@ erDiagram
     }
 
     polls {
-        uuid id PK
+        bigint id PK
         string title
         string category
         string status "draft/scheduled/published/publish_failed"
@@ -123,25 +123,25 @@ erDiagram
     }
 
     article_bookmarks {
-        uuid id PK
-        uuid user_id FK
-        uuid article_id FK
+        bigint id PK
+        bigint user_id FK
+        bigint article_id FK
         datetime created_at
         datetime updated_at
     }
 
     news_bookmarks {
-        uuid id PK
-        uuid user_id FK
-        uuid news_id FK
+        bigint id PK
+        bigint user_id FK
+        bigint news_id FK
         datetime created_at
         datetime updated_at
     }
 
     poll_bookmarks {
-        uuid id PK
-        uuid user_id FK
-        uuid poll_id FK
+        bigint id PK
+        bigint user_id FK
+        bigint poll_id FK
         datetime created_at
         datetime updated_at
     }

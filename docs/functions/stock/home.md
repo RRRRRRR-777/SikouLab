@@ -97,7 +97,7 @@ erDiagram
     portfolios ||--o{ portfolio_stocks : "contains"
 
     stocks {
-        uuid id PK
+        bigint id PK
         string symbol
         string name
         datetime created_at
@@ -105,8 +105,8 @@ erDiagram
     }
 
     stock_prices {
-        uuid id PK
-        uuid stock_id FK
+        bigint id PK
+        bigint stock_id FK
         date price_date
         decimal open
         decimal high
@@ -118,8 +118,8 @@ erDiagram
     }
 
     stock_fundamentals {
-        uuid id PK
-        uuid stock_id FK
+        bigint id PK
+        bigint stock_id FK
         date date
         decimal market_cap
         decimal pe_ratio
@@ -129,8 +129,8 @@ erDiagram
     }
 
     stock_insider_trades {
-        uuid id PK
-        uuid stock_id FK
+        bigint id PK
+        bigint stock_id FK
         string insider_name
         string insider_title
         string transaction_type
@@ -143,8 +143,8 @@ erDiagram
     }
 
     stock_uoa {
-        uuid id PK
-        uuid stock_id FK
+        bigint id PK
+        bigint stock_id FK
         string option_type
         decimal strike
         date expiry
@@ -155,8 +155,8 @@ erDiagram
     }
 
     stock_ratings {
-        uuid id PK
-        uuid stock_id FK
+        bigint id PK
+        bigint stock_id FK
         string firm_name
         string rating
         decimal target_price
@@ -166,8 +166,8 @@ erDiagram
     }
 
     analyst_ratings {
-        uuid id PK
-        uuid stock_id FK
+        bigint id PK
+        bigint stock_id FK
         string analyst_name
         string grade
         text comment
@@ -177,15 +177,15 @@ erDiagram
     }
 
     stock_news {
-        uuid id PK
-        uuid stock_id FK
-        uuid news_id FK
+        bigint id PK
+        bigint stock_id FK
+        bigint news_id FK
         datetime created_at
         datetime updated_at
     }
 
     news {
-        uuid id PK
+        bigint id PK
         string source
         string title
         text body
@@ -197,24 +197,24 @@ erDiagram
     }
 
     news_views {
-        uuid id PK
-        uuid user_id FK
-        uuid news_id FK
+        bigint id PK
+        bigint user_id FK
+        bigint news_id FK
         datetime created_at
         datetime updated_at
     }
 
     stock_articles {
-        uuid id PK
-        uuid stock_id FK
-        uuid article_id FK
+        bigint id PK
+        bigint stock_id FK
+        bigint article_id FK
         datetime created_at
         datetime updated_at
     }
 
     articles {
-        uuid id PK
-        uuid author_id FK
+        bigint id PK
+        bigint author_id FK
         string title
         text body
         string status "draft/scheduled/published/publish_failed"
@@ -225,25 +225,25 @@ erDiagram
     }
 
     article_views {
-        uuid id PK
-        uuid user_id FK
-        uuid article_id FK
+        bigint id PK
+        bigint user_id FK
+        bigint article_id FK
         datetime created_at
         datetime updated_at
     }
 
     portfolios {
-        uuid id PK
-        uuid user_id FK
+        bigint id PK
+        bigint user_id FK
         string name
         datetime created_at
         datetime updated_at
     }
 
     portfolio_stocks {
-        uuid id PK
-        uuid portfolio_id FK
-        uuid stock_id FK
+        bigint id PK
+        bigint portfolio_id FK
+        bigint stock_id FK
         decimal purchase_price "取得価格"
         int shares "保有株数"
         datetime created_at

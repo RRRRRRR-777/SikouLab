@@ -98,8 +98,8 @@ erDiagram
     newsletter_articles ||--o{ newsletter_logs : "logged"
 
     newsletter_articles {
-        uuid id PK
-        uuid article_id FK
+        bigint id PK
+        bigint article_id FK
         date scheduled_date
         int display_order
         datetime created_at
@@ -107,7 +107,7 @@ erDiagram
     }
 
     newsletter_logs {
-        uuid id PK
+        bigint id PK
         int recipient_count
         text article_ids
         datetime created_at

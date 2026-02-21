@@ -95,8 +95,8 @@ Pencil未定義（実装のみ）
 erDiagram
     %% 正: docs/versions/1_0_0/data-model.md
     articles {
-        uuid id PK
-        uuid author_id FK
+        bigint id PK
+        bigint author_id FK
         string title
         text body
         string status "draft/scheduled/published/publish_failed"

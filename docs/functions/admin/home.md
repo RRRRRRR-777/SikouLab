@@ -282,14 +282,14 @@ erDiagram
     polls ||--o{ poll_votes : "receives"
 
     users {
-        uuid id PK
+        bigint id PK
         string oauth_provider
         string oauth_user_id
         string name
         string display_name
         string avatar_url
         string role "admin/writer/user"
-        uuid plan_id FK
+        bigint plan_id FK
         string stripe_customer_id
         string subscription_status "active/canceled/past_due"
         datetime created_at
@@ -297,19 +297,19 @@ erDiagram
     }
 
     posting_users {
-        uuid id PK
+        bigint id PK
         string name "表示名"
         string avatar_url
         boolean is_active
-        uuid created_by FK
+        bigint created_by FK
         datetime created_at
         datetime updated_at
     }
 
     articles {
-        uuid id PK
-        uuid author_id FK "操作者"
-        uuid posting_user_id FK "表示著者"
+        bigint id PK
+        bigint author_id FK "操作者"
+        bigint posting_user_id FK "表示著者"
         string title
         text body
         string status "draft/scheduled/published/publish_failed"
@@ -320,11 +320,11 @@ erDiagram
     }
 
     news {
-        uuid id PK
+        bigint id PK
         string origin "api/manual"
         string source "ソースURL（手動時NULL）"
-        uuid author_id FK "操作者（手動投稿時）"
-        uuid posting_user_id FK "表示著者"
+        bigint author_id FK "操作者（手動投稿時）"
+        bigint posting_user_id FK "表示著者"
         string title
         text body
         string original_language
@@ -339,20 +339,20 @@ erDiagram
     }
 
     news_translations {
-        uuid id PK
-        uuid news_id FK
+        bigint id PK
+        bigint news_id FK
         string language
         string title
         text body
         string translation_status "pending/translated/reviewed"
-        uuid edited_by FK
-        uuid reviewed_by FK
+        bigint edited_by FK
+        bigint reviewed_by FK
         datetime created_at
         datetime updated_at
     }
 
     genres {
-        uuid id PK
+        bigint id PK
         string name
         string type "article/news"
         int display_order
@@ -361,23 +361,23 @@ erDiagram
     }
 
     article_genres {
-        uuid id PK
-        uuid article_id FK
-        uuid genre_id FK
+        bigint id PK
+        bigint article_id FK
+        bigint genre_id FK
         datetime created_at
         datetime updated_at
     }
 
     news_genres {
-        uuid id PK
-        uuid news_id FK
-        uuid genre_id FK
+        bigint id PK
+        bigint news_id FK
+        bigint genre_id FK
         datetime created_at
         datetime updated_at
     }
 
     polls {
-        uuid id PK
+        bigint id PK
         string title
         string category
         string status "draft/scheduled/published/publish_failed"
@@ -388,8 +388,8 @@ erDiagram
     }
 
     poll_options {
-        uuid id PK
-        uuid poll_id FK
+        bigint id PK
+        bigint poll_id FK
         string label
         int display_order
         datetime created_at
@@ -397,32 +397,32 @@ erDiagram
     }
 
     poll_votes {
-        uuid id PK
-        uuid poll_id FK
-        uuid option_id FK
-        uuid user_id FK
+        bigint id PK
+        bigint poll_id FK
+        bigint option_id FK
+        bigint user_id FK
         datetime created_at
         datetime updated_at
     }
 
     article_views {
-        uuid id PK
-        uuid user_id FK
-        uuid article_id FK
+        bigint id PK
+        bigint user_id FK
+        bigint article_id FK
         datetime created_at
         datetime updated_at
     }
 
     news_views {
-        uuid id PK
-        uuid user_id FK
-        uuid news_id FK
+        bigint id PK
+        bigint user_id FK
+        bigint news_id FK
         datetime created_at
         datetime updated_at
     }
 
     system_settings {
-        uuid id PK
+        bigint id PK
         string key
         text value
         string description
@@ -434,8 +434,8 @@ erDiagram
     newsletter_articles ||--o{ newsletter_logs : "logged"
 
     newsletter_articles {
-        uuid id PK
-        uuid article_id FK
+        bigint id PK
+        bigint article_id FK
         date scheduled_date
         int display_order
         datetime created_at
@@ -443,7 +443,7 @@ erDiagram
     }
 
     newsletter_logs {
-        uuid id PK
+        bigint id PK
         int recipient_count
         text article_ids
         datetime created_at
@@ -453,12 +453,12 @@ erDiagram
     users ||--o{ announcements : "creates"
 
     announcements {
-        uuid id PK
+        bigint id PK
         string title
         text body
         string category "maintenance/update/news/other"
         string target "all/subscribers"
-        uuid created_by FK
+        bigint created_by FK
         datetime created_at
         datetime updated_at
     }

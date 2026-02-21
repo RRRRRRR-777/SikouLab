@@ -75,11 +75,11 @@ erDiagram
     stocks ||--o{ portfolio_stocks : "registered_in"
 
     news {
-        uuid id PK
+        bigint id PK
         string origin "api/manual"
         string source "ソースURL（手動時NULL）"
-        uuid author_id FK "操作者（手動投稿時）"
-        uuid posting_user_id FK "表示著者"
+        bigint author_id FK "操作者（手動投稿時）"
+        bigint posting_user_id FK "表示著者"
         string title
         text body
         string original_language
@@ -94,28 +94,28 @@ erDiagram
     }
 
     news_translations {
-        uuid id PK
-        uuid news_id FK
+        bigint id PK
+        bigint news_id FK
         string language
         string title
         text body
         string translation_status "pending/translated/reviewed"
-        uuid edited_by FK
-        uuid reviewed_by FK
+        bigint edited_by FK
+        bigint reviewed_by FK
         datetime created_at
         datetime updated_at
     }
 
     news_genres {
-        uuid id PK
-        uuid news_id FK
-        uuid genre_id FK
+        bigint id PK
+        bigint news_id FK
+        bigint genre_id FK
         datetime created_at
         datetime updated_at
     }
 
     genres {
-        uuid id PK
+        bigint id PK
         string name
         string type "article/news"
         int display_order
@@ -124,31 +124,31 @@ erDiagram
     }
 
     news_views {
-        uuid id PK
-        uuid user_id FK
-        uuid news_id FK
+        bigint id PK
+        bigint user_id FK
+        bigint news_id FK
         datetime created_at
         datetime updated_at
     }
 
     news_likes {
-        uuid id PK
-        uuid user_id FK
-        uuid news_id FK
+        bigint id PK
+        bigint user_id FK
+        bigint news_id FK
         datetime created_at
         datetime updated_at
     }
 
     news_bookmarks {
-        uuid id PK
-        uuid user_id FK
-        uuid news_id FK
+        bigint id PK
+        bigint user_id FK
+        bigint news_id FK
         datetime created_at
         datetime updated_at
     }
 
     stocks {
-        uuid id PK
+        bigint id PK
         string symbol "銘柄コード（ティッカー）"
         string name
         datetime created_at
@@ -156,17 +156,17 @@ erDiagram
     }
 
     stock_news {
-        uuid id PK
-        uuid stock_id FK
-        uuid news_id FK
+        bigint id PK
+        bigint stock_id FK
+        bigint news_id FK
         datetime created_at
         datetime updated_at
     }
 
     portfolio_stocks {
-        uuid id PK
-        uuid portfolio_id FK
-        uuid stock_id FK
+        bigint id PK
+        bigint portfolio_id FK
+        bigint stock_id FK
         decimal purchase_price "取得価格"
         int shares "保有株数"
         datetime created_at

@@ -129,7 +129,7 @@ erDiagram
     poll_options ||--o{ poll_votes : "selected"
 
     polls {
-        uuid id PK
+        bigint id PK
         string title
         string category
         string status "draft/scheduled/published/publish_failed"
@@ -140,8 +140,8 @@ erDiagram
     }
 
     poll_options {
-        uuid id PK
-        uuid poll_id FK
+        bigint id PK
+        bigint poll_id FK
         string label
         int display_order
         datetime created_at
@@ -149,18 +149,18 @@ erDiagram
     }
 
     poll_votes {
-        uuid id PK
-        uuid poll_id FK
-        uuid option_id FK
-        uuid user_id FK
+        bigint id PK
+        bigint poll_id FK
+        bigint option_id FK
+        bigint user_id FK
         datetime created_at
         datetime updated_at
     }
 
     poll_bookmarks {
-        uuid id PK
-        uuid user_id FK
-        uuid poll_id FK
+        bigint id PK
+        bigint user_id FK
+        bigint poll_id FK
         datetime created_at
         datetime updated_at
     }

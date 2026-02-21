@@ -123,14 +123,14 @@ erDiagram
     news ||--o{ stock_news : "relates"
 
     users {
-        uuid id PK
+        bigint id PK
         string oauth_provider
         string oauth_user_id
         string name
         string display_name
         string avatar_url
         string role "admin/writer/user"
-        uuid plan_id FK
+        bigint plan_id FK
         string stripe_customer_id
         string subscription_status "active/canceled/past_due"
         datetime created_at
@@ -138,17 +138,17 @@ erDiagram
     }
 
     portfolios {
-        uuid id PK
-        uuid user_id FK
+        bigint id PK
+        bigint user_id FK
         string name
         datetime created_at
         datetime updated_at
     }
 
     portfolio_stocks {
-        uuid id PK
-        uuid portfolio_id FK
-        uuid stock_id FK
+        bigint id PK
+        bigint portfolio_id FK
+        bigint stock_id FK
         decimal purchase_price "取得価格"
         int shares "保有株数"
         datetime created_at
@@ -156,7 +156,7 @@ erDiagram
     }
 
     stocks {
-        uuid id PK
+        bigint id PK
         string symbol
         string name
         datetime created_at
@@ -164,8 +164,8 @@ erDiagram
     }
 
     stock_prices {
-        uuid id PK
-        uuid stock_id FK
+        bigint id PK
+        bigint stock_id FK
         decimal open
         decimal high
         decimal low
@@ -177,15 +177,15 @@ erDiagram
     }
 
     stock_news {
-        uuid id PK
-        uuid stock_id FK
-        uuid news_id FK
+        bigint id PK
+        bigint stock_id FK
+        bigint news_id FK
         datetime created_at
         datetime updated_at
     }
 
     news {
-        uuid id PK
+        bigint id PK
         string source
         string title
         text body

@@ -6,14 +6,14 @@
 erDiagram
     %% ユーザー・認証
     users {
-        uuid id PK
+        bigint id PK
         string oauth_provider
         string oauth_user_id
         string name
         string display_name
         string avatar_url
         string role "admin/writer/user"
-        uuid plan_id FK
+        bigint plan_id FK
         string stripe_customer_id
         string subscription_status "active/canceled/past_due"
         datetime created_at
@@ -21,7 +21,7 @@ erDiagram
     }
 
     plans {
-        uuid id PK
+        bigint id PK
         string name
         string description
         boolean is_active
@@ -30,8 +30,8 @@ erDiagram
     }
 
     user_settings {
-        uuid id PK
-        uuid user_id FK
+        bigint id PK
+        bigint user_id FK
         boolean sidebar_article_expanded "記事タブの折りたたみ状態"
         datetime created_at
         datetime updated_at
@@ -39,8 +39,8 @@ erDiagram
 
     %% ニュースレター購読
     newsletter_subscriptions {
-        uuid id PK
-        uuid user_id FK
+        bigint id PK
+        bigint user_id FK
         string email
         boolean is_active
         datetime created_at
@@ -48,8 +48,8 @@ erDiagram
     }
 
     newsletter_articles {
-        uuid id PK
-        uuid article_id FK
+        bigint id PK
+        bigint article_id FK
         date scheduled_date
         int display_order
         datetime created_at
@@ -57,7 +57,7 @@ erDiagram
     }
 
     newsletter_logs {
-        uuid id PK
+        bigint id PK
         int recipient_count
         text article_ids
         datetime created_at
@@ -65,8 +65,8 @@ erDiagram
     }
 
     article_summaries {
-        uuid id PK
-        uuid article_id FK
+        bigint id PK
+        bigint article_id FK
         text summary
         datetime created_at
         datetime updated_at
@@ -74,20 +74,20 @@ erDiagram
 
     %% 投稿ユーザー（表示著者）
     posting_users {
-        uuid id PK
+        bigint id PK
         string name "表示名"
         string avatar_url "アバター画像URL"
         boolean is_active "有効フラグ"
-        uuid created_by FK "作成者（usersへのFK）"
+        bigint created_by FK "作成者（usersへのFK）"
         datetime created_at
         datetime updated_at
     }
 
     %% コンテンツ
     articles {
-        uuid id PK
-        uuid author_id FK "操作者（ログインユーザー）"
-        uuid posting_user_id FK "表示著者（投稿ユーザー）"
+        bigint id PK
+        bigint author_id FK "操作者（ログインユーザー）"
+        bigint posting_user_id FK "表示著者（投稿ユーザー）"
         string title
         text body
         string status "draft/scheduled/published/publish_failed"
@@ -98,7 +98,7 @@ erDiagram
     }
 
     genres {
-        uuid id PK
+        bigint id PK
         string name
         string type "article/news"
         int display_order
@@ -107,19 +107,19 @@ erDiagram
     }
 
     article_genres {
-        uuid id PK
-        uuid article_id FK
-        uuid genre_id FK
+        bigint id PK
+        bigint article_id FK
+        bigint genre_id FK
         datetime created_at
         datetime updated_at
     }
 
     news {
-        uuid id PK
+        bigint id PK
         string origin "取得元区分（api/manual）"
         string source "ソースURL（手動投稿時はNULL）"
-        uuid author_id FK "操作者（手動投稿時のログインユーザー）"
-        uuid posting_user_id FK "表示著者（投稿ユーザー）"
+        bigint author_id FK "操作者（手動投稿時のログインユーザー）"
+        bigint posting_user_id FK "表示著者（投稿ユーザー）"
         string title
         text body
         string original_language
@@ -134,40 +134,40 @@ erDiagram
     }
 
     announcements {
-        uuid id PK
+        bigint id PK
         string title
         text body
         string category "maintenance/update/news/other"
         string target "all/subscribers"
-        uuid created_by FK
+        bigint created_by FK
         datetime created_at
         datetime updated_at
     }
 
     news_translations {
-        uuid id PK
-        uuid news_id FK
+        bigint id PK
+        bigint news_id FK
         string language
         string title
         text body
         string translation_status "pending/translated/reviewed"
-        uuid edited_by FK
-        uuid reviewed_by FK
+        bigint edited_by FK
+        bigint reviewed_by FK
         datetime created_at
         datetime updated_at
     }
 
     news_genres {
-        uuid id PK
-        uuid news_id FK
-        uuid genre_id FK
+        bigint id PK
+        bigint news_id FK
+        bigint genre_id FK
         datetime created_at
         datetime updated_at
     }
 
     %% 銘柄
     stocks {
-        uuid id PK
+        bigint id PK
         string symbol
         string name
         datetime created_at
@@ -175,24 +175,24 @@ erDiagram
     }
 
     stock_news {
-        uuid id PK
-        uuid stock_id FK
-        uuid news_id FK
+        bigint id PK
+        bigint stock_id FK
+        bigint news_id FK
         datetime created_at
         datetime updated_at
     }
 
     stock_articles {
-        uuid id PK
-        uuid stock_id FK
-        uuid article_id FK
+        bigint id PK
+        bigint stock_id FK
+        bigint article_id FK
         datetime created_at
         datetime updated_at
     }
 
     stock_prices {
-        uuid id PK
-        uuid stock_id FK
+        bigint id PK
+        bigint stock_id FK
         decimal open
         decimal high
         decimal low
@@ -204,8 +204,8 @@ erDiagram
     }
 
     stock_fundamentals {
-        uuid id PK
-        uuid stock_id FK
+        bigint id PK
+        bigint stock_id FK
         decimal eps
         decimal market_cap
         decimal pe_ratio
@@ -215,8 +215,8 @@ erDiagram
     }
 
     stock_insider_trades {
-        uuid id PK
-        uuid stock_id FK
+        bigint id PK
+        bigint stock_id FK
         string insider_name
         string insider_title
         string transaction_type "buy/sell"
@@ -229,8 +229,8 @@ erDiagram
     }
 
     stock_uoa {
-        uuid id PK
-        uuid stock_id FK
+        bigint id PK
+        bigint stock_id FK
         string option_type
         decimal strike
         date expiry
@@ -241,8 +241,8 @@ erDiagram
     }
 
     stock_ratings {
-        uuid id PK
-        uuid stock_id FK
+        bigint id PK
+        bigint stock_id FK
         string firm_name
         string rating "buy/hold/sell"
         decimal target_price
@@ -252,8 +252,8 @@ erDiagram
     }
 
     analyst_ratings {
-        uuid id PK
-        uuid stock_id FK
+        bigint id PK
+        bigint stock_id FK
         string analyst_name
         string grade
         text comment
@@ -264,8 +264,8 @@ erDiagram
 
     %% 異常検出
     stock_anomalies {
-        uuid id PK
-        uuid stock_id FK
+        bigint id PK
+        bigint stock_id FK
         string anomaly_type "price_surge/volume_surge/volatility_surge"
         decimal value "検出値（変動率%、出来高倍率等）"
         decimal threshold "検出閾値"
@@ -276,17 +276,17 @@ erDiagram
 
     %% ポートフォリオ
     portfolios {
-        uuid id PK
-        uuid user_id FK
+        bigint id PK
+        bigint user_id FK
         string name
         datetime created_at
         datetime updated_at
     }
 
     portfolio_stocks {
-        uuid id PK
-        uuid portfolio_id FK
-        uuid stock_id FK
+        bigint id PK
+        bigint portfolio_id FK
+        bigint stock_id FK
         decimal purchase_price "取得価格"
         int shares "保有株数"
         datetime created_at
@@ -295,7 +295,7 @@ erDiagram
 
     %% アンケート
     polls {
-        uuid id PK
+        bigint id PK
         string title
         string category
         string status "draft/scheduled/published/publish_failed"
@@ -306,8 +306,8 @@ erDiagram
     }
 
     poll_options {
-        uuid id PK
-        uuid poll_id FK
+        bigint id PK
+        bigint poll_id FK
         string label
         int display_order
         datetime created_at
@@ -315,74 +315,74 @@ erDiagram
     }
 
     poll_votes {
-        uuid id PK
-        uuid poll_id FK
-        uuid option_id FK
-        uuid user_id FK
+        bigint id PK
+        bigint poll_id FK
+        bigint option_id FK
+        bigint user_id FK
         datetime created_at
         datetime updated_at
     }
 
     %% ユーザーアクション
     article_likes {
-        uuid id PK
-        uuid user_id FK
-        uuid article_id FK
+        bigint id PK
+        bigint user_id FK
+        bigint article_id FK
         datetime created_at
         datetime updated_at
     }
 
     news_likes {
-        uuid id PK
-        uuid user_id FK
-        uuid news_id FK
+        bigint id PK
+        bigint user_id FK
+        bigint news_id FK
         datetime created_at
         datetime updated_at
     }
 
     article_bookmarks {
-        uuid id PK
-        uuid user_id FK
-        uuid article_id FK
+        bigint id PK
+        bigint user_id FK
+        bigint article_id FK
         datetime created_at
         datetime updated_at
     }
 
     news_bookmarks {
-        uuid id PK
-        uuid user_id FK
-        uuid news_id FK
+        bigint id PK
+        bigint user_id FK
+        bigint news_id FK
         datetime created_at
         datetime updated_at
     }
 
     poll_bookmarks {
-        uuid id PK
-        uuid user_id FK
-        uuid poll_id FK
+        bigint id PK
+        bigint user_id FK
+        bigint poll_id FK
         datetime created_at
         datetime updated_at
     }
 
     article_views {
-        uuid id PK
-        uuid user_id FK
-        uuid article_id FK
+        bigint id PK
+        bigint user_id FK
+        bigint article_id FK
         datetime created_at
         datetime updated_at
     }
 
     news_views {
-        uuid id PK
-        uuid user_id FK
-        uuid news_id FK
+        bigint id PK
+        bigint user_id FK
+        bigint news_id FK
         datetime created_at
         datetime updated_at
     }
 
     %% システム設定
     system_settings {
-        uuid id PK
+        bigint id PK
         string key
         text value
         string description
@@ -497,14 +497,14 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
+| id | bigint | 主キー | PK |
 | oauth_provider | string | OAuthプロバイダ（google/apple/x） | NOT NULL |
 | oauth_user_id | string | プロバイダ側のユーザーID | NOT NULL |
 | name | string | ユーザー名 | |
 | display_name | string | 表示名 | |
 | avatar_url | string | アバター画像URL | |
 | role | string | ロール（admin/writer/user） | NOT NULL, DEFAULT 'user' |
-| plan_id | uuid | 加入プランID | FK |
+| plan_id | bigint | 加入プランID | FK |
 | stripe_customer_id | string | Stripe顧客ID | UNIQUE |
 | subscription_status | string | サブスクリプション状態 | NOT NULL |
 | created_at | datetime | 作成日時 | NOT NULL |
@@ -514,8 +514,8 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| user_id | uuid | ユーザーID | FK, NOT NULL, UNIQUE |
+| id | bigint | 主キー | PK |
+| user_id | bigint | ユーザーID | FK, NOT NULL, UNIQUE |
 | sidebar_article_expanded | boolean | 記事タブの折りたたみ状態 | DEFAULT true |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
@@ -524,7 +524,7 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
+| id | bigint | 主キー | PK |
 | name | string | プラン名 | NOT NULL |
 | description | text | プラン説明 | |
 | is_active | boolean | 有効フラグ | DEFAULT true |
@@ -535,11 +535,11 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
+| id | bigint | 主キー | PK |
 | name | string | 表示名 | NOT NULL |
 | avatar_url | string | アバター画像URL | |
 | is_active | boolean | 有効フラグ | DEFAULT true |
-| created_by | uuid | 作成者（usersへのFK） | FK, NOT NULL |
+| created_by | bigint | 作成者（usersへのFK） | FK, NOT NULL |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
 
@@ -547,9 +547,9 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| author_id | uuid | 操作者ID（ログインユーザー） | FK, NOT NULL |
-| posting_user_id | uuid | 表示著者ID（投稿ユーザー） | FK |
+| id | bigint | 主キー | PK |
+| author_id | bigint | 操作者ID（ログインユーザー） | FK, NOT NULL |
+| posting_user_id | bigint | 表示著者ID（投稿ユーザー） | FK |
 | title | string | タイトル | NOT NULL |
 | body | text | 本文（Markdown） | NOT NULL |
 | status | string | 状態（draft/scheduled/published/publish_failed） | NOT NULL |
@@ -562,7 +562,7 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
+| id | bigint | 主キー | PK |
 | name | string | ジャンル名 | NOT NULL |
 | type | string | タイプ（article/news） | NOT NULL |
 | display_order | int | 表示順 | |
@@ -573,9 +573,9 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| article_id | uuid | 記事ID | FK, NOT NULL |
-| genre_id | uuid | ジャンルID | FK, NOT NULL |
+| id | bigint | 主キー | PK |
+| article_id | bigint | 記事ID | FK, NOT NULL |
+| genre_id | bigint | ジャンルID | FK, NOT NULL |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
 
@@ -586,11 +586,11 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
+| id | bigint | 主キー | PK |
 | origin | string | 取得元区分（api/manual） | NOT NULL, DEFAULT 'api' |
 | source | string | ソースURL（手動投稿時はNULL） | |
-| author_id | uuid | 操作者ID（手動投稿時のログインユーザー） | FK |
-| posting_user_id | uuid | 表示著者ID（投稿ユーザー） | FK |
+| author_id | bigint | 操作者ID（手動投稿時のログインユーザー） | FK |
+| posting_user_id | bigint | 表示著者ID（投稿ユーザー） | FK |
 | title | string | タイトル | NOT NULL |
 | body | text | 本文 | NOT NULL |
 | original_language | string | 原文言語 | NOT NULL |
@@ -607,14 +607,14 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| news_id | uuid | ニュースID | FK, NOT NULL |
+| id | bigint | 主キー | PK |
+| news_id | bigint | ニュースID | FK, NOT NULL |
 | language | string | 翻訳言語 | NOT NULL |
 | title | string | 翻訳タイトル | |
 | body | text | 翻訳本文 | |
 | translation_status | string | 翻訳状態（pending/translated/reviewed） | NOT NULL |
-| edited_by | uuid | 編集者ID | FK |
-| reviewed_by | uuid | レビュー者ID | FK |
+| edited_by | bigint | 編集者ID | FK |
+| reviewed_by | bigint | レビュー者ID | FK |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
 
@@ -625,9 +625,9 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| news_id | uuid | ニュースID | FK, NOT NULL |
-| genre_id | uuid | ジャンルID | FK, NOT NULL |
+| id | bigint | 主キー | PK |
+| news_id | bigint | ニュースID | FK, NOT NULL |
+| genre_id | bigint | ジャンルID | FK, NOT NULL |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
 
@@ -638,7 +638,7 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
+| id | bigint | 主キー | PK |
 | symbol | string | 銘柄コード（ティッカー） | NOT NULL, UNIQUE |
 | name | string | 銘柄名 | NOT NULL |
 | created_at | datetime | 作成日時 | NOT NULL |
@@ -648,9 +648,9 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| stock_id | uuid | 銘柄ID | FK, NOT NULL |
-| news_id | uuid | ニュースID | FK, NOT NULL |
+| id | bigint | 主キー | PK |
+| stock_id | bigint | 銘柄ID | FK, NOT NULL |
+| news_id | bigint | ニュースID | FK, NOT NULL |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
 
@@ -661,9 +661,9 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| stock_id | uuid | 銘柄ID | FK, NOT NULL |
-| article_id | uuid | 記事ID | FK, NOT NULL |
+| id | bigint | 主キー | PK |
+| stock_id | bigint | 銘柄ID | FK, NOT NULL |
+| article_id | bigint | 記事ID | FK, NOT NULL |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
 
@@ -674,8 +674,8 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| stock_id | uuid | 銘柄ID | FK, NOT NULL |
+| id | bigint | 主キー | PK |
+| stock_id | bigint | 銘柄ID | FK, NOT NULL |
 | open | decimal | 始値 | NOT NULL |
 | high | decimal | 高値 | NOT NULL |
 | low | decimal | 安値 | NOT NULL |
@@ -689,8 +689,8 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| stock_id | uuid | 銘柄ID | FK, NOT NULL |
+| id | bigint | 主キー | PK |
+| stock_id | bigint | 銘柄ID | FK, NOT NULL |
 | eps | decimal | EPS（1株あたり利益） | |
 | market_cap | decimal | 時価総額 | |
 | pe_ratio | decimal | PER（株価収益率） | |
@@ -702,8 +702,8 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| stock_id | uuid | 銘柄ID | FK, NOT NULL |
+| id | bigint | 主キー | PK |
+| stock_id | bigint | 銘柄ID | FK, NOT NULL |
 | insider_name | string | インサイダー名 | NOT NULL |
 | insider_title | string | インサイダーの役職 | |
 | transaction_type | string | 取引種別（buy/sell） | NOT NULL |
@@ -718,8 +718,8 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| stock_id | uuid | 銘柄ID | FK, NOT NULL |
+| id | bigint | 主キー | PK |
+| stock_id | bigint | 銘柄ID | FK, NOT NULL |
 | option_type | string | オプション種別（call/put） | NOT NULL |
 | strike | decimal | 権利行使価格 | NOT NULL |
 | expiry | date | 満期日 | NOT NULL |
@@ -732,8 +732,8 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| stock_id | uuid | 銘柄ID | FK, NOT NULL |
+| id | bigint | 主キー | PK |
+| stock_id | bigint | 銘柄ID | FK, NOT NULL |
 | firm_name | string | 証券会社名 | NOT NULL |
 | rating | string | レーティング（buy/hold/sell） | NOT NULL |
 | target_price | decimal | 目標株価 | |
@@ -745,8 +745,8 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| stock_id | uuid | 銘柄ID | FK, NOT NULL |
+| id | bigint | 主キー | PK |
+| stock_id | bigint | 銘柄ID | FK, NOT NULL |
 | analyst_name | string | アナリスト名 | NOT NULL |
 | grade | string | 格付け | NOT NULL |
 | comment | text | コメント | |
@@ -758,8 +758,8 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| stock_id | uuid | 銘柄ID | FK, NOT NULL |
+| id | bigint | 主キー | PK |
+| stock_id | bigint | 銘柄ID | FK, NOT NULL |
 | anomaly_type | string | 異常種別（price_surge/volume_surge/volatility_surge） | NOT NULL |
 | value | decimal | 検出値（変動率%、出来高倍率等） | NOT NULL |
 | threshold | decimal | 検出閾値 | NOT NULL |
@@ -771,8 +771,8 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| user_id | uuid | ユーザーID | FK, NOT NULL |
+| id | bigint | 主キー | PK |
+| user_id | bigint | ユーザーID | FK, NOT NULL |
 | name | string | ポートフォリオ名 | NOT NULL |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
@@ -781,9 +781,9 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| portfolio_id | uuid | ポートフォリオID | FK, NOT NULL |
-| stock_id | uuid | 銘柄ID | FK, NOT NULL |
+| id | bigint | 主キー | PK |
+| portfolio_id | bigint | ポートフォリオID | FK, NOT NULL |
+| stock_id | bigint | 銘柄ID | FK, NOT NULL |
 | purchase_price | decimal | 取得価格 | NOT NULL |
 | shares | int | 保有株数 | NOT NULL |
 | created_at | datetime | 作成日時 | NOT NULL |
@@ -796,7 +796,7 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
+| id | bigint | 主キー | PK |
 | title | string | タイトル | NOT NULL |
 | category | string | カテゴリ | |
 | status | string | 状態（draft/scheduled/published/publish_failed） | NOT NULL |
@@ -809,8 +809,8 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| poll_id | uuid | アンケートID | FK, NOT NULL |
+| id | bigint | 主キー | PK |
+| poll_id | bigint | アンケートID | FK, NOT NULL |
 | label | string | 選択肢ラベル | NOT NULL |
 | display_order | int | 表示順 | NOT NULL |
 | created_at | datetime | 作成日時 | NOT NULL |
@@ -820,10 +820,10 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| poll_id | uuid | アンケートID | FK, NOT NULL |
-| option_id | uuid | 選択肢ID | FK, NOT NULL |
-| user_id | uuid | ユーザーID | FK, NOT NULL |
+| id | bigint | 主キー | PK |
+| poll_id | bigint | アンケートID | FK, NOT NULL |
+| option_id | bigint | 選択肢ID | FK, NOT NULL |
+| user_id | bigint | ユーザーID | FK, NOT NULL |
 | created_at | datetime | 投票日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
 
@@ -834,9 +834,9 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| user_id | uuid | ユーザーID | FK, NOT NULL |
-| article_id | uuid | 記事ID | FK, NOT NULL |
+| id | bigint | 主キー | PK |
+| user_id | bigint | ユーザーID | FK, NOT NULL |
+| article_id | bigint | 記事ID | FK, NOT NULL |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
 
@@ -847,9 +847,9 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| user_id | uuid | ユーザーID | FK, NOT NULL |
-| news_id | uuid | ニュースID | FK, NOT NULL |
+| id | bigint | 主キー | PK |
+| user_id | bigint | ユーザーID | FK, NOT NULL |
+| news_id | bigint | ニュースID | FK, NOT NULL |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
 
@@ -860,9 +860,9 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| user_id | uuid | ユーザーID | FK, NOT NULL |
-| article_id | uuid | 記事ID | FK, NOT NULL |
+| id | bigint | 主キー | PK |
+| user_id | bigint | ユーザーID | FK, NOT NULL |
+| article_id | bigint | 記事ID | FK, NOT NULL |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
 
@@ -873,9 +873,9 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| user_id | uuid | ユーザーID | FK, NOT NULL |
-| news_id | uuid | ニュースID | FK, NOT NULL |
+| id | bigint | 主キー | PK |
+| user_id | bigint | ユーザーID | FK, NOT NULL |
+| news_id | bigint | ニュースID | FK, NOT NULL |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
 
@@ -886,9 +886,9 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| user_id | uuid | ユーザーID | FK, NOT NULL |
-| poll_id | uuid | アンケートID | FK, NOT NULL |
+| id | bigint | 主キー | PK |
+| user_id | bigint | ユーザーID | FK, NOT NULL |
+| poll_id | bigint | アンケートID | FK, NOT NULL |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
 
@@ -899,9 +899,9 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| user_id | uuid | ユーザーID | FK, NOT NULL |
-| article_id | uuid | 記事ID | FK, NOT NULL |
+| id | bigint | 主キー | PK |
+| user_id | bigint | ユーザーID | FK, NOT NULL |
+| article_id | bigint | 記事ID | FK, NOT NULL |
 | created_at | datetime | 閲覧日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
 
@@ -909,9 +909,9 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| user_id | uuid | ユーザーID | FK, NOT NULL |
-| news_id | uuid | ニュースID | FK, NOT NULL |
+| id | bigint | 主キー | PK |
+| user_id | bigint | ユーザーID | FK, NOT NULL |
+| news_id | bigint | ニュースID | FK, NOT NULL |
 | created_at | datetime | 閲覧日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
 
@@ -919,8 +919,8 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| user_id | uuid | ユーザーID | FK, NOT NULL, UNIQUE |
+| id | bigint | 主キー | PK |
+| user_id | bigint | ユーザーID | FK, NOT NULL, UNIQUE |
 | email | string | メールアドレス | NOT NULL |
 | is_active | boolean | 有効フラグ | DEFAULT true |
 | created_at | datetime | 作成日時 | NOT NULL |
@@ -930,8 +930,8 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
-| article_id | uuid | 記事ID | FK, NOT NULL |
+| id | bigint | 主キー | PK |
+| article_id | bigint | 記事ID | FK, NOT NULL |
 | scheduled_date | date | 配信予定日 | NOT NULL |
 | display_order | int | 表示順 | NOT NULL |
 | created_at | datetime | 作成日時 | NOT NULL |
@@ -941,7 +941,7 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
+| id | bigint | 主キー | PK |
 | recipient_count | int | 受信者数 | NOT NULL |
 | article_ids | text | 記事IDリスト（JSON配列） | |
 | created_at | datetime | 配信日時 | NOT NULL |
@@ -951,7 +951,7 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
+| id | bigint | 主キー | PK |
 | key | string | 設定キー | NOT NULL, UNIQUE |
 | value | text | 設定値 | |
 | description | string | 説明 | |
@@ -962,11 +962,11 @@ erDiagram
 
 | カラム名 | データ型 | 説明 | 制約 |
 |---------|---------|------|------|
-| id | uuid | 主キー | PK |
+| id | bigint | 主キー | PK |
 | title | string | お知らせタイトル | NOT NULL |
 | body | text | お知らせ本文 | NOT NULL |
 | category | string | カテゴリ（maintenance/update/news/other） | NOT NULL |
 | target | string | 対象（all/subscribers） | NOT NULL |
-| created_by | uuid | 作成者（usersへのFK） | FK, NOT NULL |
+| created_by | bigint | 作成者（usersへのFK） | FK, NOT NULL |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |

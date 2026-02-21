@@ -112,9 +112,9 @@ erDiagram
     stocks ||--o{ stock_anomalies : "detected"
 
     articles {
-        uuid id PK
-        uuid author_id FK "操作者（ログインユーザー）"
-        uuid posting_user_id FK "表示著者（投稿ユーザー）"
+        bigint id PK
+        bigint author_id FK "操作者（ログインユーザー）"
+        bigint posting_user_id FK "表示著者（投稿ユーザー）"
         string title
         text body
         string status "draft/scheduled/published/publish_failed"
@@ -125,15 +125,15 @@ erDiagram
     }
 
     article_genres {
-        uuid id PK
-        uuid article_id FK
-        uuid genre_id FK
+        bigint id PK
+        bigint article_id FK
+        bigint genre_id FK
         datetime created_at
         datetime updated_at
     }
 
     genres {
-        uuid id PK
+        bigint id PK
         string name
         string type "article/news"
         int display_order
@@ -142,19 +142,19 @@ erDiagram
     }
 
     article_views {
-        uuid id PK
-        uuid user_id FK
-        uuid article_id FK
+        bigint id PK
+        bigint user_id FK
+        bigint article_id FK
         datetime created_at
         datetime updated_at
     }
 
     news {
-        uuid id PK
+        bigint id PK
         string origin "api/manual"
         string source
-        uuid author_id FK
-        uuid posting_user_id FK
+        bigint author_id FK
+        bigint posting_user_id FK
         string title
         text body
         string original_language
@@ -169,32 +169,32 @@ erDiagram
     }
 
     news_views {
-        uuid id PK
-        uuid user_id FK
-        uuid news_id FK
+        bigint id PK
+        bigint user_id FK
+        bigint news_id FK
         datetime created_at
         datetime updated_at
     }
 
     posting_users {
-        uuid id PK
+        bigint id PK
         string name "表示名"
         string avatar_url "アバター画像URL"
         boolean is_active "有効フラグ"
-        uuid created_by FK "作成者（usersへのFK）"
+        bigint created_by FK "作成者（usersへのFK）"
         datetime created_at
         datetime updated_at
     }
 
     users {
-        uuid id PK
+        bigint id PK
         string oauth_provider
         string oauth_user_id
         string name
         string display_name
         string avatar_url
         string role "admin/writer/user"
-        uuid plan_id FK
+        bigint plan_id FK
         string stripe_customer_id
         string subscription_status
         datetime created_at
@@ -202,17 +202,17 @@ erDiagram
     }
 
     portfolios {
-        uuid id PK
-        uuid user_id FK
+        bigint id PK
+        bigint user_id FK
         string name
         datetime created_at
         datetime updated_at
     }
 
     portfolio_stocks {
-        uuid id PK
-        uuid portfolio_id FK
-        uuid stock_id FK
+        bigint id PK
+        bigint portfolio_id FK
+        bigint stock_id FK
         decimal purchase_price "取得価格"
         int shares "保有株数"
         datetime created_at
@@ -220,7 +220,7 @@ erDiagram
     }
 
     stocks {
-        uuid id PK
+        bigint id PK
         string symbol
         string name
         datetime created_at
@@ -228,8 +228,8 @@ erDiagram
     }
 
     stock_prices {
-        uuid id PK
-        uuid stock_id FK
+        bigint id PK
+        bigint stock_id FK
         decimal open
         decimal high
         decimal low
@@ -241,16 +241,16 @@ erDiagram
     }
 
     stock_news {
-        uuid id PK
-        uuid stock_id FK
-        uuid news_id FK
+        bigint id PK
+        bigint stock_id FK
+        bigint news_id FK
         datetime created_at
         datetime updated_at
     }
 
     stock_anomalies {
-        uuid id PK
-        uuid stock_id FK
+        bigint id PK
+        bigint stock_id FK
         string anomaly_type "price_surge/volume_surge/volatility_surge"
         decimal value "検出値（変動率%、出来高倍率等）"
         decimal threshold "検出閾値"
