@@ -32,6 +32,7 @@
 - [013: Markdownライブラリ](docs/adr/013-markdown-library.md)
 - [014: 検索エンジン](docs/adr/014-search-engine.md)
 - [015: インフラ環境構築](docs/adr/015-deploy-platform.md)
+- [016: Phase 0横断的決定事項](docs/adr/016-phase0-cross-cutting-decisions.md)
 
 ## 機能別詳細仕様
 - **認証機能（F-01）**

@@ -62,9 +62,9 @@
   * 概要: 検索エンジン方式の選定。PGroonga（PostgreSQL拡張）を採用。
     LIKE/pg_bigm/PGroonga/Typesense/Elasticsearchを比較し、日本語形態素解析の精度・PG内完結・スコアリング対応を理由に選定。
 * docs/adr/015-deploy-platform.md
-  * 概要: インフラ環境構築。Cloud Runを採用。Cloud Run/GKE Autopilot/GKE Standardを比較し、コスト最適・運用負荷最小・一人運用適合性を理由に選定。
-    スケール設計の前提・根拠（DAU・同時接続数・日次リクエスト数の算出）、エッジ構成の最適化（LB最小構成採用、CDN不採用、Cloud Armor採用）、
-    リソース最適化（BE min=0、max=3、PITR有効維持）の決定と根拠を含む。
+  * 概要: インフラ環境構築。Cloud Runを採用。コスト最適・運用負荷最小・一人運用適合性を理由に選定。
+* docs/adr/016-phase0-cross-cutting-decisions.md
+  * 概要: Phase 0横断的決定事項。ログ（zerolog）、ログレベル（標準4レベル）、スケルトン表示（あり）、エラー表示（トースト）、未定義画面（テキストベース）を決定。
 
 ## バージョン別ドキュメント（versions/）
 * docs/versions/1_0_0/requirements.md
