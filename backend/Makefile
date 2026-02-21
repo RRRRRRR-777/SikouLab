@@ -1,4 +1,4 @@
-.PHONY: dev run build test lint fmt migrate-up migrate-down docker-build help
+.PHONY: dev run build test lint fmt migrate-up migrate-down docker-build check-doc help
 
 # デフォルトターゲット
 help:
@@ -12,6 +12,7 @@ help:
 	@echo "  migrate-up   - Apply migrations"
 	@echo "  migrate-down - Rollback migrations"
 	@echo "  docker-build - Build Docker image"
+	@echo "  check-doc    - Check documentation comments"
 
 # 開発サーバー起動（ホットリロード）
 dev:
@@ -39,12 +40,16 @@ fmt:
 
 # マイグレーション適用
 migrate-up:
-	migrate -path db/migrations -database "$$DATABASE_URL" up
+	migrate -path migrations -database "$$DATABASE_URL" up
 
 # マイグレーション戻し
 migrate-down:
-	migrate -path db/migrations -database "$$DATABASE_URL" down
+	migrate -path migrations -database "$$DATABASE_URL" down 1
 
 # Dockerイメージビルド
 docker-build:
 	docker build -t sicoulab-api .
+
+# ドキュメントコメントチェック
+check-doc:
+	go run check_doc.go
