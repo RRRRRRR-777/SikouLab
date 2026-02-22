@@ -190,7 +190,7 @@ git commit --no-verify
 
 ## 5. コード内ドキュメント
 
-関数・型の仕様をコード内に記述し、TypeDoc/doc2goでGitHub Pagesに公開する。
+関数・型の仕様をコード内に記述し、TypeDoc/doc2goでCloudflare Pages（Zero Trust認証付き）に公開する。
 
 ### 5.1 フロントエンド（TypeScript）
 
@@ -198,7 +198,7 @@ git commit --no-verify
 |------|------|
 | 形式 | **JSDoc** |
 | ツール | **TypeDoc** |
-| 公開先 | GitHub Pages |
+| 公開先 | Cloudflare Pages |
 
 **参考**: [TypeDoc公式](https://typedoc.org), [GitHub Pages使用例](https://github.com/TypeStrong/typedoc-site)
 
@@ -208,7 +208,7 @@ git commit --no-verify
 |------|------|
 | 形式 | **godoc** |
 | ツール | **doc2go** |
-| 公開先 | GitHub Pages |
+| 公開先 | Cloudflare Pages |
 
 **参考**: [doc2go GitHub](https://github.com/abhinav/doc2go)
 
@@ -216,12 +216,12 @@ git commit --no-verify
 
 | ワークフロー | トリガー | 内容 |
 |------------|---------|------|
-| `doc-check.yml` | PR時 / main push | PR時はdocコメントチェック、main push時はGitHub Pagesへデプロイ |
+| `doc-check.yml` | PR時 / main push | PR時はdocコメントチェック、main push時はCloudflare Pagesへデプロイ |
 
 **mainブランチへのマージ時**:
 1. TypeDocでフロントエンドドキュメントを生成
 2. OpenAPI（backend/api/openapi.yaml）をコピー
-3. GitHub Pagesへデプロイ（`public/frontend/`、`public/backend/`）
+3. Cloudflare Pagesへデプロイ（`public/frontend/`、`public/backend/`）
 
 ## 6. ブランチ戦略
 
