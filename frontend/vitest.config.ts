@@ -12,7 +12,7 @@ import { defineConfig } from "vitest/config";
  * @see {@link https://vitest.dev/config/} 詳細設定
  * @example
  * ```bash
- * npm test          # 単体テスト実行
+ * npm test           # 単体テスト実行
  * npm run test:watch # ウォッチモード
  * ```
  */
