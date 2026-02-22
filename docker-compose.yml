@@ -61,6 +61,15 @@ services:
     profiles:
       - swagger
 
+  typedoc:
+    image: nginx:alpine
+    ports:
+      - "8082:80"
+    volumes:
+      - ./frontend/docs:/usr/share/nginx/html:ro
+    profiles:
+      - docs
+
 volumes:
   postgres_data:
 
