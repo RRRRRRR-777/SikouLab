@@ -1,8 +1,8 @@
 # SicouLab ドキュメント
 
 ## API リファレンス
-- [Frontend API（TypeDoc）](frontend/)
-- [Backend API（Swagger UI）](backend/)
+- [Frontend API（TypeDoc）](https://sicoulab-docs.pages.dev/frontend/)
+- [Backend API（Swagger UI）](https://sicoulab-docs.pages.dev/backend/)
 
 ---
 
