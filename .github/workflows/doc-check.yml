@@ -9,7 +9,7 @@ on:
       - 'frontend/**/*.tsx'
       - 'backend/api/openapi.yaml'
   push:
-    branches: [main, test/ci-check-jobs]
+    branches: [main]
     paths:
       - 'frontend/**/*.ts'
       - 'frontend/**/*.tsx'
@@ -64,15 +64,38 @@ jobs:
         working-directory: frontend
         run: npm run docs
 
+      # TypeDoc を生成
+      - name: Generate TypeDoc
+        working-directory: frontend
+        run: npm run docs
+
+      # ドキュメント用の public ディレクトリを準備
       - name: Prepare public directory
         run: |
-          mkdir -p public/frontend
-          mkdir -p public/backend
-          cp -r frontend/docs/. public/frontend/
-          cp backend/api/openapi.yaml public/backend/openapi.yaml
+          # 既存の frontend/docs を削除して再作成
+          rm -rf public
+          mkdir -p public
 
-      - name: Create Swagger UI page
-        run: |
+          # docsify 用 index.html をコピー
+          cp index.html public/
+
+          # docs/ 配下（全体）
+          mkdir -p public/docs
+          cp -r docs/* public/docs/
+
+          # .claude/ 配下
+          mkdir -p public/.claude
+          cp -r .claude/rules public/.claude/
+          cp -r .claude/skills public/.claude/
+          cp .claude/CLAUDE.md public/.claude/
+
+          # TypeDoc
+          mkdir -p public/frontend
+          cp -r frontend/docs/. public/frontend/
+
+          # OpenAPI + Swagger UI
+          mkdir -p public/backend
+          cp backend/api/openapi.yaml public/backend/openapi.yaml
           cat > public/backend/index.html << 'EOF'
           <!DOCTYPE html>
           <html>
@@ -97,24 +120,11 @@ jobs:
           </html>
           EOF
 
-      - name: Create index page
-        run: |
-          cat > public/index.html << 'EOF'
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <title>SicouLab Docs</title>
-              <meta charset="utf-8"/>
-            </head>
-            <body>
-              <h1>SicouLab ドキュメント</h1>
-              <ul>
-                <li><a href="./frontend/">Frontend（TypeDoc）</a></li>
-                <li><a href="./backend/">Backend API（Swagger UI）</a></li>
-              </ul>
-            </body>
-          </html>
-          EOF
+          # README
+          cp README.md public/
+
+          # .nojekyll（GitHub Pages 互換性）
+          touch public/.nojekyll
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
