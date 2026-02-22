@@ -8,5 +8,6 @@
   "readme": "none",
   "excludePrivate": true,
   "excludeExternals": true,
-  "plugin": []
+  "plugin": [],
+  "exclude": ["**/*.test.ts", "**/*.test.tsx", "**/__tests__/**", "vitest.config.ts"]
 }
