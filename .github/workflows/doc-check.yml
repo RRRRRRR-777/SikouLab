@@ -1,0 +1,135 @@
+name: Documentation
+
+on:
+  pull_request:
+    paths:
+      - 'backend/**/*.go'
+      - 'frontend/**/*.ts'
+      - 'frontend/**/*.tsx'
+      - 'backend/api/openapi.yaml'
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**/*.ts'
+      - 'frontend/**/*.tsx'
+      - 'backend/api/openapi.yaml'
+
+jobs:
+  # PR時: バックエンドdocコメントチェック
+  check-backend:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - name: Check documentation comments
+        working-directory: backend
+        run: go run check_doc.go
+
+  # PR時: フロントエンドdocコメントチェック
+  check-frontend:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Check documentation comments
+        working-directory: frontend
+        run: npm run lint
+
+  # main push時: GitHub Pagesへデプロイ
+  deploy:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Generate TypeDoc
+        working-directory: frontend
+        run: npm run docs
+
+      - name: Prepare public directory
+        run: |
+          mkdir -p public/frontend
+          mkdir -p public/backend
+          cp -r frontend/docs/. public/frontend/
+          cp backend/api/openapi.yaml public/backend/openapi.yaml
+
+      - name: Create Swagger UI page
+        run: |
+          cat > public/backend/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>SicouLab API Docs</title>
+              <meta charset="utf-8"/>
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+            </head>
+            <body>
+              <div id="swagger-ui"></div>
+              <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+              <script>
+                SwaggerUIBundle({
+                  url: './openapi.yaml',
+                  dom_id: '#swagger-ui',
+                  presets: [SwaggerUIBundle.presets.apis, SwaggerUIBundle.SwaggerUIStandalonePreset],
+                  layout: 'StandaloneLayout'
+                });
+              </script>
+            </body>
+          </html>
+          EOF
+
+      - name: Create index page
+        run: |
+          cat > public/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>SicouLab Docs</title>
+              <meta charset="utf-8"/>
+            </head>
+            <body>
+              <h1>SicouLab ドキュメント</h1>
+              <ul>
+                <li><a href="./frontend/">Frontend（TypeDoc）</a></li>
+                <li><a href="./backend/">Backend API（Swagger UI）</a></li>
+              </ul>
+            </body>
+          </html>
+          EOF
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
