@@ -22,13 +22,21 @@ Firebase Authenticationを使用し、Google / Apple / X によるOAuth認証を
 ※ ログイン画面は未ログイン状態の場合のみアクセス可能
 
 ### 制約事項
-🟢 **後回し可**
+✅ **決定済み**
 
 - セッション有効期限
-  - 案1: 7日 → ユーザビリティ高、セキュリティリスク中
-  - 案2: 24時間 → セキュリティ高、ユーザビリティ低
-  - 案3: リメンバーme機能で切替 → 開発コスト増
-  - **決定: TBD**
+  - **決定: 7日固定**（ADR-017関連決定）
+  - リメンバーme機能はなし（実装コスト削減）
+
+- CSRF対策方式
+  - **決定: SameSite=Lax**（ADR-017承認済み）
+  - 費用対効果の観点から採用（実装15分 vs Double Submitの6-8時間）
+
+- OAuthプロバイダごとの取得項目
+  - **決定: デフォルト案**
+  - Google: name, email, picture
+  - Apple: name, email（非公開の場合はemailのみ）
+  - X: name, profile_image_url
 
 - OAuthプロバイダごとの取得項目
   - Google: email, name, picture
@@ -197,10 +205,10 @@ sequenceDiagram
 - 機能仕様1: 未ログイン時のアクセス制限（保護されたページへリダイレクト）
 
 ### 機能要件5: セキュリティ詳細（F-01）
-- 機能仕様1: CSRFトークンの検証: TBD
-- 機能仕様2: セッション有効期限: TBD
-- 機能仕様3: OAuthステートの検証: TBD
-- 機能仕様4: リメンバーme機能: TBD
+- 機能仕様1: CSRF対策: **SameSite=Lax**（HttpOnly + Secure + SameSite=LaxのCookie設定）。追加のCSRFトークンは不要（ADR-017参照、費用対効果で決定）
+- 機能仕様2: セッション有効期限: **7日**（CookieのMaxAgeで設定）
+- 機能仕様3: OAuthステートの検証: **Firebase SDK任せ**（Firebase Authenticationのデフォルト実装に依存）
+- 機能仕様4: リメンバーme機能: **なし**（7日固定）
 
 ## 非機能要件
 🟢 **後回し可**
@@ -211,9 +219,10 @@ sequenceDiagram
 
 ### 非機能要件2: セキュリティ
 - 非機能仕様1: Firebase Authenticationのセキュリティ機能を活用（OAuth 2.0 / OpenID Connect準拠）
-- 非機能仕様2: ID Token検証によるユーザー認証
-- 非機能仕様3: httpOnly Cookie（SameSite=Lax）
-- 非機能仕様4: セッションハイジャック対策
+- 非機能仕様2: ID Token検証によるユーザー認証（Firebase Admin SDK）
+- 非機能仕様3: httpOnly Cookie（HttpOnly + Secure + SameSite=Lax）
+- 非機能仕様4: セッションハイジャック対策（SameSite=Lax + HTTPS強制）
+- 非機能仕様5: CSRF対策（SameSite=Lax、追加トークン不要・ADR-017参照）
 
 ### 非機能要件3: 可用性
 - 非機能仕様1: OAuthプロバイダ障害時: エラーメッセージ表示、リトライ誘導
