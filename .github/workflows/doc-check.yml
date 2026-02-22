@@ -95,8 +95,8 @@ jobs:
                 SwaggerUIBundle({
                   url: './openapi.yaml',
                   dom_id: '#swagger-ui',
-                  presets: [SwaggerUIBundle.presets.apis, SwaggerUIBundle.SwaggerUIStandalonePreset],
-                  layout: 'StandaloneLayout'
+                  presets: [SwaggerUIBundle.presets.apis],
+                  layout: 'BaseLayout'
                 });
               </script>
             </body>
@@ -124,6 +124,8 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
+        with:
+          enablement: true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
