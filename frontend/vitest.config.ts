@@ -10,6 +10,11 @@ import { defineConfig } from "vitest/config";
  * - exclude: 除外対象のディレクトリを指定
  *
  * @see {@link https://vitest.dev/config/} 詳細設定
+ * @example
+ * ```bash
+ * npm test          # 単体テスト実行
+ * npm run test:watch # ウォッチモード
+ * ```
  */
 export default defineConfig({
   test: {
