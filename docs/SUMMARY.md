@@ -11,8 +11,8 @@
   * 概要: 開発に関する技術的なガイドライン。技術スタック（Next.js + Go）、リポジトリ構成（モノレポ）、インフラ（Google Cloud）、外部サービス連携（OAuth, Stripe, Metabase）、API連携方針、フロントエンドディレクトリ構成を定義。
     テスト方針、CI/CD、ブランチ戦略、バージョニング戦略、デプロイフローを記載。
 * docs/documentation_guidelines.md
-  * 概要: ドキュメント作成・管理・運用の方針を定義。ディレクトリ構成、ファイル命名規則、更新ルール、ドキュメント種別を記載。
-    SUMMARY.md更新ルールやAIエージェント向けガイドラインを含む。
+  * 概要: ドキュメント作成・管理・運用の方針を定義。ディレクトリ構成、ファイル命名規則（ケバブケース）、SUMMARY.md・_sidebar.md更新ルール、
+    設計ドキュメントワークフロー（/requirements・/system-design・/feature-spec Skill）、ER図同期ルール、ドキュメント間相関関係を記載。
 
 ## ADR（Architecture Decision Records）
 技術選定の意思決定記録。選定理由と検討した選択肢を記載。
