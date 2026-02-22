@@ -1,6 +1,7 @@
 name: Documentation
 
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - 'backend/**/*.go'
@@ -44,17 +45,10 @@ jobs:
         working-directory: frontend
         run: npm run lint
 
-  # main push時: GitHub Pagesへデプロイ
+  # main push時: Cloudflare Pagesへデプロイ
   deploy:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -122,16 +116,9 @@ jobs:
           </html>
           EOF
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
         with:
-          enablement: true
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: public
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy public --project-name=sicoulab-docs
