@@ -9,7 +9,7 @@ on:
       - 'frontend/**/*.tsx'
       - 'backend/api/openapi.yaml'
   push:
-    branches: [main]
+    branches: [main, test/ci-check-jobs]
     paths:
       - 'frontend/**/*.ts'
       - 'frontend/**/*.tsx'
