@@ -4,7 +4,7 @@ import { twMerge } from "tailwind-merge";
 /**
  * Tailwindクラスをマージする。
  *
- * clsxで条件付きクラスを結合し、tailwind-mergeで競合するクラスを解決する。
+ * clsxで条件付きクラスを結合し、tailwind-mergeで競合するユーティリティクラスを解決する。
  *
  * @param inputs - マージするクラス値
  * @returns マージされたクラス文字列
