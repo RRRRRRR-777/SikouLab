@@ -8,6 +8,8 @@ import { defineConfig } from "vitest/config";
  * - environment: jsdom でブラウザ環境をシミュレート
  * - include: テストファイルのパターンを指定
  * - exclude: 除外対象のディレクトリを指定
+ *
+ * @see {@link https://vitest.dev/config/} 詳細設定
  */
 export default defineConfig({
   test: {
