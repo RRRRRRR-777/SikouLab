@@ -1,20 +1,16 @@
-# SicouLab ドキュメント
-
 ## API リファレンス
-- [Frontend API（TypeDoc）](https://sicoulab-docs.pages.dev/frontend/)
-- [Backend API（Swagger UI）](https://sicoulab-docs.pages.dev/backend/)
+- [Frontend API](https://sicoulab-docs.pages.dev/frontend/)
+- [Backend API](https://sicoulab-docs.pages.dev/backend/)
 
 ---
 
 ## サービス定義
 - [サービス定義書](service.md)
-
-## プロジェクト管理
 - [環境構築ガイド](setup.md)
 - [開発ガイドライン](development_guidelines.md)
 - [ドキュメントガイドライン](documentation_guidelines.md)
 
-## バージョン別ドキュメント
+## バージョン毎
 - **v1.0.0**
   - [要件定義書](versions/1_0_0/requirements.md)
   - [基本設計書](versions/1_0_0/system-design.md)
@@ -40,7 +36,7 @@
 - [015: インフラ環境構築](adr/015-deploy-platform.md)
 - [016: Phase 0横断的決定事項](adr/016-phase0-cross-cutting-decisions.md)
 
-## 機能別詳細仕様
+## 機能仕様書
 - **認証機能（F-01）**
   - [ログイン](functions/auth/login.md)
 - **ダッシュボード機能（F-02）**
