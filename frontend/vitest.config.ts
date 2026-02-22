@@ -2,8 +2,12 @@ import { defineConfig } from "vitest/config";
 
 /**
  * Vitest設定
+ *
+ * @description
  * - globals: true でグローバルテスト関数（describe, test, expect等）を有効化
  * - environment: jsdom でブラウザ環境をシミュレート
+ * - include: テストファイルのパターンを指定
+ * - exclude: 除外対象のディレクトリを指定
  */
 export default defineConfig({
   test: {
