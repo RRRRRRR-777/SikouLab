@@ -47,12 +47,17 @@ docker system prune -f
 
 **additional_fields の正しい渡し方**
 ```json
-// ✅ 正しい（オブジェクト）
+// ⚠️ MCPツール経由ではエラーになる可能性がある
+// 原因: ツール側でJSONが文字列として解釈される
 additional_fields: {"customfield_10071": 3}
 
-// ❌ 誤り（文字列）
-additional_fields: "{\"customfield_10071\": 3}"
+// ✅ 推奨: チケット作成後にJira UIで設定、または省略する
+// または editJiraIssue で後から更新
 ```
+
+**MCP認証エラー時の対処**
+- `401 Unauthorized` や `filter is not a function` が発生した場合
+- `/mcp` コマンドで認証を再実行すること
 
 **チケットテンプレート**
 
