@@ -27,6 +27,10 @@ kubectl delete
 docker system prune -f
 ```
 
+## コミットルール
+- **日本語で書く**
+- **適切な粒度**: 1機能につき1コミット。関連する変更はまとめる
+
 ## タスク管理
 - Jira MCPツールを使用
 - タスク進行の詳細は @.claude/rules/workflow.md の「タスク実行フロー」を参照
