@@ -13,7 +13,7 @@ import { defineConfig } from "vitest/config";
  * @example
  * ```bash
  * npm test           # 単体テスト実行
- * npm run test:watch # ウォッチモード
+ * npm run test:watch # ウォッチモード（開発中）
  * ```
  */
 export default defineConfig({
