@@ -96,7 +96,7 @@
 ### リスク要因
 
 - Appleプロバイダの設定手順が多い（Apple Developer Program設定）
-- Stripe連携：テスト環境での挙動確認が必要
+- UnivaPay連携：テスト環境での挙動確認が必要
 
 ### 作業項目
 
@@ -106,10 +106,10 @@
 | 1-2 | DBマイグレーション | users, plans, user_settings テーブル |
 | 1-3 | BE: Firebase Admin SDK統合 | IDトークン検証、ユーザー初回作成 |
 | 1-4 | BE: 認証ミドルウェア | JWT検証、ロール判定、サブスク状態チェック |
-| 1-5 | BE: Stripe連携（初回） | カスタマー作成、Checkout Session |
+| 1-5 | BE: UnivaPay連携（初回） | カスタマー作成、Checkout Session |
 | 1-6 | FE: ログイン画面（S-01） | Firebase JS SDK、OAuth3プロバイダ |
 | 1-7 | FE: 認証状態管理 | AuthProvider、ルートガード |
-| 1-8 | FE: サブスク登録フロー | 初回ログイン後のStripe Checkout遷移 |
+| 1-8 | FE: サブスク登録フロー | 初回ログイン後のUnivaPay Checkout遷移 |
 
 ---
 
@@ -125,16 +125,16 @@
 
 ### リスク要因
 
-- Stripeカスタマーポータルの初回連携手順（+1-2sp）
+- UnivaPayカスタマーポータルの初回連携手順（+1-2sp）
 - メールアドレス暗号化保存の実装（+3sp）
 
 ### 作業項目
 
 | # | 作業 | 対象 |
 |---|------|------|
-| 2-1 | OpenAPI追記 | POST /stripe/checkout, POST /stripe/webhook, GET /settings/subscription |
+| 2-1 | OpenAPI追記 | POST /univapay/checkout, POST /univapay/webhook, GET /settings/subscription |
 | 2-2 | DBマイグレーション | newsletter_subscriptions テーブル |
-| 2-3 | BE: Stripe Webhook処理 | subscription.created/updated/deleted イベント |
+| 2-3 | BE: UnivaPay Webhook処理 | subscription.created/updated/deleted イベント |
 | 2-4 | BE: サブスク状態管理 | subscription_status更新、アクセス制御 |
 | 2-5 | FE: 設定画面（S-17） | プロフィール、サブスク管理、メール登録、FAQ |
 | 2-6 | FE: メール登録ウィジェット | 各画面に配置可能な共通コンポーネント |

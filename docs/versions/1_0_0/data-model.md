@@ -14,7 +14,7 @@ erDiagram
         string avatar_url
         string role "admin/writer/user"
         bigint plan_id FK
-        string stripe_customer_id
+        string univapay_customer_id
         string subscription_status "active/canceled/past_due"
         datetime created_at
         datetime updated_at
@@ -505,7 +505,7 @@ erDiagram
 | avatar_url | string | アバター画像URL | |
 | role | string | ロール（admin/writer/user） | NOT NULL, DEFAULT 'user' |
 | plan_id | bigint | 加入プランID | FK |
-| stripe_customer_id | string | Stripe顧客ID | UNIQUE |
+| univapay_customer_id | string | UnivaPay顧客ID | UNIQUE |
 | subscription_status | string | サブスクリプション状態 | NOT NULL |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |

@@ -38,12 +38,6 @@ Firebase Authenticationを使用し、Google / Apple / X によるOAuth認証を
   - Apple: name, email（非公開の場合はemailのみ）
   - X: name, profile_image_url
 
-- OAuthプロバイダごとの取得項目
-  - Google: email, name, picture
-  - Apple: email, name（非公開の場合はemailのみ）
-  - X: email, name, profile_image_url
-  - **決定: TBD**
-
 ## 画面設計図
 🟡 **中程度**
 
@@ -99,7 +93,7 @@ erDiagram
         string avatar_url
         string role "admin/writer/user"
         bigint plan_id FK
-        string stripe_customer_id
+        string univapay_customer_id
         string subscription_status "active/canceled/past_due"
         datetime created_at
         datetime updated_at
@@ -142,7 +136,7 @@ flowchart TD
 
     I --> J{初回ログイン?}
     J -->|Yes| K[ユーザー作成]
-    K --> L[Stripeカスタマー作成]
+    K --> L[UnivaPayカスタマー作成]
     L --> M[サブスクリプション登録画面へ]
     J -->|No| N[ダッシュボードへ]
 ```
@@ -156,7 +150,7 @@ sequenceDiagram
     participant Firebase as Firebase Auth
     participant API as バックエンドAPI
     participant DB as データベース
-    participant Stripe as Stripe
+    participant UnivaPay as UnivaPay
 
     User->>Front: ログイン画面アクセス
     Front->>Front: 未ログイン確認
@@ -174,9 +168,9 @@ sequenceDiagram
     alt 初回ログイン
         API->>DB: ユーザー作成
         API->>DB: user_settings作成
-        API->>Stripe: カスタマー作成
-        Stripe-->>API: customer_id
-        API->>DB: stripe_customer_id保存
+        API->>UnivaPay: カスタマー作成
+        UnivaPay-->>API: customer_id
+        API->>DB: univapay_customer_id保存
         API-->>Front: is_first_login=true
         Front->>User: サブスクリプション登録画面へ遷移
     else 既存ユーザー
@@ -195,7 +189,7 @@ sequenceDiagram
 
 ### 機能要件2: ユーザー自動登録（F-01）
 - 機能仕様1: 初回ログイン時のユーザー自動登録（users、user_settings）
-- 機能仕様2: 初回ログイン時のStripeカスタマー作成
+- 機能仕様2: 初回ログイン時のUnivaPayカスタマー作成
 
 ### 機能要件3: セッション管理（F-01）
 - 機能仕様1: セッション管理（httpOnly Cookie、SameSite=Lax）
@@ -231,14 +225,14 @@ sequenceDiagram
 🟢 **後回し可**
 
 ### 出力タイミング
-- 案1: 全認証操作時に出力（Firebase認証・ID Token検証・ユーザー作成・Stripe連携） → 追跡しやすいがログ量増加
+- 案1: 全認証操作時に出力（Firebase認証・ID Token検証・ユーザー作成・UnivaPay連携） → 追跡しやすいがログ量増加
 - 案2: エラー時のみ出力 → ログ量削減だが正常系追跡困難
-- 案3: 重要操作のみ出力（初回ログイン時のユーザー作成・Stripe連携・認証エラー） → バランス型
+- 案3: 重要操作のみ出力（初回ログイン時のユーザー作成・UnivaPay連携・認証エラー） → バランス型
 - **決定: TBD**
 
 ### ログレベル方針
 - 案1: INFO中心（認証開始・成功・ユーザー作成をINFO） → 詳細追跡可能
-- 案2: WARN/ERROR中心（認証エラー・Stripe連携エラーのみ） → 異常検知に特化
+- 案2: WARN/ERROR中心（認証エラー・UnivaPay連携エラーのみ） → 異常検知に特化
 - 案3: INFO（認証成功・ユーザー作成）+ WARN（認証失敗）+ ERROR（システムエラー） → バランス型
 - **決定: TBD**
 
@@ -279,7 +273,7 @@ sequenceDiagram
 | ID Token検証 | Firebaseから取得したID Tokenの検証 | 有効なトークンの場合はユーザー情報が返される |
 | ID Token検証（無効） | 無効なID Tokenの場合のエラー処理 | 401認証エラーが返される |
 | ユーザー情報取得 | Firebaseからユーザー情報取得 | uid, email, name, pictureが取得できる |
-| 初回ログイン処理 | ユーザー作成・user_settings作成・Stripeカスタマー作成 | users, user_settingsテーブルにレコード作成、stripe_customer_idが保存される |
+| 初回ログイン処理 | ユーザー作成・user_settings作成・UnivaPayカスタマー作成 | users, user_settingsテーブルにレコード作成、univapay_customer_idが保存される |
 | 既存ユーザーログイン | ユーザー取得・サブスクリプション状態確認 | ユーザー情報とサブスクリプション状態が返される |
 | ログアウト処理 | Firebaseサインアウト・セッション削除 | Firebaseセッションが無効化され、本システム側のセッションも削除される |
 | セッション確認 | 有効なセッションでユーザー情報取得 | ユーザー情報が返される |
@@ -309,7 +303,7 @@ sequenceDiagram
 
 - フロントエンド: Firebase Authentication SDK、認証画面、セッション管理
 - バックエンド: Firebase Admin SDK（ID Token検証）、セッション管理、ユーザー登録
-- 外部サービス: Firebase Authentication、Stripe
+- 外部サービス: Firebase Authentication、UnivaPay
 - **決定: TBD**（実装時に確定）
 
 ## API仕様（参考）
@@ -352,7 +346,7 @@ GET /api/auth/me
 | Firebaseプロジェクト設定 | 2 | コンソール設定・プロバイダ有効化・環境変数 |
 | Firebase Admin SDK導入 | 2 | SDKインストール・初期化・ID Token検証 |
 | ユーザー登録ロジック | 3 | users/user_settings作成・既存ユーザー判定 |
-| Stripe連携 | 2-3 | カスタマー作成・エラーハンドリング |
+| UnivaPay連携 | 2-3 | カスタマー作成・エラーハンドリング |
 | ログアウトAPI | 1 | Firebaseサインアウト・セッション削除 |
 | セッション確認API | 1 | ユーザー情報返却 |
 | **フロントエンド** | | |
@@ -360,16 +354,16 @@ GET /api/auth/me
 | 認証画面実装 | 2 | UI実装・OAuthボタン・ローディング状態 |
 | セッション管理 | 2 | Cookie管理・未ログイン時リダイレクト |
 | **テスト** | | |
-| 単体テスト | 3sp | Firebase/Stripeモック・認証フロー |
+| 単体テスト | 3sp | Firebase/UnivaPayモック・認証フロー |
 | E2Eテスト | 2-3sp | OAuthログイン/ログアウト/セッション確認の主要フロー |
 
 ### リスク要因
 
-- **Stripe連携**: テスト環境での挙動確認が必要
+- **UnivaPay連携**: テスト環境での挙動確認が必要
 - **Firebase設定**: プロバイダごとの設定差異（Appleは特に手順が多い）
 - **セッション管理**: httpOnly Cookieの設定・ドメイン跨ぎ対応
 
 ### 依存関係
 
 - Firebaseプロジェクト作成・設定完了後、実装可能
-- Stripeテスト環境の事前準備が必要
+- UnivaPayテスト環境の事前準備が必要

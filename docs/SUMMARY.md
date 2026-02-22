@@ -8,7 +8,7 @@
 * docs/setup.md
   * 概要: 環境構築の手順書。必須ツール・バージョン、リポジトリ初期化、環境変数、ローカルサービス起動（docker-compose.yml）、開発コマンドを記載。
 * docs/development_guidelines.md
-  * 概要: 開発に関する技術的なガイドライン。技術スタック（Next.js + Go）、リポジトリ構成（モノレポ）、インフラ（Google Cloud）、外部サービス連携（OAuth, Stripe, Metabase）、API連携方針、フロントエンドディレクトリ構成を定義。
+  * 概要: 開発に関する技術的なガイドライン。技術スタック（Next.js + Go）、リポジトリ構成（モノレポ）、インフラ（Google Cloud）、外部サービス連携（OAuth, UnivaPay, Metabase）、API連携方針、フロントエンドディレクトリ構成を定義。
     テスト方針、CI/CD、ブランチ戦略、バージョニング戦略、デプロイフローを記載。
 * docs/documentation_guidelines.md
   * 概要: ドキュメント作成・管理・運用の方針を定義。ディレクトリ構成、ファイル命名規則（ケバブケース）、SUMMARY.md・_sidebar.md更新ルール、
@@ -99,7 +99,7 @@
 
 ### 認証機能（F-01）
 * docs/functions/auth/login.md
-  * 概要: ログイン機能（F-01）の詳細設計書。Google / Apple / XによるOAuth認証、初回ログイン時のユーザー登録・Stripeカスタマー作成、
+  * 概要: ログイン機能（F-01）の詳細設計書。Google / Apple / XによるOAuth認証、初回ログイン時のユーザー登録・UnivaPayカスタマー作成、
     セッション管理（httpOnly Cookie）、ログアウトの仕様を定義。
     画面設計図・シーケンス図・API仕様・機能要件・非機能要件・テストケースを含む。
 

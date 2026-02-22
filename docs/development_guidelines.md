@@ -75,7 +75,7 @@
 
 ### 1.6 外部サービス連携
 - **認証**: OAuth（Google / Apple 等）
-- **課金**: Stripe
+- **課金**: UnivaPay
 - **アナリティクス**: Metabase
 
 ### 1.7 API連携
