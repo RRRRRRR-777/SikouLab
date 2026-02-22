@@ -166,6 +166,9 @@ make -C backend fmt
 
 # 単体テスト
 make -C backend test
+
+# ドキュメントコメントチェック
+make -C backend check-doc
 ```
 
 ### マイグレーション
