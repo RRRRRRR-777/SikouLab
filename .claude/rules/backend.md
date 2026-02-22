@@ -149,40 +149,40 @@ func FunctionName(param string) (string, error) {
 
 ```bash
 # 開発サーバー起動
-cd backend && make run
+make -C backend run
 
 # バイナリビルド
-cd backend && make build
+make -C backend build
 ```
 
 ### コード品質
 
 ```bash
 # 静的解析
-cd backend && make lint
+make -C backend lint
 
 # フォーマット
-cd backend && make fmt
+make -C backend fmt
 
 # 単体テスト
-cd backend && make test
+make -C backend test
 ```
 
 ### マイグレーション
 
 ```bash
 # マイグレーション適用
-cd backend && make migrate-up
+make -C backend migrate-up
 
 # マイグレーション戻し
-cd backend && make migrate-down
+make -C backend migrate-down
 ```
 
 ### Docker
 
 ```bash
 # Dockerイメージビルド
-cd backend && make docker-build
+make -C backend docker-build
 ```
 
 ### 参考情報

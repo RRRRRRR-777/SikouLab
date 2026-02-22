@@ -127,43 +127,43 @@ paths:
 
 ```bash
 # 開発サーバー起動
-cd frontend && make dev
+make -C frontend dev
 
 # 本番ビルド
-cd frontend && make build
+make -C frontend build
 
 # 本番サーバー起動（ビルド後）
-cd frontend && make start
+make -C frontend start
 ```
 
 ### コード品質
 
 ```bash
 # ESLint 実行
-cd frontend && make lint
+make -C frontend lint
 
 # Prettier フォーマット
-cd frontend && make fmt
+make -C frontend fmt
 
 # 単体テスト
-cd frontend && make test
+make -C frontend test
 ```
 
 ### E2E / VRT
 
 ```bash
 # E2Eテスト（frontend/backend 起動済み前提）
-cd frontend && make test-e2e
+make -C frontend test-e2e
 
 # VRT（frontend/backend 起動済み前提）
-cd frontend && make test-vrt
+make -C frontend test-vrt
 ```
 
 ### Docker
 
 ```bash
 # Dockerイメージビルド
-cd frontend && make docker-build
+make -C frontend docker-build
 ```
 
 ### 参考情報
