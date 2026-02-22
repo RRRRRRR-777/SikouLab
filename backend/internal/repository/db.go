@@ -1,3 +1,6 @@
+// Package repository はデータベースアクセスを提供する。
+//
+// PostgreSQLへの接続プール管理を担当する。
 package repository
 
 import (
