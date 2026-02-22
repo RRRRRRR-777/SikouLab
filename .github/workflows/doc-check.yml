@@ -74,11 +74,6 @@ jobs:
         working-directory: frontend
         run: npm run docs
 
-      # TypeDoc を生成
-      - name: Generate TypeDoc
-        working-directory: frontend
-        run: npm run docs
-
       # ドキュメント用の public ディレクトリを準備
       - name: Prepare public directory
         run: |
@@ -89,9 +84,9 @@ jobs:
           # docsify 用 index.html をコピー
           cp index.html public/
 
-          # docs/ 配下（全体）
+          # docs/ 配下（全体、.penファイル除外）
           mkdir -p public/docs
-          cp -r docs/* public/docs/
+          rsync -av --exclude='*.pen' docs/ public/docs/
 
           # .claude/ 配下
           mkdir -p public/.claude
