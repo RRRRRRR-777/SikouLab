@@ -1,4 +1,4 @@
-.PHONY: dev build start test lint fmt test-e2e test-vrt docker-build help
+.PHONY: dev build start test lint fmt test-e2e test-vrt docker-build docs help
 
 # デフォルトターゲット
 help:
@@ -11,6 +11,7 @@ help:
 	@echo "  fmt         - Run Prettier format"
 	@echo "  test-e2e    - Run E2E tests"
 	@echo "  test-vrt    - Run VRT"
+	@echo "  docs         - Generate TypeDoc documentation"
 	@echo "  docker-build - Build Docker image"
 
 # 開発サーバー起動
@@ -44,6 +45,10 @@ test-e2e:
 # VRT実行
 test-vrt:
 	npm run test:vrt
+
+# TypeDocドキュメント生成
+docs:
+	npm run docs
 
 # Dockerイメージビルド
 docker-build:

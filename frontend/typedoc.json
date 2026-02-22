@@ -1,0 +1,12 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "name": "SicouLab フロントエンド",
+  "entryPoints": ["./components", "./lib"],
+  "entryPointStrategy": "expand",
+  "out": "./docs",
+  "includeVersion": true,
+  "readme": "none",
+  "excludePrivate": true,
+  "excludeExternals": true,
+  "plugin": []
+}
