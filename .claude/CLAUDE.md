@@ -35,39 +35,36 @@ docker system prune -f
 - Jira MCPツールを使用
 - タスク進行の詳細は @.claude/rules/workflow.md の「タスク実行フロー」を参照
 
-**Jira MCP使用時の必須手順**
+### Jiraチケット運用ルール
+
+#### MCPツール使用時の基本設定
 - `cloudId` には**URL**を指定する（UUIDではない）
-- ❌ 誤り: `ca2727d3-32bb-4f76-9181d70e7c7c`（UUIDは使えない）
-- ✅ 正しい: `https://rrrrrrr777.atlassian.net`（URLを指定）
+  - ❌ 誤り: `ca2727d3-32bb-4f76-9181d70e7c7c`（UUIDは使えない）
+  - ✅ 正しい: `https://rrrrrrr777.atlassian.net`（URLを指定）
 
-**MCPツールパラメータの正しい形式**
-- `transition`: オブジェクト形式でIDを指定
-  - ✅ 正しい: `{"id": "41"}`（完了への遷移）
-  - ❌ 誤り: `"Done"`（文字列は使えない）
-- `commentBody`: コメント本文を指定
-  - ✅ 正しい: `commentBody="## やったこと\n..."`
-  - ❌ 誤り: `body="..."`（パラメータ名が違う）
+#### MCPツールパラメータの正しい形式
 
-**Jiraチケット作成時の必須項目**
+| ツール | パラメータ | 正しい形式 | 誤り |
+|--------|-----------|-----------|------|
+| `transitionJiraIssue` | `transition` | `{"id": "41"}`（idは**文字列**） | `{"id": 41}`（数値）、`"Done"`（ステータス名） |
+| `addCommentToJiraIssue` | `commentBody` | `commentBody="本文"` | `body="..."` |
+
+**遷移ID一覧**
+| ID | ステータス |
+|----|----------|
+| 11 | 進行中 |
+| 21 | レビュー中 |
+| 31 | 対応なし |
+| 41 | 完了 |
+| 42 | To Do |
+
+#### チケット作成時の必須項目
 - **プロジェクトキー**: `KAN`
-- **ストーリーポイント**: `additional_fields.customfield_10071`で設定（**オブジェクト型**で渡すこと。文字列不可）
 - **担当者**: `assignee_account_id`で設定（省略時はユーザーに確認）
+- **ストーリーポイント**: チケット作成後にJira UIで設定推奨
+  - MCPツール経由では `additional_fields.customfield_10071` の指定がエラーになる可能性あり
 
-**additional_fields の正しい渡し方**
-```json
-// ⚠️ MCPツール経由ではエラーになる可能性がある
-// 原因: ツール側でJSONが文字列として解釈される
-additional_fields: {"customfield_10071": 3}
-
-// ✅ 推奨: チケット作成後にJira UIで設定、または省略する
-// または editJiraIssue で後から更新
-```
-
-**MCP認証エラー時の対処**
-- `401 Unauthorized` や `filter is not a function` が発生した場合
-- `/mcp` コマンドで認証を再実行すること
-
-**チケットテンプレート**
+#### チケットテンプレート
 
 | 項目 | エピック | 子チケット |
 |------|----------|------------|
@@ -77,6 +74,9 @@ additional_fields: {"customfield_10071": 3}
 | 完了条件 | 成功の定義 | 完了の定義 |
 | やったこと | 完了時に記載 | 完了時に記載 |
 | 情報元 | 参照資料（./docs/features/xxx.md） | 参照資料（./docs/features/xxx.md） |
+
+#### トラブルシューティング
+- **MCP認証エラー**: `401 Unauthorized` や `filter is not a function` が発生した場合、`/mcp` コマンドで認証を再実行
 
 
 
