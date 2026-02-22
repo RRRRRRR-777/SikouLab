@@ -8,12 +8,22 @@ on:
       - 'frontend/**/*.ts'
       - 'frontend/**/*.tsx'
       - 'backend/api/openapi.yaml'
+      - 'docs/**'
+      - '.claude/**'
+      - 'index.html'
+      - 'README.md'
+      - '.github/workflows/doc-check.yml'
   push:
     branches: [main]
     paths:
       - 'frontend/**/*.ts'
       - 'frontend/**/*.tsx'
       - 'backend/api/openapi.yaml'
+      - 'docs/**'
+      - '.claude/**'
+      - 'index.html'
+      - 'README.md'
+      - '.github/workflows/doc-check.yml'
 
 jobs:
   # PR時: バックエンドdocコメントチェック
