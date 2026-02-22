@@ -1,3 +1,7 @@
+// Package main はドキュメントコメントの品質チェックツールを提供する。
+//
+// backendディレクトリ内のGoファイルを解析し、
+// godoc形式のドキュメントコメントの網羅率をチェックする。
 package main
 
 import (
@@ -10,7 +14,7 @@ import (
 	"strings"
 )
 
-// DocCommentCheckResult はドキュメントコメントのチェック結果を保持する
+// DocCommentCheckResult はドキュメントコメントのチェック結果を保持する。
 type DocCommentCheckResult struct {
 	FileName      string
 	HasPackageDoc bool
@@ -18,7 +22,7 @@ type DocCommentCheckResult struct {
 	Issues        []string
 }
 
-// ExportedDeclaration エクスポートされた宣言情報
+// ExportedDeclaration はエクスポートされた宣言の情報を保持する。
 type ExportedDeclaration struct {
 	Name    string
 	Type    string // function, type, const, var
@@ -27,12 +31,13 @@ type ExportedDeclaration struct {
 	HasDoc  bool
 }
 
-// checkDocComments は指定されたディレクトリ内のGoファイルのドキュメントコメントをチェックする
+// checkDocComments は指定されたディレクトリ内のGoファイルのドキュメントコメントをチェックする。
+// パッケージコメントの検証はファイル単位ではなくパッケージ単位で行うため、2パスで処理する。
 func checkDocComments(dir string) ([]DocCommentCheckResult, error) {
 	fset := token.NewFileSet()
 	var results []DocCommentCheckResult
 
-	// ディレクトリ内の全Goファイルを再帰的に探索
+	// 第1パス: 全Goファイルをパース
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -57,6 +62,21 @@ func checkDocComments(dir string) ([]DocCommentCheckResult, error) {
 
 	if err != nil {
 		return nil, err
+	}
+
+	// パッケージ単位でパッケージコメントが存在するか確認
+	// 同一ディレクトリのいずれかのファイルにパッケージコメントがあればOKとする
+	packageHasDoc := make(map[string]bool)
+	for _, r := range results {
+		if r.HasPackageDoc {
+			packageHasDoc[filepath.Dir(r.FileName)] = true
+		}
+	}
+
+	// 第2パス: パッケージレベルの情報を考慮して問題点をチェック
+	for i := range results {
+		pkgDir := filepath.Dir(results[i].FileName)
+		checkIssues(&results[i], packageHasDoc[pkgDir])
 	}
 
 	return results, nil
@@ -89,7 +109,7 @@ func checkSingleFile(filePath string, fset *token.FileSet) (DocCommentCheckResul
 					HasDoc: decl.Doc != nil,
 				}
 				if decl.Doc != nil {
-					exported.Comment = decl.Doc.Text()
+					exported.Comment = strings.TrimSpace(decl.Doc.Text())
 				}
 				result.ExportedDecls = append(result.ExportedDecls, exported)
 			}
@@ -106,7 +126,7 @@ func checkSingleFile(filePath string, fset *token.FileSet) (DocCommentCheckResul
 							HasDoc: decl.Doc != nil,
 						}
 						if decl.Doc != nil {
-							exported.Comment = decl.Doc.Text()
+							exported.Comment = strings.TrimSpace(decl.Doc.Text())
 						}
 						result.ExportedDecls = append(result.ExportedDecls, exported)
 					}
@@ -121,7 +141,7 @@ func checkSingleFile(filePath string, fset *token.FileSet) (DocCommentCheckResul
 								HasDoc: decl.Doc != nil,
 							}
 							if decl.Doc != nil {
-								exported.Comment = decl.Doc.Text()
+								exported.Comment = strings.TrimSpace(decl.Doc.Text())
 							}
 							result.ExportedDecls = append(result.ExportedDecls, exported)
 						}
@@ -131,9 +151,6 @@ func checkSingleFile(filePath string, fset *token.FileSet) (DocCommentCheckResul
 		}
 		return true
 	})
-
-	// 問題点をチェック
-	checkIssues(&result)
 
 	return result, nil
 }
@@ -150,10 +167,11 @@ func getDeclarationType(decl *ast.GenDecl) string {
 	}
 }
 
-// checkIssues はドキュメントコメントの問題点をチェックする
-func checkIssues(result *DocCommentCheckResult) {
-	// パッケージコメントがない場合の問題点
-	if !result.HasPackageDoc && result.FileName != "doc.go" {
+// checkIssues はドキュメントコメントの問題点をチェックする。
+// packageHasDoc はパッケージ内のいずれかのファイルにパッケージコメントが存在するかを示す。
+func checkIssues(result *DocCommentCheckResult, packageHasDoc bool) {
+	// パッケージコメントがない場合の問題点（パッケージ単位で判定）
+	if !packageHasDoc {
 		result.Issues = append(result.Issues, "パッケージコメントがありません")
 	}
 
@@ -213,13 +231,15 @@ func isCompleteSentence(comment string) bool {
 		return false
 	}
 
-	// 文末がピリオドで終わっているか
-	if comment[len(comment)-1] != '.' {
+	// rune単位で最後の文字を取得し、句点（。）またはピリオド（.）で終わっているかチェック
+	runes := []rune(comment)
+	lastRune := runes[len(runes)-1]
+	if lastRune != '.' && lastRune != '。' {
 		return false
 	}
 
 	// 完全な文の基本チェック（簡略化）
-	if len(comment) < 10 {
+	if len(runes) < 10 {
 		return false
 	}
 

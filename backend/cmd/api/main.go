@@ -1,3 +1,6 @@
+// Package main はAPIサーバーのエントリポイントを提供する。
+//
+// 設定読み込み、DB接続、ミドルウェア設定、ルーティングを行い、HTTPサーバーを起動する。
 package main
 
 import (
