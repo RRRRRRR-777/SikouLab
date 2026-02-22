@@ -214,7 +214,14 @@ git commit --no-verify
 
 ### 5.3 CI/CD
 
-mainブランチへのマージ時に自動生成・デプロイする。
+| ワークフロー | トリガー | 内容 |
+|------------|---------|------|
+| `doc-check.yml` | PR時 / main push | PR時はdocコメントチェック、main push時はGitHub Pagesへデプロイ |
+
+**mainブランチへのマージ時**:
+1. TypeDocでフロントエンドドキュメントを生成
+2. OpenAPI（backend/api/openapi.yaml）をコピー
+3. GitHub Pagesへデプロイ（`public/frontend/`、`public/backend/`）
 
 ## 6. ブランチ戦略
 

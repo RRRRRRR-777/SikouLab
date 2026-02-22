@@ -510,6 +510,7 @@ Cloud Scheduler（cron式でトリガー）
 | `ci.yml` | PR作成/更新 | lint, format, 単体テスト, docker build |
 | `ci-main.yml` | mainマージ | lint, format, 単体テスト, docker build, E2E, VRT, Lighthouse CI |
 | `deploy.yml` | mainマージ後（承認後） | Dockerイメージビルド → Artifact Registry push → Cloud Run deploy |
+| `doc-check.yml` | PR時 / main push | PR時: docコメントチェック / main push: TypeDoc生成 + GitHub Pagesデプロイ |
 
 **deploy.yml のステップ**:
 ```
