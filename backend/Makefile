@@ -1,4 +1,4 @@
-.PHONY: dev run build test lint fmt migrate-up migrate-down seed docker-build check-doc swagger help
+.PHONY: dev run build test lint fmt migrate-up migrate-down seed docker-build check-doc swagger validate-api help
 
 # デフォルトターゲット
 help:
@@ -15,6 +15,7 @@ help:
 	@echo "  docker-build - Build Docker image"
 	@echo "  check-doc    - Check documentation comments"
 	@echo "  swagger      - Start Swagger UI (http://localhost:8081)"
+	@echo "  validate-api - Validate OpenAPI specification"
 
 # 開発サーバー起動（ホットリロード）
 dev:
@@ -66,3 +67,7 @@ check-doc:
 # Swagger UI 起動
 swagger:
 	docker compose -f ../docker-compose.yml up -d swagger-ui
+
+# OpenAPI仕様バリデーション
+validate-api:
+	npx @apidevtools/swagger-cli validate api/openapi.yaml
