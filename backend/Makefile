@@ -1,4 +1,4 @@
-.PHONY: dev run build test lint fmt migrate-up migrate-down docker-build check-doc swagger help
+.PHONY: dev run build test lint fmt migrate-up migrate-down seed docker-build check-doc swagger help
 
 # デフォルトターゲット
 help:
@@ -11,6 +11,7 @@ help:
 	@echo "  fmt          - Format code with gofmt"
 	@echo "  migrate-up   - Apply migrations"
 	@echo "  migrate-down - Rollback migrations"
+	@echo "  seed         - Seed database with test data"
 	@echo "  docker-build - Build Docker image"
 	@echo "  check-doc    - Check documentation comments"
 	@echo "  swagger      - Start Swagger UI (http://localhost:8081)"
@@ -46,6 +47,13 @@ migrate-up:
 # マイグレーション戻し
 migrate-down:
 	migrate -path migrations -database "$$DATABASE_URL" down 1
+
+# シードデータ適用
+seed:
+	@for file in seeds/*.sql; do \
+		echo "Applying $$file..."; \
+		docker exec -i sicoulab-postgres-1 psql -U postgres -d sicoulab_database_development < "$$file"; \
+	done
 
 # Dockerイメージビルド
 docker-build:
