@@ -267,18 +267,16 @@ sequenceDiagram
 
 **記載タイミング**: 単体テストは大枠のみ設計段階、詳細はTDD実装時。E2Eテストは実装完了後
 
-### 単体テスト（設計段階は大枠のみ、詳細はTDD実装時に追記）
+### 単体テスト
 
-| テスト項目 | 観点 | 期待値 |
-|------------|------|--------|
-| ID Token検証 | Firebaseから取得したID Tokenの検証 | 有効なトークンの場合はユーザー情報が返される |
-| ID Token検証（無効） | 無効なID Tokenの場合のエラー処理 | 401認証エラーが返される |
-| ユーザー情報取得 | Firebaseからユーザー情報取得 | uid, email, name, pictureが取得できる |
-| 初回ログイン処理 | ユーザー作成・user_settings作成・UnivaPayカスタマー作成 | users, user_settingsテーブルにレコード作成、univapay_customer_idが保存される |
-| 既存ユーザーログイン | ユーザー取得・サブスクリプション状態確認 | ユーザー情報とサブスクリプション状態が返される |
-| ログアウト処理 | Firebaseサインアウト・セッション削除 | Firebaseセッションが無効化され、本システム側のセッションも削除される |
-| セッション確認 | 有効なセッションでユーザー情報取得 | ユーザー情報が返される |
-| セッション確認（無効） | 無効なセッションで401エラー | 認証エラーが返される |
+| テスト項目 | テスト関数 | ケース名 | 期待値 |
+|-----------|-----------|---------|--------|
+| ID Token検証（有効） | `TestAuthUsecase_Login` | 有効なIDトークンで既存ユーザーがログインする | ユーザー情報が返される、isFirstLogin=false |
+| ID Token検証（無効） | `TestAuthUsecase_Login` | 無効なIDトークンでエラーが返される | ErrInvalidTokenが返される |
+| 初回ログイン処理 | `TestAuthUsecase_Login` | 初回ログインでユーザーが新規作成される | isFirstLogin=true、Createが呼ばれる |
+| セッション確認（有効） | `TestAuthUsecase_GetCurrentUser` | 有効なセッショントークンでユーザー情報が返される | ユーザー情報が返される |
+| セッション確認（無効） | `TestAuthUsecase_GetCurrentUser` | 無効なセッショントークンでエラーが返される | ErrInvalidTokenが返される |
+| ログアウト処理 | `TestAuthHandler_ServeLogout` | ログアウト時にセッションCookieが削除される | 204、Cookie value=""、MaxAge=-1 |
 
 ### E2Eテスト（実装完了後に記載）
 
