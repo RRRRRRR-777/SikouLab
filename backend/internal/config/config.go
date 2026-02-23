@@ -22,6 +22,9 @@ type Config struct {
 	LogLevel string
 	// DatabaseURL はPostgreSQLの接続文字列。
 	DatabaseURL string
+	// FirebaseServiceAccountJSON はFirebaseサービスアカウントのJSON。
+	// 空の場合はApplication Default Credentials (ADC) を使用する。
+	FirebaseServiceAccountJSON string
 }
 
 // Load は.envファイルおよび環境変数から設定を読み込む。
@@ -61,6 +64,9 @@ func Load() (*Config, error) {
 	if len(missing) > 0 {
 		return nil, errors.New("必須の環境変数が未設定です: " + strings.Join(missing, ", "))
 	}
+
+	// 任意: Firebase認証情報（空の場合はADCを使用）
+	cfg.FirebaseServiceAccountJSON = os.Getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
 
 	return cfg, nil
 }

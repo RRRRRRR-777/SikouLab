@@ -4,16 +4,19 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
 
 	"github.com/rs/zerolog"
 
-	"github.com/bokuyamada/SicouLab/backend/internal/config"
-	"github.com/bokuyamada/SicouLab/backend/internal/handler"
-	"github.com/bokuyamada/SicouLab/backend/internal/middleware"
-	"github.com/bokuyamada/SicouLab/backend/internal/repository"
+	"github.com/RRRRRRR-777/SicouLab/backend/internal/config"
+	"github.com/RRRRRRR-777/SicouLab/backend/internal/firebase"
+	"github.com/RRRRRRR-777/SicouLab/backend/internal/handler"
+	"github.com/RRRRRRR-777/SicouLab/backend/internal/middleware"
+	"github.com/RRRRRRR-777/SicouLab/backend/internal/repository"
+	"github.com/RRRRRRR-777/SicouLab/backend/internal/usecase"
 )
 
 func main() {
@@ -39,9 +42,33 @@ func main() {
 	defer db.Close()
 	logger.Info().Msg("DB接続成功")
 
+	// Firebase初期化
+	ctx := context.Background()
+	firebaseClient, err := firebase.NewClient(ctx, cfg.FirebaseServiceAccountJSON)
+	if err != nil {
+		logger.Fatal().Err(err).Msg("Firebase初期化失敗")
+	}
+	logger.Info().Msg("Firebase初期化成功")
+
+	// リポジトリ・ユースケース・ハンドラーの初期化
+	userRepo := repository.NewUserRepository(db)
+	authUsecase := usecase.NewAuthUsecase(firebaseClient, userRepo)
+	authHandler := handler.NewAuthHandler(authUsecase, logger)
+
 	// ルーティング設定
 	mux := http.NewServeMux()
 	mux.Handle("GET /health", &handler.HealthHandler{})
+
+	// Go 1.22+: メソッドをHandleFuncに渡す場合、明示的にレシーバーをバインドする必要がある
+	mux.HandleFunc("POST /api/v1/auth/login", func(w http.ResponseWriter, r *http.Request) {
+		authHandler.ServeLogin(w, r)
+	})
+	mux.HandleFunc("GET /api/v1/auth/me", func(w http.ResponseWriter, r *http.Request) {
+		authHandler.ServeMe(w, r)
+	})
+	mux.HandleFunc("POST /api/v1/auth/logout", func(w http.ResponseWriter, r *http.Request) {
+		authHandler.ServeLogout(w, r)
+	})
 
 	// ミドルウェアチェーン: Recovery → Logger → CORS → Handler
 	var h http.Handler = mux

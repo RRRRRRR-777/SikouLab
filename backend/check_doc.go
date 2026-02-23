@@ -102,11 +102,11 @@ func checkSingleFile(filePath string, fset *token.FileSet) (DocCommentCheckResul
 		case *ast.FuncDecl:
 			if decl.Name.IsExported() {
 				exported := ExportedDeclaration{
-					Name: decl.Name.Name,
-					Type: "function",
-					Line: fset.Position(decl.Pos()).Line,
+					Name:    decl.Name.Name,
+					Type:    "function",
+					Line:    fset.Position(decl.Pos()).Line,
 					Comment: "",
-					HasDoc: decl.Doc != nil,
+					HasDoc:  decl.Doc != nil,
 				}
 				if decl.Doc != nil {
 					exported.Comment = strings.TrimSpace(decl.Doc.Text())
@@ -119,11 +119,11 @@ func checkSingleFile(filePath string, fset *token.FileSet) (DocCommentCheckResul
 				case *ast.TypeSpec:
 					if s.Name.IsExported() {
 						exported := ExportedDeclaration{
-							Name: s.Name.Name,
-							Type: "type",
-							Line: fset.Position(decl.Pos()).Line,
+							Name:    s.Name.Name,
+							Type:    "type",
+							Line:    fset.Position(decl.Pos()).Line,
 							Comment: "",
-							HasDoc: decl.Doc != nil,
+							HasDoc:  decl.Doc != nil,
 						}
 						if decl.Doc != nil {
 							exported.Comment = strings.TrimSpace(decl.Doc.Text())
@@ -134,11 +134,11 @@ func checkSingleFile(filePath string, fset *token.FileSet) (DocCommentCheckResul
 					for _, name := range s.Names {
 						if name.IsExported() {
 							exported := ExportedDeclaration{
-								Name: name.Name,
-								Type: getDeclarationType(decl),
-								Line: fset.Position(decl.Pos()).Line,
+								Name:    name.Name,
+								Type:    getDeclarationType(decl),
+								Line:    fset.Position(decl.Pos()).Line,
 								Comment: "",
-								HasDoc: decl.Doc != nil,
+								HasDoc:  decl.Doc != nil,
 							}
 							if decl.Doc != nil {
 								exported.Comment = strings.TrimSpace(decl.Doc.Text())
