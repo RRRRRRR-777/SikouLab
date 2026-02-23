@@ -103,6 +103,7 @@ erDiagram
         bigint id PK
         bigint user_id FK
         boolean sidebar_article_expanded "記事タブの折りたたみ状態"
+        boolean sidebar_admin_expanded "管理タブの折りたたみ状態"
         datetime created_at
         datetime updated_at
     }
@@ -161,7 +162,7 @@ sequenceDiagram
     User->>Firebase: 認証実行
     Firebase-->>Front: ID Token
 
-    Front->>API: POST /api/auth/verify {id_token}
+    Front->>API: POST /api/v1/auth/login {id_token}
     API->>Firebase: ID Token検証
     Firebase-->>API: ユーザー情報（uid, email, name, picture）
 
@@ -308,9 +309,9 @@ sequenceDiagram
 
 ## API仕様（参考）
 
-### ID Token検証
+### ログイン
 ```http
-POST /api/auth/verify
+POST /api/v1/auth/login
 Content-Type: application/json
 
 {
@@ -318,14 +319,14 @@ Content-Type: application/json
 }
 ```
 
-### ログアウト
-```http
-POST /api/auth/logout
-```
-
 ### セッション確認
 ```http
-GET /api/auth/me
+GET /api/v1/auth/me
+```
+
+### ログアウト
+```http
+POST /api/v1/auth/logout
 ```
 
 ## 作業見積もり
