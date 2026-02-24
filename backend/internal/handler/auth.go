@@ -27,13 +27,17 @@ type authUsecase interface {
 
 // AuthHandler は認証APIハンドラーを提供する。
 type AuthHandler struct {
-	usecase authUsecase
-	logger  zerolog.Logger
+	usecase      authUsecase
+	logger       zerolog.Logger
+	// secureCookie は true の場合、Cookie に Secure 属性を付与する（本番環境用）。
+	// 開発環境（localhost HTTP）では false にする。
+	secureCookie bool
 }
 
 // NewAuthHandler はAuthHandlerを作成する。
-func NewAuthHandler(uc authUsecase, logger zerolog.Logger) *AuthHandler {
-	return &AuthHandler{usecase: uc, logger: logger}
+// secureCookie は本番環境では true、開発環境では false を渡す。
+func NewAuthHandler(uc authUsecase, logger zerolog.Logger, secureCookie bool) *AuthHandler {
+	return &AuthHandler{usecase: uc, logger: logger, secureCookie: secureCookie}
 }
 
 // loginRequest はログインリクエストのJSON構造。
@@ -102,13 +106,18 @@ func (h *AuthHandler) ServeLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// セッションCookieを設定
+	//
+	// Cookie属性:
+	// - HttpOnly: JavaScriptからのアクセスを禁止（XSS対策）
+	// - Secure: HTTPSのみで送信（本番環境のみ）
+	// - SameSite=Lax: CSRF対策しつつ、外部リンクからの遷移を許可
 	http.SetCookie(w, &http.Cookie{
 		Name:     sessionCookieName,
 		Value:    req.IDToken,
 		MaxAge:   sessionCookieMaxAge,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   h.secureCookie,
 		SameSite: http.SameSiteLaxMode,
 	})
 
@@ -159,7 +168,7 @@ func (h *AuthHandler) ServeLogout(w http.ResponseWriter, r *http.Request) {
 		MaxAge:   -1,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
+		Secure:   h.secureCookie,
 		SameSite: http.SameSiteLaxMode,
 	})
 	w.WriteHeader(http.StatusNoContent)

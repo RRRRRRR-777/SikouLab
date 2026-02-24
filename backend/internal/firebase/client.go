@@ -39,15 +39,18 @@ type Client struct {
 
 // NewClient はFirebase Admin SDKクライアントを初期化する。
 // serviceAccountJSON が空の場合はApplication Default Credentials (ADC) を使用する。
-func NewClient(ctx context.Context, serviceAccountJSON string) (*Client, error) {
+// projectID はIDトークン検証時のaudience確認に必要。
+func NewClient(ctx context.Context, projectID, serviceAccountJSON string) (*Client, error) {
 	var app *firebaseSDK.App
 	var err error
 
+	appConfig := &firebaseSDK.Config{ProjectID: projectID}
+
 	if serviceAccountJSON != "" {
 		opt := option.WithCredentialsJSON([]byte(serviceAccountJSON))
-		app, err = firebaseSDK.NewApp(ctx, nil, opt)
+		app, err = firebaseSDK.NewApp(ctx, appConfig, opt)
 	} else {
-		app, err = firebaseSDK.NewApp(ctx, nil)
+		app, err = firebaseSDK.NewApp(ctx, appConfig)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("Firebase App初期化失敗: %w", err)

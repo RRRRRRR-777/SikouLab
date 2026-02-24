@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/rs/zerolog"
 
@@ -44,7 +45,7 @@ func main() {
 
 	// Firebase初期化
 	ctx := context.Background()
-	firebaseClient, err := firebase.NewClient(ctx, cfg.FirebaseServiceAccountJSON)
+	firebaseClient, err := firebase.NewClient(ctx, cfg.FirebaseProjectID, cfg.FirebaseServiceAccountJSON)
 	if err != nil {
 		logger.Fatal().Err(err).Msg("Firebase初期化失敗")
 	}
@@ -53,7 +54,7 @@ func main() {
 	// リポジトリ・ユースケース・ハンドラーの初期化
 	userRepo := repository.NewUserRepository(db)
 	authUsecase := usecase.NewAuthUsecase(firebaseClient, userRepo)
-	authHandler := handler.NewAuthHandler(authUsecase, logger)
+	authHandler := handler.NewAuthHandler(authUsecase, logger, strings.EqualFold(cfg.AppEnv, "production"))
 
 	// ルーティング設定
 	mux := http.NewServeMux()

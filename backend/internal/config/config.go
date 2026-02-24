@@ -22,9 +22,15 @@ type Config struct {
 	LogLevel string
 	// DatabaseURL はPostgreSQLの接続文字列。
 	DatabaseURL string
+	// AppEnv はアプリケーションの実行環境。
+	// "production" の場合はSecure Cookieを有効化するなど、本番向けの設定が適用される。
+	AppEnv string
 	// FirebaseServiceAccountJSON はFirebaseサービスアカウントのJSON。
 	// 空の場合はApplication Default Credentials (ADC) を使用する。
 	FirebaseServiceAccountJSON string
+	// FirebaseProjectID はFirebaseプロジェクトID。
+	// IDトークン検証時のaudience確認に必要。
+	FirebaseProjectID string
 }
 
 // Load は.envファイルおよび環境変数から設定を読み込む。
@@ -61,11 +67,18 @@ func Load() (*Config, error) {
 		}
 	}
 
+	// FirebaseプロジェクトID（IDトークン検証のaudience確認に必要）
+	cfg.FirebaseProjectID = os.Getenv("FIREBASE_PROJECT_ID")
+	if cfg.FirebaseProjectID == "" {
+		missing = append(missing, "FIREBASE_PROJECT_ID")
+	}
+
 	if len(missing) > 0 {
 		return nil, errors.New("必須の環境変数が未設定です: " + strings.Join(missing, ", "))
 	}
 
-	// 任意: Firebase認証情報（空の場合はADCを使用）
+	// 任意設定
+	cfg.AppEnv = os.Getenv("APP_ENV")
 	cfg.FirebaseServiceAccountJSON = os.Getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
 
 	return cfg, nil

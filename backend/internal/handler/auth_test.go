@@ -38,22 +38,39 @@ func TestAuthHandler_ServeLogin(t *testing.T) {
 	}
 
 	tests := []struct {
-		name       string
-		body       string
-		uc         *mockAuthUsecase
-		wantStatus int
-		wantCookie bool
+		name         string
+		body         string
+		uc           *mockAuthUsecase
+		wantStatus   int
+		wantCookie   bool
+		secureCookie bool
+		wantSecure   bool
 	}{
 		{
-			name: "正常なログインで200とCookieが返される",
+			name: "本番環境ではSecure=trueのCookieが返される",
 			body: `{"id_token": "valid-token"}`,
 			uc: &mockAuthUsecase{
 				loginFunc: func(_ context.Context, _ string) (*domain.User, bool, error) {
 					return validUser, false, nil
 				},
 			},
-			wantStatus: http.StatusOK,
-			wantCookie: true,
+			wantStatus:   http.StatusOK,
+			wantCookie:   true,
+			secureCookie: true,
+			wantSecure:   true,
+		},
+		{
+			name: "開発環境ではSecure=falseのCookieが返される",
+			body: `{"id_token": "valid-token"}`,
+			uc: &mockAuthUsecase{
+				loginFunc: func(_ context.Context, _ string) (*domain.User, bool, error) {
+					return validUser, false, nil
+				},
+			},
+			wantStatus:   http.StatusOK,
+			wantCookie:   true,
+			secureCookie: false,
+			wantSecure:   false,
 		},
 		{
 			name:       "id_tokenが空の場合は400が返される",
@@ -91,7 +108,7 @@ func TestAuthHandler_ServeLogin(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := &AuthHandler{usecase: tt.uc}
+			h := &AuthHandler{usecase: tt.uc, secureCookie: tt.secureCookie}
 			req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/login", strings.NewReader(tt.body))
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
@@ -110,8 +127,8 @@ func TestAuthHandler_ServeLogin(t *testing.T) {
 						if !c.HttpOnly {
 							t.Error("Cookie HttpOnly = false, want true")
 						}
-						if !c.Secure {
-							t.Error("Cookie Secure = false, want true")
+						if c.Secure != tt.wantSecure {
+							t.Errorf("Cookie Secure = %v, want %v", c.Secure, tt.wantSecure)
 						}
 					}
 				}
@@ -200,18 +217,30 @@ func TestAuthHandler_ServeLogout(t *testing.T) {
 		wantStatus     int
 		wantCookieName string
 		wantMaxAge     int
+		secureCookie   bool
+		wantSecure     bool
 	}{
 		{
-			name:           "ログアウト時にセッションCookieが削除される",
+			name:           "本番環境のログアウトCookieはSecure=true",
 			wantStatus:     http.StatusNoContent,
 			wantCookieName: "session",
 			wantMaxAge:     -1,
+			secureCookie:   true,
+			wantSecure:     true,
+		},
+		{
+			name:           "開発環境のログアウトCookieはSecure=false",
+			wantStatus:     http.StatusNoContent,
+			wantCookieName: "session",
+			wantMaxAge:     -1,
+			secureCookie:   false,
+			wantSecure:     false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := &AuthHandler{}
+			h := &AuthHandler{secureCookie: tt.secureCookie}
 			req := httptest.NewRequest(http.MethodPost, "/api/v1/auth/logout", nil)
 			rec := httptest.NewRecorder()
 
@@ -232,8 +261,8 @@ func TestAuthHandler_ServeLogout(t *testing.T) {
 					if !c.HttpOnly {
 						t.Error("Cookie HttpOnly = false, want true")
 					}
-					if !c.Secure {
-						t.Error("Cookie Secure = false, want true")
+					if c.Secure != tt.wantSecure {
+						t.Errorf("Cookie Secure = %v, want %v", c.Secure, tt.wantSecure)
 					}
 				}
 			}
