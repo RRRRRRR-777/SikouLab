@@ -58,15 +58,15 @@ Pencil未定義（実装のみ）
 │  │            OAuthプロバイダでログイン               │  │
 │  │                                                   │  │
 │  │  ┌──────────────────────────────────────────┐    │  │
-│  │  │ [G]  Google で続ける                      │    │  │
+│  │  │ [G]  Google でログイン                      │    │  │
 │  │  └──────────────────────────────────────────┘    │  │
 │  │                                                   │  │
 │  │  ┌──────────────────────────────────────────┐    │  │
-│  │  │   Apple で続ける                          │    │  │
+│  │  │   Apple でログイン                          │    │  │
 │  │  └──────────────────────────────────────────┘    │  │
 │  │                                                   │  │
 │  │  ┌──────────────────────────────────────────┐    │  │
-│  │  │   X で続ける                               │    │  │
+│  │  │   X でログイン                               │    │  │
 │  │  └──────────────────────────────────────────┘    │  │
 │  │                                                   │  │
 │  └───────────────────────────────────────────────────┘  │
@@ -263,20 +263,103 @@ sequenceDiagram
 3. ログイン画面へ遷移
 
 ## テストケース
-🟡 **中程度**
+🟢 **実装済み**
 
-**記載タイミング**: 単体テストは大枠のみ設計段階、詳細はTDD実装時。E2Eテストは実装完了後
+### 単体テスト（バックエンド）
 
-### 単体テスト
+#### `TestAuthUsecase_Login`（`backend/internal/usecase/`）
 
-| テスト項目 | テスト関数 | ケース名 | 期待値 |
-|-----------|-----------|---------|--------|
-| ID Token検証（有効） | `TestAuthUsecase_Login` | 有効なIDトークンで既存ユーザーがログインする | ユーザー情報が返される、isFirstLogin=false |
-| ID Token検証（無効） | `TestAuthUsecase_Login` | 無効なIDトークンでエラーが返される | ErrInvalidTokenが返される |
-| 初回ログイン処理 | `TestAuthUsecase_Login` | 初回ログインでユーザーが新規作成される | isFirstLogin=true、Createが呼ばれる |
-| セッション確認（有効） | `TestAuthUsecase_GetCurrentUser` | 有効なセッショントークンでユーザー情報が返される | ユーザー情報が返される |
-| セッション確認（無効） | `TestAuthUsecase_GetCurrentUser` | 無効なセッショントークンでエラーが返される | ErrInvalidTokenが返される |
-| ログアウト処理 | `TestAuthHandler_ServeLogout` | ログアウト時にセッションCookieが削除される | 204、Cookie value=""、MaxAge=-1 |
+| ケース名 | 期待値 |
+|---------|--------|
+| 有効なIDトークンで既存ユーザーがログインする | ユーザー情報が返される、isFirstLogin=false |
+| 無効なIDトークンでエラーが返される | ErrInvalidTokenが返される |
+| 初回ログインでユーザーが新規作成される | isFirstLogin=true、Createが呼ばれる |
+
+#### `TestAuthUsecase_GetCurrentUser`（`backend/internal/usecase/`）
+
+| ケース名 | 期待値 |
+|---------|--------|
+| 有効なセッショントークンでユーザー情報が返される | ユーザー情報が返される |
+| 無効なセッショントークンでエラーが返される | ErrInvalidTokenが返される |
+
+#### `TestAuthHandler_ServeLogin`（`backend/internal/handler/auth_test.go`）
+
+| ケース名 | 期待値 |
+|---------|--------|
+| 本番環境ではSecure=trueのCookieが返される | 200、Cookie Secure=true |
+| 開発環境ではSecure=falseのCookieが返される | 200、Cookie Secure=false |
+| id_tokenが空の場合は400が返される | 400 |
+| 不正なJSONボディの場合は400が返される | 400 |
+| ErrInvalidTokenの場合は401が返される | 401 |
+| その他のエラーの場合は500が返される | 500 |
+
+#### `TestAuthHandler_ServeMe`（`backend/internal/handler/auth_test.go`）
+
+| ケース名 | 期待値 |
+|---------|--------|
+| 有効なCookieで200とユーザー情報が返される | 200、ユーザー情報 |
+| Cookieがない場合は401が返される | 401 |
+| ErrInvalidTokenの場合は401が返される | 401 |
+| その他のエラーの場合は500が返される | 500 |
+
+#### `TestAuthHandler_ServeLogout`（`backend/internal/handler/auth_test.go`）
+
+| ケース名 | 期待値 |
+|---------|--------|
+| 本番環境のログアウトCookieはSecure=true | 204、Cookie value=""、MaxAge=-1、Secure=true |
+| 開発環境のログアウトCookieはSecure=false | 204、Cookie value=""、MaxAge=-1、Secure=false |
+
+---
+
+### 単体テスト（フロントエンド）
+
+#### ミドルウェア（`frontend/middleware.test.ts`）
+
+| ケース名 | 期待値 |
+|---------|--------|
+| `'/'` は完全一致のみ | `/login` や `/articles` にはマッチしない |
+| 非ルートパスはサブパスにもマッチする | `/articles/123` は `/articles` にマッチ、`/articles-legacy` はマッチしない |
+| 公開パス・保護パスの判定が正しい | `/login` は公開、`/` と `/articles/2026` は保護 |
+
+#### 認証APIクライアント（`frontend/lib/auth/__tests__/auth-api.test.ts`）
+
+| グループ | ケース名 | 期待値 |
+|---------|---------|--------|
+| `authApi.login` | 成功時はユーザー情報と初回ログインフラグを返す | user情報、is_first_login=false |
+| `authApi.login` | 初回ログイン時はis_first_loginがtrue | is_first_login=true |
+| `authApi.login` | 無効なID Token時は401エラーを投げる | 401エラー |
+| `authApi.login` | ネットワークエラー時はエラーを投げる | Network Error |
+| `authApi.getMe` | 成功時はユーザー情報を返す | user情報 |
+| `authApi.getMe` | 未認証時は401エラーを投げる | 401エラー |
+| `authApi.logout` | 成功時は204 No Contentを返す | 正常完了 |
+| `authApi.logout` | 未認証時は401エラーを投げる | 401エラー |
+
+#### 認証コンテキスト（`frontend/lib/auth/__tests__/auth-context.test.tsx`）
+
+| グループ | ケース名 | 期待値 |
+|---------|---------|--------|
+| 初期状態 | 認証状態は未ログイン・ローディング完了 | user=null、isLoading=false、isAuthenticated=false |
+| `loginWithGoogle` | 成功時はユーザー情報をセットする | user情報がセット、isAuthenticated=true |
+| `loginWithGoogle` | 初回ログイン時はサブスクリプション画面へ遷移する | `/subscription` へpush |
+| `loginWithApple` | 成功時はユーザー情報をセットする | isAuthenticated=true |
+| `loginWithX` | 成功時はユーザー情報をセットする | isAuthenticated=true |
+| `logout` | 成功時はユーザー情報をクリアする | user=null、isAuthenticated=false |
+| ログインページでの動作 | Firebaseユーザーがいても/auth/meを呼ばない | getMe未呼び出し、user=null |
+| `refresh` | 成功時は最新のユーザー情報を取得する | getMeが呼ばれる |
+
+#### ログイン画面（`frontend/components/auth/__tests__/LoginPage.test.tsx`）
+
+| グループ | ケース名 | 期待値 |
+|---------|---------|--------|
+| 画面表示 | ロゴとタイトルが表示される | "SikouLab"、利用規約文言が表示される |
+| 画面表示 | 3つのOAuthボタンが表示される | Google / Apple / X のボタンが表示される |
+| OAuthボタン操作 | Googleボタンクリック時はGoogleログインを実行する | `loginWithGoogle` が1回呼ばれる |
+| OAuthボタン操作 | Appleボタンクリック時はAppleログインを実行する | `loginWithApple` が1回呼ばれる |
+| OAuthボタン操作 | Xボタンクリック時はXログインを実行する | `loginWithX` が1回呼ばれる |
+| アクセシビリティ | 各OAuthボタンには適切なtype属性が設定されている | `type="button"` |
+| ダークモード対応 | ダークモードでも正しく表示される | 基本要素が表示される |
+
+---
 
 ### E2Eテスト（実装完了後に記載）
 

@@ -42,6 +42,7 @@
 * docs/adr/008-api-integration.md
   * 概要: フロントエンドとバックエンドのAPI連携方針。axios + httpOnly Cookie（SameSite=Lax）を採用。
     認証方式、型定義管理、エラーハンドリング、将来のモバイル対応方針を記載。
+    本番環境はCloud Load BalancingのURLパスルーティングでBFF構成（CORS不要）。開発環境はNEXT_PUBLIC_API_URL（http://localhost:8080/api/v1）で直接接続。
 * docs/adr/009-frontend-directory-structure.md
   * 概要: Next.js 15（App Router）のベストプラクティスに沿ったフロントエンドディレクトリ構成。
     app/はルーティング専用、components/features/で機能別整理、lib/utils/storesの役割を定義。

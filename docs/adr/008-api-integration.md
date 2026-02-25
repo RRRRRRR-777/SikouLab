@@ -17,7 +17,7 @@
 | ライブラリ | axios |
 | タイムアウト | 10秒 |
 | リトライ | TanStack Queryに任せる |
-| 環境変数 | `NEXT_PUBLIC_API_BASE_URL` |
+| 環境変数 | `NEXT_PUBLIC_API_URL` |
 
 **理由:**
 - axiosのインターセプターで認証・エラー処理を一元化
@@ -67,31 +67,46 @@
 
 ### 環境変数
 
-| 環境 | 設定ファイル | API URL |
-|------|-------------|---------|
-| 開発 | `.env.local` | `http://localhost:8080` |
-| 本番 | `.env.production` | `https://api.sicoulab.com` |
+| 環境 | 設定ファイル | NEXT_PUBLIC_API_URL |
+|------|-------------|---------------------|
+| 開発 | `.env`（git管理外） | `http://localhost:8080/api/v1` |
+| 本番 | 未設定 | -（LBルーティングを使用） |
 
 ```bash
-# frontend/.env.local（開発環境）
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+# frontend/.env（開発環境・git管理外）
+NEXT_PUBLIC_API_URL=http://localhost:8080/api/v1
 
-# frontend/.env.production（本番環境）
-NEXT_PUBLIC_API_BASE_URL=https://api.sicoulab.com
+# 本番環境は未設定。Cloud Load Balancing の URLパスルーティングに委ねる。
+# ブラウザから /api/v1/* → LB → Cloud Run（Go API）
 ```
+
+### 本番環境のBFFアーキテクチャ
+
+本番環境では Next.js が BFF（Backend for Frontend）として機能する。Cloud Load Balancing が URL パスでルーティングを担当する（インフラ設計書 §5.2 参照）:
+
+| パス | ルーティング先 |
+|------|-------------|
+| `/api/*` | Cloud Run（Go API） |
+| `/*` | Cloud Run（Next.js） |
+
+同一ドメインでフロントエンドとバックエンドを提供するため、ブラウザから見て同一オリジンとなり CORS 設定が不要になる。
+
+> 開発環境は直接接続（クロスオリジン）のため、バックエンドの CORS 設定（`Access-Control-Allow-Credentials: true`）が必要。
 
 ### ファイル配置
 
 ```
 frontend/
 ├── lib/
-│   └── api-client.ts    # axiosクライアント
+│   ├── api.ts           # 汎用axiosクライアント
+│   └── auth/
+│       └── auth-api.ts  # 認証API専用クライアント
 ├── types/
 │   └── api/             # API型定義
 │       ├── article.ts
 │       ├── user.ts
 │       └── index.ts
-└── .env.local           # 環境変数（git管理外）
+└── .env                 # 環境変数（git管理外）
 ```
 
 ## 実装例
@@ -99,11 +114,11 @@ frontend/
 ### axiosクライアント
 
 ```typescript
-// frontend/lib/api-client.ts
+// frontend/lib/api.ts
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  baseURL: process.env.NEXT_PUBLIC_API_URL ?? "/api/v1",
   timeout: 10000,
   withCredentials: true, // Cookie送信
 });
