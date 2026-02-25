@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "@/lib/auth/auth-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,6 +20,15 @@ export const metadata: Metadata = {
   description: "SicouLab - 受動的な情報体験プラットフォーム",
 };
 
+/**
+ * ルートレイアウト
+ *
+ * アプリケーション全体のHTMLルート構造と共通プロバイダーを定義する。
+ *
+ * @param root0 - ページのプロパティ
+ * @param root0.children - 子コンポーネント
+ * @returns ルートHTML構造
+ */
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,8 +38,10 @@ export default function RootLayout({
     <html lang="ja" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>
-          {children}
-          <Toaster />
+          <AuthProvider>
+            {children}
+            <Toaster />
+          </AuthProvider>
         </Providers>
       </body>
     </html>
