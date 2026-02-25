@@ -59,7 +59,7 @@ export function Sidebar({ open, setOpen }: { open: boolean; setOpen: (open: bool
       {/* ブランドロゴ */}
       <div className="flex h-16 items-center border-b px-6">
         <Link href="/" className="text-xl font-bold text-primary" onClick={() => setOpen(false)}>
-          SicouLab
+          シコウラボ
         </Link>
         {/* モバイル時の閉じるボタン */}
         <button

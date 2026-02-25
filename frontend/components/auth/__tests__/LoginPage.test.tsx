@@ -52,7 +52,7 @@ describe("LoginPage", () => {
       render(<LoginPage />);
 
       // ロゴテキスト
-      expect(screen.getByText("SikouLab")).toBeInTheDocument();
+      expect(screen.getByText("シコウラボ")).toBeInTheDocument();
       // 利用規約文言
       expect(
         screen.getByText(/ログインすることで利用規約に同意したものとみなされます/),
@@ -119,7 +119,7 @@ describe("LoginPage", () => {
       render(<LoginPage />);
 
       // 基本要素が表示されることを確認
-      expect(screen.getByText("SikouLab")).toBeInTheDocument();
+      expect(screen.getByText("シコウラボ")).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /Google でログイン/ })).toBeInTheDocument();
 
       // 後処理

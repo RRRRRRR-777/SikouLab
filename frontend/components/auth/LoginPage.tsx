@@ -92,9 +92,9 @@ export function LoginPage({ error }: LoginPageProps) {
   };
 
   return (
-    <div className="flex min-h-screen">
-      {/* ブランディングエリア（デスクトップのみ） */}
-      <div className="hidden md:flex md:w-1/2 items-center justify-center bg-[#E86D00] p-20">
+    <div className="flex min-h-screen lg:flex-row">
+      {/* ブランディングエリア。スマホではロゴ下のオレンジテキストで代替、デスクトップは左半分 */}
+      <div className="hidden lg:flex lg:w-1/2 items-center justify-center bg-[#E86D00] p-20">
         <div className="flex flex-col items-center justify-center gap-6 text-center">
           <h1 className="text-5xl font-bold text-white leading-tight">
             ようこそ
@@ -110,7 +110,7 @@ export function LoginPage({ error }: LoginPageProps) {
       </div>
 
       {/* ログインエリア */}
-      <div className="flex w-full flex-col items-center justify-center bg-white p-8 md:w-1/2 dark:bg-black">
+      <div className="flex w-full flex-col items-center justify-center bg-white p-8 lg:w-1/2 dark:bg-black">
         <div className="flex w-full max-w-[400px] flex-col items-center gap-12">
           {/* ロゴ */}
           <div className="flex flex-col items-center gap-4">
@@ -118,7 +118,16 @@ export function LoginPage({ error }: LoginPageProps) {
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#E86D00]">
               <span className="text-3xl font-bold text-white">S</span>
             </div>
-            <h2 className="text-2xl font-bold text-black dark:text-white">SikouLab</h2>
+            <h2 className="text-2xl font-bold text-black dark:text-white">シコウラボ</h2>
+            {/* スマホ: ブランディングエリアの代わりにオレンジテキストで表示。デスクトップは左半分エリアで代替 */}
+            <div className="flex flex-col items-center gap-2 text-center lg:hidden">
+              <p className="text-lg font-bold text-[#E86D00]">ようこそシコウラボへ！</p>
+              <p className="text-sm text-[#E86D00] opacity-80">
+                このコミュニティは米国株投資家が集まり、
+                <br />
+                専門家の思考プロセスを覗ける場です。
+              </p>
+            </div>
           </div>
 
           {/* OAuthボタン */}
