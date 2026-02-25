@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+frontend/node_modules
 /.pnp
 .pnp.js
 
@@ -9,7 +10,8 @@
 /coverage
 
 # next.js
-/.next/
+.next/
+frontend/.next/
 /out/
 
 # production
@@ -17,6 +19,7 @@
 
 # misc
 .DS_Store
+frontend/docs/
 *.pem
 .mcp.json
 
@@ -26,8 +29,17 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
-.env*.local
 .env
+.env*.local
+!.env.sample
+.pnpm-debug.log*
+
+# yarn
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
 # vercel
 .vercel
@@ -71,4 +83,3 @@ go.work.sum
 TODO.md
 tmp/
 build-errors.log
-
