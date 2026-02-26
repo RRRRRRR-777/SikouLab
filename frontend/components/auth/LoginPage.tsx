@@ -30,25 +30,25 @@ const oauthProviders = [
     id: "google" as const,
     label: "Google でログイン",
     icon: "G",
-    bgColor: "bg-[#F5F5F5]",
-    hoverColor: "hover:bg-[#E8E8E8]",
-    textColor: "text-black",
+    bgColor: "bg-secondary",
+    hoverColor: "hover:bg-secondary/80",
+    textColor: "text-foreground",
   },
   {
     id: "apple" as const,
     label: "Apple でログイン",
     icon: "",
-    bgColor: "bg-[#F5F5F5]",
-    hoverColor: "hover:bg-[#E8E8E8]",
-    textColor: "text-black",
+    bgColor: "bg-secondary",
+    hoverColor: "hover:bg-secondary/80",
+    textColor: "text-foreground",
   },
   {
     id: "x" as const,
     label: "X でログイン",
     icon: "X",
-    bgColor: "bg-[#F5F5F5]",
-    hoverColor: "hover:bg-[#E8E8E8]",
-    textColor: "text-black",
+    bgColor: "bg-secondary",
+    hoverColor: "hover:bg-secondary/80",
+    textColor: "text-foreground",
   },
 ] as const;
 
@@ -110,7 +110,7 @@ export function LoginPage({ error }: LoginPageProps) {
       </div>
 
       {/* ログインエリア */}
-      <div className="flex w-full flex-col items-center justify-center bg-white p-8 lg:w-1/2 dark:bg-black">
+      <div className="flex w-full flex-col items-center justify-center bg-background p-8 lg:w-1/2">
         <div className="flex w-full max-w-[400px] flex-col items-center gap-12">
           {/* ロゴ */}
           <div className="flex flex-col items-center gap-4">
@@ -118,7 +118,7 @@ export function LoginPage({ error }: LoginPageProps) {
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#E86D00]">
               <span className="text-3xl font-bold text-white">S</span>
             </div>
-            <h2 className="text-2xl font-bold text-black dark:text-white">シコウラボ</h2>
+            <h2 className="text-2xl font-bold text-foreground">シコウラボ</h2>
             {/* スマホ: ブランディングエリアの代わりにオレンジテキストで表示。デスクトップは左半分エリアで代替 */}
             <div className="flex flex-col items-center gap-2 text-center lg:hidden">
               <p className="text-lg font-bold text-[#E86D00]">ようこそシコウラボへ！</p>

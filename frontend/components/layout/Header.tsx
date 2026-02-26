@@ -75,7 +75,7 @@ export function Header({ setOpen }: { setOpen: (open: boolean) => void }) {
           <button
             onClick={() => setSearchOpen(true)}
             aria-label="検索を開く"
-            className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#E86D00] text-white shadow-lg"
+            className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg"
           >
             <Search className="h-6 w-6" />
           </button>

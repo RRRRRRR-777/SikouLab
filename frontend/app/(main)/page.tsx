@@ -6,7 +6,7 @@
 export default function Home() {
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold text-black dark:text-white">ダッシュボード</h1>
+      <h1 className="text-2xl font-bold text-foreground">ダッシュボード</h1>
       <p className="mt-2 text-zinc-500">準備中</p>
     </div>
   );

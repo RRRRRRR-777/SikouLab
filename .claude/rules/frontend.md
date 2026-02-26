@@ -97,6 +97,78 @@ paths:
 
 - この定義外の値を使う場合はコメントで理由を明記する
 
+## ダークモード原則
+
+### 基本方針
+
+- **OS設定に追従**する（`prefers-color-scheme`）。手動切り替えは将来拡張
+- Tailwindの `dark:` プレフィックスを使用する（`darkMode: "class"` 設定済み前提）
+- **ハードコードした色は使わない** — 必ずCSSカスタムプロパティまたはTailwindセマンティックトークンで定義する
+
+### カラートークン定義（プロジェクト共通）
+
+CLAUDE.mdのカラーコードに基づく定義。`globals.css` の `:root` / `.dark` で管理する。
+
+| トークン名 | ライトモード | ダークモード | 用途 |
+|-----------|------------|------------|------|
+| `--color-bg` | `#FFFFFF` | `#000000` | メイン背景 |
+| `--color-text` | `#000000` | `#FFFFFF` | サブタイトル・見出し |
+| `--color-primary` | `#E86D00` | `#E86D00` | ボタン・ジャンル名・ラベル（共通） |
+| `--color-ticker` | `#63B7E2` | `#63B7E2` | 銘柄コード（共通） |
+| `--color-muted` | `#D5D5D5` | `#EBEBEB` | 日付・時間などサブテキスト |
+
+```css
+/* globals.css */
+:root {
+  --color-bg: #FFFFFF;
+  --color-text: #000000;
+  --color-primary: #E86D00;
+  --color-ticker: #63B7E2;
+  --color-muted: #D5D5D5;
+}
+
+.dark {
+  --color-bg: #000000;
+  --color-text: #FFFFFF;
+  --color-muted: #EBEBEB;
+  /* primary / ticker はライト・ダーク共通のため省略 */
+}
+```
+
+### 記述原則
+
+- ベースクラス = ライトモード として書き、`dark:` で上書きする
+- プライマリカラー（`#E86D00`）・ティッカー色（`#63B7E2`）はモード間で変わらないため `dark:` 不要
+
+### 禁止パターン
+
+| アンチパターン | 問題 | 代替 |
+|---|---|---|
+| `bg-white dark:bg-black` を直書き | トークン管理外になる | `bg-[var(--color-bg)]` または Tailwindカスタムトークン |
+| `text-gray-500` のみ（dark:なし） | ダークで読めない色になる | `text-[var(--color-muted)]` |
+| インラインstyleに色を直書き | ダークモード切り替え不可 | CSSカスタムプロパティ経由 |
+
+### 実装パターン
+
+```tsx
+{/* 背景・テキストはトークンで指定 */}
+<div className="bg-[var(--color-bg)] text-[var(--color-text)]">
+
+{/* プライマリカラーはモード不問で同色 */}
+<button className="bg-[#E86D00] text-white">
+
+{/* サブテキスト（日付等） */}
+<span className="text-[var(--color-muted)]">2026-02-26</span>
+
+{/* 境界線など微妙な色はTailwindのdark:で対応 */}
+<div className="border border-gray-200 dark:border-gray-800">
+```
+
+### shadcn/ui との連携
+
+- shadcn/uiのデフォルトCSSトークン（`--background`, `--foreground` 等）は上記プロジェクトトークンと**別管理**
+- shadcn/uiコンポーネントを使う場合はshadcnのトークン体系に乗る。プロジェクトトークンを混在させない
+
 ## UI/UX原則
 * **受動的体験を最優先** - ユーザーは「読む」ことが主目的
 * **チャット前提UIは完全排除**
