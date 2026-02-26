@@ -392,8 +392,12 @@ sequenceDiagram
 | `loginWithApple` | 成功時はユーザー情報をセットする | isAuthenticated=true |
 | `loginWithX` | 成功時はユーザー情報をセットする | isAuthenticated=true |
 | `logout` | 成功時はユーザー情報をクリアする | user=null、isAuthenticated=false |
-| ログインページでの動作 | Firebaseユーザーがいても/auth/meを呼ばない | getMe未呼び出し、user=null |
+| ログインページでの動作 | Firebaseユーザーがいても/auth/meも/auth/loginも呼ばない | getMe未呼び出し、authApi.login未呼び出し、user=null |
 | `refresh` | 成功時は最新のユーザー情報を取得する | getMeが呼ばれる |
+| `onAuthStateChanged リフレッシュ` | Firebaseユーザーがいる場合、getIdTokenが呼ばれてからPOST /auth/loginが呼ばれる | getIdToken(forceRefresh=true) が呼ばれ、authApi.login が呼ばれる |
+| `onAuthStateChanged リフレッシュ` | トークンリフレッシュ成功後、loginレスポンスからユーザー情報がセットされる | user情報がセット、isAuthenticated=true |
+| `onAuthStateChanged リフレッシュ` | getIdToken失敗時はユーザーをnullにする | user=null、isAuthenticated=false |
+| `onAuthStateChanged リフレッシュ` | login失敗（401等）時はユーザーをnullにする | user=null、isAuthenticated=false |
 
 #### ログイン画面（`frontend/components/auth/__tests__/LoginPage.test.tsx`）
 

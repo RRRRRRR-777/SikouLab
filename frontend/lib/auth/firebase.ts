@@ -142,8 +142,9 @@ export function onAuthStateChangedHelper(
  * FirebaseユーザーからID Tokenを取得する
  *
  * @param user - Firebaseユーザー
+ * @param forceRefresh - trueの場合、キャッシュを無視して最新トークンを取得する
  * @returns ID Token
  */
-export async function getIdToken(user: FirebaseUser): Promise<string> {
-  return await user.getIdToken();
+export async function getIdToken(user: FirebaseUser, forceRefresh = false): Promise<string> {
+  return await user.getIdToken(forceRefresh);
 }

@@ -228,10 +228,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     const unsubscribe = onAuthStateChangedHelper(async (firebaseUser) => {
       if (firebaseUser && pathnameRef.current !== "/login") {
-        // Firebase認証済みかつログインページ以外の場合、バックエンドでユーザー情報を取得
-        await fetchUserInfo();
+        // Firebase認証済みかつログインページ以外の場合、最新トークンでセッションCookieを更新する。
+        // getIdToken(forceRefresh=true)でFirebaseが自動リフレッシュした最新トークンを取得し、
+        // POST /auth/login でCookieを更新することで期限切れによる401を防ぐ。
+        try {
+          const idToken = await getIdToken(firebaseUser, true);
+          const loginResponse = await authApi.login(idToken);
+          setUser(toAuthUser(loginResponse.user));
+        } catch (error) {
+          logWarn("セッションリフレッシュ失敗", { error });
+          setUser(null);
+        } finally {
+          setIsLoading(false);
+        }
       } else {
-        // 未認証状態またはログインページ（/auth/meを呼ぶ必要がない）
+        // 未認証状態またはログインページ
         setUser(null);
         setIsLoading(false);
       }

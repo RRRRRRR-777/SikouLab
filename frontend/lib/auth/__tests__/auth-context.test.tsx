@@ -125,7 +125,7 @@ vi.mock("../auth-api", () => ({
 
 import { useAuth } from "../auth-context";
 import { AuthProvider } from "../auth-context";
-import { onAuthStateChangedHelper } from "../firebase";
+import { onAuthStateChangedHelper, getIdToken } from "../firebase";
 
 describe("useAuth", () => {
   beforeEach(() => {
@@ -288,8 +288,9 @@ describe("useAuth", () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      // ログインページでは/auth/meが呼ばれないことを確認
+      // ログインページでは/auth/meも/auth/loginも呼ばれないことを確認
       expect(mockAuthApi.getMe).not.toHaveBeenCalled();
+      expect(mockAuthApi.login).not.toHaveBeenCalled();
       expect(result.current.user).toBeNull();
     });
   });
@@ -308,6 +309,76 @@ describe("useAuth", () => {
       // 検証
       await waitFor(() => {
         expect(mockAuthApi.getMe).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe("onAuthStateChanged リフレッシュ", () => {
+    beforeEach(() => {
+      // Firebaseユーザーあり・ログインページ以外でonAuthStateChangedを呼ぶ
+      vi.mocked(onAuthStateChangedHelper).mockImplementationOnce((callback) => {
+        callback(mockFirebaseUser as never);
+        return mockUnsubscribe;
+      });
+    });
+
+    it("Firebaseユーザーがいる場合、getIdTokenが呼ばれてからPOST /auth/loginが呼ばれる", async () => {
+      renderHook(() => useAuth(), { wrapper: AuthProvider });
+
+      // 検証: getIdToken(forceRefresh=true) → authApi.login の順で呼ばれる
+      await waitFor(() => {
+        expect(vi.mocked(getIdToken)).toHaveBeenCalledWith(mockFirebaseUser, true);
+        expect(mockAuthApi.login).toHaveBeenCalledWith("valid_firebase_id_token");
+      });
+    });
+
+    it("トークンリフレッシュ成功後、loginレスポンスからユーザー情報がセットされる", async () => {
+      const { result } = renderHook(() => useAuth(), { wrapper: AuthProvider });
+
+      // 検証: loginレスポンスのユーザー情報がセットされる
+      await waitFor(() => {
+        expect(result.current.user).toEqual({
+          id: 1,
+          oauthProvider: "google.com",
+          name: "Test User",
+          displayName: "Test User",
+          avatarUrl: "https://example.com/avatar.jpg",
+          role: "user",
+          planId: null,
+          subscriptionStatus: null,
+          createdAt: "2024-01-01T00:00:00Z",
+          updatedAt: "2024-01-01T00:00:00Z",
+        });
+        expect(result.current.isAuthenticated).toBe(true);
+        expect(result.current.isLoading).toBe(false);
+      });
+    });
+
+    it("getIdToken失敗時はユーザーをnullにする", async () => {
+      // 準備: getIdTokenが失敗するようにモック
+      vi.mocked(getIdToken).mockRejectedValueOnce(new Error("Token refresh failed"));
+
+      const { result } = renderHook(() => useAuth(), { wrapper: AuthProvider });
+
+      // 検証: ユーザーはnull、ローディング完了
+      await waitFor(() => {
+        expect(result.current.user).toBeNull();
+        expect(result.current.isAuthenticated).toBe(false);
+        expect(result.current.isLoading).toBe(false);
+      });
+    });
+
+    it("login失敗（401等）時はユーザーをnullにする", async () => {
+      // 準備: loginが401エラーを返すようにモック
+      mockAuthApi.login.mockRejectedValueOnce({ response: { status: 401 } });
+
+      const { result } = renderHook(() => useAuth(), { wrapper: AuthProvider });
+
+      // 検証: ユーザーはnull、ローディング完了
+      await waitFor(() => {
+        expect(result.current.user).toBeNull();
+        expect(result.current.isAuthenticated).toBe(false);
+        expect(result.current.isLoading).toBe(false);
       });
     });
   });
