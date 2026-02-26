@@ -282,6 +282,38 @@ sequenceDiagram
 | 有効なセッショントークンでユーザー情報が返される | ユーザー情報が返される |
 | 無効なセッショントークンでエラーが返される | ErrInvalidTokenが返される |
 
+#### `TestAuthMiddleware_RequireAuth`（`backend/internal/middleware/auth_test.go`）
+
+| ケース名 | 期待値 |
+|---------|--------|
+| Cookieあり・有効なトークンの場合はnextが呼ばれる | 200、next handler実行 |
+| Cookieなしの場合は401が返される | 401 |
+| Cookieあり・無効なトークン（検証失敗）の場合は401が返される | 401 |
+| Cookieあり・トークンは有効だがDBにユーザーが存在しない場合は401 | 401 |
+| contextにUserが設定されること | next handlerからuser情報を取得できる |
+
+#### `TestAuthMiddleware_RequireRole`（`backend/internal/middleware/auth_test.go`）
+
+| ケース名 | 期待値 |
+|---------|--------|
+| admin roleでadminエンドポイントにアクセスできる | 200 |
+| user roleでadminエンドポイントにアクセスすると403 | 403 |
+| writer roleでadminエンドポイントにアクセスすると403 | 403 |
+| writer roleでwriterエンドポイントにアクセスできる | 200 |
+| user roleでwriterエンドポイントにアクセスすると403 | 403 |
+| admin roleはwriter権限エンドポイントにもアクセスできる（admin > writer > user） | 200 |
+| contextにUserがない場合は401 | 401 |
+| 不明なroleの場合は403 | 403 |
+
+#### `TestAuthMiddleware_RequireSubscription`（`backend/internal/middleware/auth_test.go`）
+
+| ケース名 | 期待値 |
+|---------|--------|
+| subscription_status=activeのユーザーはアクセスできる | 200 |
+| subscription_status=canceledのユーザーは403 | 403 |
+| subscription_status=past_dueのユーザーは403 | 403 |
+| contextにUserがない場合は401 | 401 |
+
 #### `TestAuthHandler_ServeLogin`（`backend/internal/handler/auth_test.go`）
 
 | ケース名 | 期待値 |
@@ -313,13 +345,29 @@ sequenceDiagram
 
 ### 単体テスト（フロントエンド）
 
-#### ミドルウェア（`frontend/middleware.test.ts`）
+#### ミドルウェア パスマッチング（`frontend/middleware.test.ts`）
 
 | ケース名 | 期待値 |
 |---------|--------|
 | `'/'` は完全一致のみ | `/login` や `/articles` にはマッチしない |
 | 非ルートパスはサブパスにもマッチする | `/articles/123` は `/articles` にマッチ、`/articles-legacy` はマッチしない |
 | 公開パス・保護パスの判定が正しい | `/login` は公開、`/` と `/articles/2026` は保護 |
+
+#### ミドルウェア ルートガード（`frontend/middleware.test.ts`）
+
+| ケース名 | 期待値 |
+|---------|--------|
+| セッションなしで保護パスへのリクエストは/loginにリダイレクト | 307、Location: /login |
+| セッションありで/loginへのリクエストは/にリダイレクト | 307、Location: / |
+| セッションなしで/subscriptionへのアクセスは通過する | 200（NextResponse.next()） |
+| セッションありで保護パスへのアクセスは通過する | 200（NextResponse.next()） |
+
+#### Providers（`frontend/app/__tests__/providers.test.tsx`）
+
+| ケース名 | 期待値 |
+|---------|--------|
+| AuthProviderが含まれており、useAuthが使える | isLoading=false（AuthProvider内でonAuthStateChangedが呼ばれる） |
+| QueryClientProviderが含まれている | useQueryClientが値を返す |
 
 #### 認証APIクライアント（`frontend/lib/auth/__tests__/auth-api.test.ts`）
 
