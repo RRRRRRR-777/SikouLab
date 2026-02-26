@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";　
+import { NextRequest } from "next/server";
 
-import { __internal__ } from "./middleware";
+import { __internal__, middleware } from "./middleware";
 
 describe("middleware path matching", () => {
   it("treats '/' as exact match only", () => {
@@ -21,5 +22,79 @@ describe("middleware path matching", () => {
     expect(__internal__.isProtectedPath("/login")).toBe(false);
     expect(__internal__.isProtectedPath("/")).toBe(true);
     expect(__internal__.isProtectedPath("/articles/2026")).toBe(true);
+  });
+});
+
+/**
+ * ミドルウェアのルートガードテスト
+ *
+ * @description
+ * middleware 関数本体の動作を確認する。
+ * セッションCookieの有無に応じたリダイレクト・通過の挙動をテストする。
+ */
+describe("middleware route guard", () => {
+  /**
+   * テスト用のNextRequestを生成するヘルパー
+   *
+   * @param pathname - リクエスト先のパス
+   * @param hasSession - セッションCookieを付与するかどうか
+   * @returns NextRequest インスタンス
+   */
+  function makeRequest(pathname: string, hasSession: boolean): NextRequest {
+    const url = `http://localhost${pathname}`;
+    const req = new NextRequest(url);
+    if (hasSession) {
+      req.cookies.set("session", "dummy-session-token");
+    }
+    return req;
+  }
+
+  it("セッションなしで保護パスへのリクエストは/loginにリダイレクト", () => {
+    // 準備: セッションなしで保護パス（/）へのリクエスト
+    const req = makeRequest("/", false);
+
+    // 実行
+    const res = middleware(req);
+
+    // 検証: /login へリダイレクト
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toContain("/login");
+  });
+
+  it("セッションありで/loginへのリクエストは/にリダイレクト", () => {
+    // 準備: セッションありで /login へのリクエスト
+    const req = makeRequest("/login", true);
+
+    // 実行
+    const res = middleware(req);
+
+    // 検証: / へリダイレクト
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toContain("/");
+    expect(res.headers.get("location")).not.toContain("/login");
+  });
+
+  it("セッションなしで/subscriptionへのアクセスは通過する", () => {
+    // 準備: セッションなしで公開パス（/subscription）へのリクエスト
+    const req = makeRequest("/subscription", false);
+
+    // 実行
+    const res = middleware(req);
+
+    // 検証: リダイレクトせずにそのまま通過（NextResponse.next()）
+    expect(res.status).toBe(200);
+    expect(res.headers.get("location")).toBeNull();
+  });
+
+  it("セッションありで保護パスへのアクセスは通過する", () => {
+    // 準備: セッションありで保護パス（/articles）へのリクエスト
+    const req = makeRequest("/articles", true);
+
+    // 実行
+    const res = middleware(req);
+
+    // 検証: リダイレクトせずにそのまま通過（NextResponse.next()）
+    expect(res.status).toBe(200);
+    expect(res.headers.get("location")).toBeNull();
   });
 });
