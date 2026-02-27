@@ -143,6 +143,8 @@ erDiagram
         bigint id PK
         string name
         string description
+        integer amount "月額料金（最小通貨単位）"
+        string currency "通貨コード ISO-4217（例: JPY）"
         boolean is_active
         datetime created_at
         datetime updated_at

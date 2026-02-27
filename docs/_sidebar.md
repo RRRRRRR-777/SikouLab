@@ -40,6 +40,7 @@
 ## 機能仕様書
 - **認証機能（F-01）**
   - [ログイン](functions/auth/login.md)
+  - [サブスクリプション初回登録](functions/subscription/checkout.md)
 - **ダッシュボード機能（F-02）**
   - [ダッシュボード](functions/dashboard/home.md)
 - **銘柄機能（F-03）**

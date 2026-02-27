@@ -103,6 +103,11 @@
   * 概要: ログイン機能（F-01）の詳細設計書。Google / Apple / XによるOAuth認証、初回ログイン時のユーザー登録・UnivaPayカスタマー作成、
     セッション管理（httpOnly Cookie）、ログアウトの仕様を定義。
     画面設計図・シーケンス図・API仕様・機能要件・非機能要件・テストケースを含む。
+* docs/functions/subscription/checkout.md
+  * 概要: サブスクリプション初回登録フロー（KAN-42 BE・KAN-44 FE）の詳細設計書。初回ログイン後に表示される登録画面。
+    UnivaPay JS ウィジェット（ポップアップ型）でカード情報を入力してサブスクリプションを開始する。
+    Webhook 受信（SUBSCRIPTION_PAYMENT）で subscription_status を更新し、ダッシュボードへ遷移する。
+    API 設計（GET /plans・POST /univapay/checkout・POST /univapay/webhook）・シーケンス図・テストケースを含む。
 
 ### 記事機能（F-04）
 * docs/functions/article/home.md
