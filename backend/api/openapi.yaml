@@ -8,6 +8,10 @@ info:
 tags:
   - name: auth
     description: 認証・セッション管理API
+  - name: subscription
+    description: サブスクリプション管理API
+  - name: webhook
+    description: 外部サービス Webhook 受信API
   - name: system
     description: システム管理API
 
@@ -130,6 +134,109 @@ paths:
                 example: session=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax
         "401":
           description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/plans:
+    get:
+      summary: アクティブなプラン一覧取得
+      description: is_active=true のプランを全件返す。サブスクリプション登録画面で使用する。
+      tags:
+        - subscription
+      responses:
+        "200":
+          description: プラン一覧取得成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlansResponse"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/univapay/checkout:
+    post:
+      summary: UnivaPay サブスクリプション作成
+      description: |
+        フロントエンドの UnivaPay JS ウィジェットから取得した transaction_token_id を受け取り、
+        UnivaPay API でサブスクリプションを作成する。
+        作成した subscription_id を users.univapay_customer_id に保存し、{ status: "pending" } を返す。
+        subscription_status の更新は Webhook 経由で非同期に行われる。
+      tags:
+        - subscription
+      security:
+        - SessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckoutRequest"
+      responses:
+        "200":
+          description: サブスクリプション作成開始成功（Webhook で active になるまで pending 状態）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutResponse"
+        "400":
+          description: リクエスト不正（transaction_token_id が空・未指定）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: 既にサブスクリプションが active 状態
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: サーバーエラー（UnivaPay API エラー含む）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/univapay/webhook:
+    post:
+      summary: UnivaPay Webhook 受信
+      description: |
+        UnivaPay からの Webhook イベントを受信し、users.subscription_status を更新する。
+        認証は Univapay-Signature ヘッダーで行う（セッション Cookie 不要）。
+        対応イベント: SUBSCRIPTION_PAYMENT, SUBSCRIPTION_FAILED, SUBSCRIPTION_CANCELED
+      tags:
+        - webhook
+      security:
+        - WebhookAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebhookPayload"
+      responses:
+        "200":
+          description: Webhook 受信・処理成功
+        "401":
+          description: Webhook 認証失敗（Univapay-Signature ヘッダー不正または不在）
           content:
             application/json:
               schema:

@@ -302,21 +302,64 @@ sequenceDiagram
 ## テストケース
 🟡 **中程度**
 
-**記載タイミング**: 単体テストは大枠のみ設計段階、詳細はTDD実装時。E2Eテストは実装完了後
+### 単体テスト
 
-### 単体テスト（設計段階は大枠のみ、詳細はTDD実装時に追記）
+#### Usecase: GetPlans（機能要件1）
 
-| テスト項目 | 対応仕様 | 観点 | 期待値 |
-|------------|----------|------|--------|
-| プラン取得 | 機能要件1/機能仕様1 | is_active=true のプランのみ返る | 正常なプラン情報が返る |
-| サブスク作成（正常） | 機能要件2/機能仕様1 | 有効な transaction_token_id | UnivaPay API が呼ばれ subscription_id が保存される |
-| サブスク作成（既に active） | 機能要件2/機能仕様2 | subscription_status=active のユーザー | 409 が返る |
-| サブスク作成（未認証） | 機能要件2/機能仕様2 | Cookie なし | 401 が返る |
-| Webhook 受信（SUBSCRIPTION_PAYMENT 成功） | 機能要件3/機能仕様1 | successful イベント | subscription_status='active' に更新 |
-| Webhook 受信（SUBSCRIPTION_PAYMENT 失敗） | 機能要件3/機能仕様1 | failed イベント | subscription_status='past_due' に更新 |
-| Webhook 受信（SUBSCRIPTION_CANCELED） | 機能要件3/機能仕様1 | canceled イベント | subscription_status='canceled' に更新 |
-| Webhook 認証エラー | 機能要件3/機能仕様1 | 不正な auth_token | 401 が返る |
-| Webhook 冪等性 | 機能要件3/機能仕様2 | 同一イベントを2回受信 | 2回目も正常に処理される（エラーにならない） |
+| テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
+|------------|----------|------------|--------|
+| アクティブプランのみ取得できる | 機能要件1/機能仕様1 | DB に is_active=true 1件・is_active=false 1件 | is_active=true の1件のみ返る |
+| アクティブプランが0件 | 機能要件1/機能仕様1 | DB に is_active=false のみ存在 | 空スライス（エラーなし） |
+| DBエラー時 | 機能要件1/機能仕様1 | repository がエラーを返す | error が返る |
+
+#### Handler: GET /api/v1/plans（機能要件1）
+
+| テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
+|------------|----------|------------|--------|
+| 正常レスポンス | 機能要件1/機能仕様1 | usecase 正常 | 200, `[{ id, name, description, amount, currency }]` |
+| usecase エラー | 機能要件1/機能仕様1 | usecase がエラーを返す | 500 |
+
+#### Usecase: Checkout（機能要件2）
+
+| テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
+|------------|----------|------------|--------|
+| 正常: サブスク作成 | 機能要件2/機能仕様1 | transaction_token_id="tok_xxx"・user.subscription_status="trialing" | UnivaPay API 呼び出し済み・users.univapay_customer_id に subscription_id が保存される |
+| 既に active のユーザー | 機能要件2/機能仕様2 | user.subscription_status="active" | ErrAlreadySubscribed が返る（HTTP 409 相当） |
+| UnivaPay API エラー | 機能要件2/機能仕様1 | UnivaPay がエラーレスポンスを返す | error が返る（DB 更新はされない） |
+| DB 更新エラー | 機能要件2/機能仕様1 | subscription_id 保存時に DB エラー | error が返る |
+
+#### Handler: POST /api/v1/univapay/checkout（機能要件2）
+
+| テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
+|------------|----------|------------|--------|
+| 未認証（Cookie なし） | 機能要件2/機能仕様2 | RequireAuth 通過前（Cookie 不在） | 401 |
+| transaction_token_id が空文字 | 機能要件2/機能仕様1 | body: `{ "transaction_token_id": "" }` | 400 |
+| transaction_token_id フィールドなし | 機能要件2/機能仕様1 | body: `{}` | 400 |
+| 正常 | 機能要件2/機能仕様1 | 有効な transaction_token_id・認証済みユーザー | 200, `{ "status": "pending" }` |
+| 既に active のユーザー | 機能要件2/機能仕様2 | usecase が ErrAlreadySubscribed を返す | 409 |
+| usecase エラー（上記以外） | 機能要件2/機能仕様1 | usecase が予期しないエラーを返す | 500 |
+
+#### Usecase: HandleWebhook（機能要件3）
+
+| テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
+|------------|----------|------------|--------|
+| SUBSCRIPTION_PAYMENT 成功 | 機能要件3/機能仕様1 | event=SUBSCRIPTION_PAYMENT, status=successful | subscription_status='active' に更新 |
+| SUBSCRIPTION_PAYMENT 失敗 | 機能要件3/機能仕様1 | event=SUBSCRIPTION_PAYMENT, status=failed | subscription_status='past_due' に更新 |
+| SUBSCRIPTION_FAILED | 機能要件3/機能仕様1 | event=SUBSCRIPTION_FAILED | subscription_status='past_due' に更新 |
+| SUBSCRIPTION_CANCELED | 機能要件3/機能仕様1 | event=SUBSCRIPTION_CANCELED | subscription_status='canceled' に更新 |
+| 未知イベント種別 | 機能要件3/機能仕様1 | event="UNKNOWN_EVENT" | DB 更新なし・error なし（無視） |
+| subscription_id に対応するユーザー不在 | 機能要件3/機能仕様1 | 存在しない subscription_id | DB 更新なし・error なし（ログのみ） |
+| 冪等性: 同一イベントを2回受信 | 機能要件3/機能仕様2 | 同じ subscription_id・同じイベントを2回呼び出す | 2回目も正常終了（エラーにならない） |
+| DB 更新エラー | 機能要件3/機能仕様1 | repository がエラーを返す | error が返る |
+
+#### Handler: POST /api/v1/univapay/webhook（機能要件3）
+
+| テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
+|------------|----------|------------|--------|
+| Signature ヘッダーなし | 機能要件3/機能仕様1 | `Univapay-Signature` ヘッダー不在 | 401 |
+| Signature が不正値 | 機能要件3/機能仕様1 | `Univapay-Signature: wrong_token` | 401 |
+| Signature が正しい・正常イベント | 機能要件3/機能仕様1 | 正しいトークン + 有効なペイロード | 200 |
+| usecase エラー | 機能要件3/機能仕様1 | usecase がエラーを返す | 500 |
 
 ### E2Eテスト（実装完了後に記載）
 
