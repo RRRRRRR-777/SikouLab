@@ -255,6 +255,15 @@ components:
       in: cookie
       name: session
       description: セッション認証（HttpOnly Cookie）
+    WebhookAuth:
+      type: apiKey
+      in: header
+      name: Univapay-Signature
+      description: |
+        UnivaPay Webhook 署名検証。
+        UnivaPay がリクエストボディを HMAC-SHA256 で署名して送信する。
+        サーバー側で hmac.Equal による定数時間比較で検証する（タイミング攻撃対策）。
+        シークレットは環境変数 UNIVAPAY_WEBHOOK_SECRET で管理する。
 
   schemas:
     ErrorResponse:
@@ -304,7 +313,7 @@ components:
           description: プランID
         subscription_status:
           type: string
-          enum: [active, canceled, past_due]
+          enum: [active, canceled, past_due, trialing]
           nullable: true
           description: サブスクリプション状態
         created_at:
@@ -346,6 +355,89 @@ components:
           maximum: 100
           default: 20
           description: 1ページあたりの件数
+
+    Plan:
+      type: object
+      required:
+        - id
+        - name
+        - amount
+        - currency
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: プランID
+        name:
+          type: string
+          description: プラン名
+        description:
+          type: string
+          nullable: true
+          description: プラン説明
+        amount:
+          type: integer
+          description: "月額料金（最小通貨単位。例: JPY の場合は円）"
+          example: 1980
+        currency:
+          type: string
+          description: 通貨コード（ISO-4217）
+          example: JPY
+
+    PlansResponse:
+      type: object
+      required:
+        - plans
+      properties:
+        plans:
+          type: array
+          items:
+            $ref: "#/components/schemas/Plan"
+
+    CheckoutRequest:
+      type: object
+      required:
+        - transaction_token_id
+      properties:
+        transaction_token_id:
+          type: string
+          minLength: 1
+          description: UnivaPay JS ウィジェットのコールバックで取得した transaction_token_id
+
+    CheckoutResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: [pending]
+          description: サブスクリプション作成開始状態（active への更新は Webhook 経由）
+
+    WebhookPayload:
+      type: object
+      required:
+        - event
+        - data
+      description: UnivaPay Webhook ペイロード
+      properties:
+        event:
+          type: string
+          description: イベント種別
+          example: SUBSCRIPTION_PAYMENT
+        data:
+          type: object
+          description: イベントデータ
+          properties:
+            subscriptions:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: UnivaPay サブスクリプションID（users.univapay_customer_id と一致）
+                status:
+                  type: string
+                  description: "決済状態（SUBSCRIPTION_PAYMENT イベント時のみ）。successful / failed"
 
     CursorPaginationResponse:
       type: object

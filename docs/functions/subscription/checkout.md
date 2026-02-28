@@ -82,7 +82,7 @@ erDiagram
         string role "admin/writer/user"
         bigint plan_id FK
         string univapay_customer_id
-        string subscription_status "active/canceled/past_due"
+        string subscription_status "active/canceled/past_due/trialing"
         datetime created_at
         datetime updated_at
     }
@@ -231,8 +231,12 @@ sequenceDiagram
 
 - 機能仕様1: UnivaPay の Webhook イベントを受信して subscription_status を更新する
   - エンドポイント: `POST /api/v1/univapay/webhook`
-  - **認証不要**（UnivaPay からのリクエスト）
-  - Webhook 認証: `auth_token` ヘッダーを検証する（UnivaPay ダッシュボードで設定したシークレット）
+  - **セッション Cookie 認証不要**（UnivaPay サーバーからのリクエストのため）
+  - Webhook 認証: `Univapay-Signature` ヘッダーの **HMAC-SHA256 署名検証**
+    - UnivaPay がリクエストボディを共有シークレットで HMAC-SHA256 署名して送信する
+    - サーバー側で `hmac.Equal` による定数時間比較で検証する（タイミング攻撃対策）
+    - 検証失敗時は 401 を返す
+    - シークレットは環境変数 `UNIVAPAY_WEBHOOK_SECRET` で管理する
   - 対応イベント: `SUBSCRIPTION_PAYMENT`, `SUBSCRIPTION_FAILED`, `SUBSCRIPTION_CANCELED`
   - イベントと subscription_status のマッピングは上記テーブルに従う
 
@@ -260,7 +264,9 @@ sequenceDiagram
 🟢 **後回し可**
 
 ### 非機能要件1: セキュリティ
-- 非機能仕様1: Webhook エンドポイントは `auth_token` ヘッダーで UnivaPay からのリクエストのみを受け付ける
+- 非機能仕様1: Webhook エンドポイントは `Univapay-Signature` ヘッダーの HMAC-SHA256 署名検証で UnivaPay からのリクエストのみを受け付ける
+  - `hmac.Equal` による定数時間比較（タイミング攻撃対策）
+  - シークレットは環境変数 `UNIVAPAY_WEBHOOK_SECRET` で管理
 - 非機能仕様2: `POST /api/v1/univapay/checkout` はセッション Cookie 認証済みユーザーのみ
 
 ### 非機能要件2: ポーリング上限
@@ -357,8 +363,8 @@ sequenceDiagram
 | テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
 |------------|----------|------------|--------|
 | Signature ヘッダーなし | 機能要件3/機能仕様1 | `Univapay-Signature` ヘッダー不在 | 401 |
-| Signature が不正値 | 機能要件3/機能仕様1 | `Univapay-Signature: wrong_token` | 401 |
-| Signature が正しい・正常イベント | 機能要件3/機能仕様1 | 正しいトークン + 有効なペイロード | 200 |
+| Signature が不正値（HMAC 不一致） | 機能要件3/機能仕様1 | `Univapay-Signature: wrong_hmac` | 401 |
+| Signature が正しい・正常イベント | 機能要件3/機能仕様1 | 正しい HMAC-SHA256 署名 + 有効なペイロード | 200 |
 | usecase エラー | 機能要件3/機能仕様1 | usecase がエラーを返す | 500 |
 
 ### E2Eテスト（実装完了後に記載）
