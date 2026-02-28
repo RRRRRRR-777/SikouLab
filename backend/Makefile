@@ -1,4 +1,4 @@
-.PHONY: dev run build test lint fmt migrate-up migrate-down seed docker-build check-doc swagger validate-api help
+.PHONY: dev run build test lint fmt migrate-up migrate-down seed docker-build check-doc swagger validate-api tunnel help
 
 # デフォルトターゲット
 help:
@@ -16,6 +16,7 @@ help:
 	@echo "  check-doc    - Check documentation comments"
 	@echo "  swagger      - Start Swagger UI (http://localhost:8081)"
 	@echo "  validate-api - Validate OpenAPI specification"
+	@echo "  tunnel      - Start Cloudflare tunnel (HTTPS for localhost:8080)"
 
 # 開発サーバー起動（ホットリロード）
 dev:
@@ -71,3 +72,7 @@ swagger:
 # OpenAPI仕様バリデーション
 validate-api:
 	npx @apidevtools/swagger-cli validate api/openapi.yaml
+
+# Cloudflare Tunnel 起動（ローカルHTTPS）
+tunnel:
+	docker compose -f ../docker-compose.yml --profile tunnel up -d --no-deps cloudflared

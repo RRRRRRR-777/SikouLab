@@ -70,6 +70,17 @@ services:
     profiles:
       - docs
 
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --url http://host.docker.internal:8080
+    depends_on:
+      backend:
+        condition: service_started
+    networks:
+      - sicoulab
+    profiles:
+      - tunnel
+
 volumes:
   postgres_data:
 
