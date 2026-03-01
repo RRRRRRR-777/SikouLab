@@ -76,6 +76,17 @@ docker system prune -f
 - **ストーリーポイント**: チケット作成後にJira UIで設定推奨
   - MCPツール経由では `additional_fields.customfield_10071` の指定がエラーになる可能性あり
 
+#### 課題タイプ名（issueTypeName）
+
+MCPツール `createJiraIssue` の `issueTypeName` は**英語名**を使用する。
+
+| 日本語表示名 | issueTypeName（正しい値） |
+|-------------|------------------------|
+| エピック | `エピック` |
+| タスク | `タスク` |
+| ストーリー | `ストーリー` |
+| サブタスク | `Subtask`（❌ `子タスク` は不可） |
+
 #### チケットテンプレート
 
 | 項目 | エピック | 子チケット |

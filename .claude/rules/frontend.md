@@ -333,3 +333,19 @@ make -C frontend docker-build
 ### 参考情報
 - [JSDoc Reference - TypeScript](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html)
 - [JSDoc & TypeDoc Guide](https://dev.to/mirzaleka/learn-how-to-document-javascripttypescript-code-using-jsdoc-typedoc-359h)
+
+## APIレスポンスの防御的処理
+
+外部APIのレスポンスを `setState` や変数に代入する際は、必ず fallback を設ける。
+
+```typescript
+// ✅ 正しい — fallback で undefined を防ぐ
+setPlans(res.plans ?? []);
+
+// ❌ 危険 — res.plans が undefined なら state が undefined になる
+setPlans(res.plans);
+```
+
+- 配列型: `?? []`
+- オブジェクト型: `?? {}` またはデフォルト値
+- プリミティブ型: `?? ""` / `?? 0` / `?? null`
