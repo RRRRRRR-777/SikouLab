@@ -36,6 +36,7 @@
 - [015: インフラ環境構築](adr/015-deploy-platform.md)
 - [016: Phase 0横断的決定事項](adr/016-phase0-cross-cutting-decisions.md)
 - [017: CSRF対策](adr/017-csrf-protection.md)
+- [018: E2Eテスト認証方式](adr/018-e2e-auth-strategy.md)
 
 ## 機能仕様書
 - **認証機能（F-01）**

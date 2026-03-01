@@ -10,6 +10,10 @@
 import { initializeApp, getApps, FirebaseApp } from "firebase/app";
 import {
   getAuth,
+  connectAuthEmulator,
+  setPersistence,
+  browserLocalPersistence,
+  signInWithEmailAndPassword,
   Auth,
   GoogleAuthProvider,
   OAuthProvider,
@@ -65,7 +69,18 @@ export function initializeFirebaseApp(): FirebaseApp {
 }
 
 /**
+ * Firebase Auth EmulatorのURL
+ *
+ * E2Eテスト時にFirebase Auth Emulatorを使用するための設定。
+ * NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST が設定されている場合にEmulatorに接続する。
+ */
+const EMULATOR_HOST = process.env.NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST ?? "";
+
+/**
  * Firebase Authインスタンスを取得する
+ *
+ * NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST が設定されている場合、
+ * Firebase Auth Emulatorに接続する（E2Eテスト用）。
  *
  * @returns Firebase Authインスタンス
  */
@@ -76,6 +91,26 @@ export function getFirebaseAuth(): Auth {
 
   initializeFirebaseApp();
   authInstance = getAuth();
+
+  // E2Eテスト用: Firebase Auth Emulatorに接続
+  if (EMULATOR_HOST) {
+    connectAuthEmulator(authInstance, `http://${EMULATOR_HOST}`, { disableWarnings: true });
+
+    // storageStateでセッションを引き継ぐため、IndexedDBではなくlocalStorageに永続化
+    const persistenceReady = setPersistence(authInstance, browserLocalPersistence);
+
+    // ブラウザ上でE2Eテストからサインインできるヘルパーを公開
+    if (typeof window !== "undefined") {
+      (window as unknown as Record<string, unknown>).__E2E_SIGN_IN__ = async (
+        email: string,
+        password: string,
+      ) => {
+        await persistenceReady;
+        return signInWithEmailAndPassword(authInstance!, email, password);
+      };
+    }
+  }
+
   return authInstance;
 }
 

@@ -8,10 +8,15 @@ frontend/node_modules
 
 # testing
 /coverage
+frontend/test-results/
+frontend/playwright-report/
+frontend/playwright/.cache/
+frontend/.auth/
 
 # next.js
 .next/
 frontend/.next/
+frontend/.next-e2e/
 /out/
 
 # production

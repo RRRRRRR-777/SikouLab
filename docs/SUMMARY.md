@@ -36,6 +36,8 @@
   * 概要: デプロイフローの選定。GitHub Environment承認を採用。
     トリガー、承認プロセス、ロールバック方針を記載。
 - [017: CSRF対策](adr/017-csrf-protection.md)
+* docs/adr/018-e2e-auth-strategy.md
+  * 概要: E2Eテスト認証方式の選定。Firebase Auth Emulatorを採用。storageState+手動OAuth、Admin SDKカスタムトークン、バックエンド認証バイパスを比較し、CI対応・セキュリティ・Firebase公式推奨を理由に選定。
 * docs/adr/007-log-monitoring.md
   * 概要: ログ監視方式の選定。Cloud Logging + Cloud Monitoring（GCP完結）を採用。
     障害発生時のフロー、通知先（Cloud Consoleアプリ）、将来拡張（LLM分析）を記載。
