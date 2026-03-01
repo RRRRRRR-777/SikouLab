@@ -12,6 +12,7 @@ import (
 // mockSubscriptionRepository はSubscriptionRepositoryのモック。
 type mockSubscriptionRepository struct {
 	findActivePlansFunc              func(ctx context.Context) ([]domain.Plan, error)
+	findPlanByIDFunc                 func(ctx context.Context, planID int64) (*domain.Plan, error)
 	updateSubscriptionStatusFunc     func(ctx context.Context, univapaySubscriptionID, status string) error
 	findByUnivaPaySubscriptionIDFunc func(ctx context.Context, univapaySubscriptionID string) (*domain.User, error)
 	updateUnivaPaySubscriptionIDFunc func(ctx context.Context, userID int64, subscriptionID string) error
@@ -20,6 +21,11 @@ type mockSubscriptionRepository struct {
 // FindActivePlans はモックのアクティブプラン取得を実行する。
 func (m *mockSubscriptionRepository) FindActivePlans(ctx context.Context) ([]domain.Plan, error) {
 	return m.findActivePlansFunc(ctx)
+}
+
+// FindPlanByID はモックのプランID検索を実行する。
+func (m *mockSubscriptionRepository) FindPlanByID(ctx context.Context, planID int64) (*domain.Plan, error) {
+	return m.findPlanByIDFunc(ctx, planID)
 }
 
 // UpdateSubscriptionStatus はモックのサブスクリプションステータス更新を実行する。
@@ -39,12 +45,12 @@ func (m *mockSubscriptionRepository) UpdateUnivaPaySubscriptionID(ctx context.Co
 
 // mockUnivaPayClient はUnivaPayClientのモック。
 type mockUnivaPayClient struct {
-	createSubscriptionFunc func(ctx context.Context, tokenID string, planID int64) (string, error)
+	createSubscriptionFunc func(ctx context.Context, tokenID string, amount int, currency string) (string, error)
 }
 
 // CreateSubscription はモックのサブスクリプション作成を実行する。
-func (m *mockUnivaPayClient) CreateSubscription(ctx context.Context, tokenID string, planID int64) (string, error) {
-	return m.createSubscriptionFunc(ctx, tokenID, planID)
+func (m *mockUnivaPayClient) CreateSubscription(ctx context.Context, tokenID string, amount int, currency string) (string, error) {
+	return m.createSubscriptionFunc(ctx, tokenID, amount, currency)
 }
 
 // TestSubscriptionUsecase_GetPlans はGetPlansユースケースの各パターンを検証する。
@@ -147,12 +153,15 @@ func TestSubscriptionUsecase_Checkout(t *testing.T) {
 			user:    trialingUser,
 			tokenID: "tok_xxx",
 			repo: &mockSubscriptionRepository{
+				findPlanByIDFunc: func(_ context.Context, _ int64) (*domain.Plan, error) {
+					return &domain.Plan{ID: 1, Amount: 1000, Currency: "JPY"}, nil
+				},
 				updateUnivaPaySubscriptionIDFunc: func(_ context.Context, _ int64, _ string) error {
 					return nil
 				},
 			},
 			client: &mockUnivaPayClient{
-				createSubscriptionFunc: func(_ context.Context, _ string, _ int64) (string, error) {
+				createSubscriptionFunc: func(_ context.Context, _ string, _ int, _ string) (string, error) {
 					return "sub_abc123", nil
 				},
 			},
@@ -173,13 +182,16 @@ func TestSubscriptionUsecase_Checkout(t *testing.T) {
 			user:    trialingUser,
 			tokenID: "tok_xxx",
 			repo: &mockSubscriptionRepository{
+				findPlanByIDFunc: func(_ context.Context, _ int64) (*domain.Plan, error) {
+					return &domain.Plan{ID: 1, Amount: 1000, Currency: "JPY"}, nil
+				},
 				updateUnivaPaySubscriptionIDFunc: func(_ context.Context, _ int64, _ string) error {
 					t.Error("UpdateUnivaPaySubscriptionID が呼ばれてはいけない")
 					return nil
 				},
 			},
 			client: &mockUnivaPayClient{
-				createSubscriptionFunc: func(_ context.Context, _ string, _ int64) (string, error) {
+				createSubscriptionFunc: func(_ context.Context, _ string, _ int, _ string) (string, error) {
 					return "", errors.New("univapay api error")
 				},
 			},
@@ -191,12 +203,15 @@ func TestSubscriptionUsecase_Checkout(t *testing.T) {
 			user:    trialingUser,
 			tokenID: "tok_xxx",
 			repo: &mockSubscriptionRepository{
+				findPlanByIDFunc: func(_ context.Context, _ int64) (*domain.Plan, error) {
+					return &domain.Plan{ID: 1, Amount: 1000, Currency: "JPY"}, nil
+				},
 				updateUnivaPaySubscriptionIDFunc: func(_ context.Context, _ int64, _ string) error {
 					return errors.New("db error")
 				},
 			},
 			client: &mockUnivaPayClient{
-				createSubscriptionFunc: func(_ context.Context, _ string, _ int64) (string, error) {
+				createSubscriptionFunc: func(_ context.Context, _ string, _ int, _ string) (string, error) {
 					return "sub_abc123", nil
 				},
 			},
