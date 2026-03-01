@@ -56,6 +56,11 @@ func main() {
 	authUsecase := usecase.NewAuthUsecase(firebaseClient, userRepo)
 	authHandler := handler.NewAuthHandler(authUsecase, logger, strings.EqualFold(cfg.AppEnv, "production"))
 
+	// サブスクリプション
+	subscriptionRepo := repository.NewSubscriptionRepository(db)
+	subscriptionUsecase := usecase.NewSubscriptionUsecase(subscriptionRepo, nil) // UnivaPayClientはTBD
+	subscriptionHandler := handler.NewSubscriptionHandler(subscriptionUsecase, logger, cfg.UnivaPayWebhookSecret)
+
 	// ルーティング設定
 	mux := http.NewServeMux()
 	mux.Handle("GET /health", &handler.HealthHandler{})
@@ -69,6 +74,15 @@ func main() {
 	})
 	mux.HandleFunc("POST /api/v1/auth/logout", func(w http.ResponseWriter, r *http.Request) {
 		authHandler.ServeLogout(w, r)
+	})
+	mux.HandleFunc("GET /api/v1/plans", func(w http.ResponseWriter, r *http.Request) {
+		subscriptionHandler.ServeGetPlans(w, r)
+	})
+	mux.HandleFunc("POST /api/v1/univapay/checkout", func(w http.ResponseWriter, r *http.Request) {
+		middleware.RequireAuth(authUsecase)(http.HandlerFunc(subscriptionHandler.ServeCheckout)).ServeHTTP(w, r)
+	})
+	mux.HandleFunc("POST /api/v1/univapay/webhook", func(w http.ResponseWriter, r *http.Request) {
+		subscriptionHandler.ServeWebhook(w, r)
 	})
 
 	// ミドルウェアチェーン: Recovery → Logger → CORS → Handler

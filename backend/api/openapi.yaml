@@ -220,7 +220,7 @@ paths:
       summary: UnivaPay Webhook 受信
       description: |
         UnivaPay からの Webhook イベントを受信し、users.subscription_status を更新する。
-        認証は Univapay-Signature ヘッダーで行う（セッション Cookie 不要）。
+        認証は Authorization ヘッダーで行う（セッション Cookie 不要）。
         対応イベント: SUBSCRIPTION_PAYMENT, SUBSCRIPTION_FAILED, SUBSCRIPTION_CANCELED
       tags:
         - webhook
@@ -236,7 +236,7 @@ paths:
         "200":
           description: Webhook 受信・処理成功
         "401":
-          description: Webhook 認証失敗（Univapay-Signature ヘッダー不正または不在）
+          description: Webhook 認証失敗（Authorization ヘッダー不正または不在）
           content:
             application/json:
               schema:

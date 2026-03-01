@@ -1,0 +1,65 @@
+package repository
+
+import (
+	"context"
+	"database/sql"
+	"errors"
+	"fmt"
+
+	"github.com/jmoiron/sqlx"
+
+	"github.com/RRRRRRR-777/SicouLab/backend/internal/domain"
+)
+
+// SubscriptionRepository はプランとサブスクリプション状態のDB操作を提供する。
+type SubscriptionRepository struct {
+	db *sqlx.DB
+}
+
+// NewSubscriptionRepository はSubscriptionRepositoryを作成する。
+func NewSubscriptionRepository(db *sqlx.DB) *SubscriptionRepository {
+	return &SubscriptionRepository{db: db}
+}
+
+// FindActivePlans は is_active=true のプランを全件返す。
+func (r *SubscriptionRepository) FindActivePlans(ctx context.Context) ([]domain.Plan, error) {
+	var plans []domain.Plan
+	query := `SELECT * FROM plans WHERE is_active = true ORDER BY id`
+	if err := r.db.SelectContext(ctx, &plans, query); err != nil {
+		return nil, fmt.Errorf("アクティブプラン取得失敗: %w", err)
+	}
+	return plans, nil
+}
+
+// UpdateSubscriptionStatus は univapay_customer_id でユーザーを特定して subscription_status を更新する。
+func (r *SubscriptionRepository) UpdateSubscriptionStatus(ctx context.Context, univapaySubscriptionID, status string) error {
+	query := `UPDATE users SET subscription_status = $1, updated_at = NOW() WHERE univapay_customer_id = $2`
+	if _, err := r.db.ExecContext(ctx, query, status, univapaySubscriptionID); err != nil {
+		return fmt.Errorf("サブスクリプションステータス更新失敗: %w", err)
+	}
+	return nil
+}
+
+// FindByUnivaPaySubscriptionID は univapay_customer_id でユーザーを検索する。
+// 見つからない場合は nil, nil を返す。
+func (r *SubscriptionRepository) FindByUnivaPaySubscriptionID(ctx context.Context, univapaySubscriptionID string) (*domain.User, error) {
+	var u domain.User
+	query := `SELECT * FROM users WHERE univapay_customer_id = $1`
+	err := r.db.GetContext(ctx, &u, query, univapaySubscriptionID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("ユーザー検索失敗(UnivaPaySubscriptionID): %w", err)
+	}
+	return &u, nil
+}
+
+// UpdateUnivaPaySubscriptionID は userID のユーザーに univapay_customer_id を保存する。
+func (r *SubscriptionRepository) UpdateUnivaPaySubscriptionID(ctx context.Context, userID int64, subscriptionID string) error {
+	query := `UPDATE users SET univapay_customer_id = $1, updated_at = NOW() WHERE id = $2`
+	if _, err := r.db.ExecContext(ctx, query, subscriptionID, userID); err != nil {
+		return fmt.Errorf("UnivaPayサブスクリプションID更新失敗: %w", err)
+	}
+	return nil
+}
