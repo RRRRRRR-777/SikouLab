@@ -33,6 +33,10 @@ type Config struct {
 	FirebaseProjectID string
 	// UnivaPayWebhookSecret は UnivaPay Webhook 署名検証用シークレット。
 	UnivaPayWebhookSecret string
+	// UnivaPayStoreID は UnivaPay ストアID（APIトークンのJWT部分）。
+	UnivaPayStoreID string
+	// UnivaPayStoreSecret は UnivaPay ストアシークレット（APIトークンのシークレット部分）。
+	UnivaPayStoreSecret string
 }
 
 // Load は.envファイルおよび環境変数から設定を読み込む。
@@ -83,6 +87,8 @@ func Load() (*Config, error) {
 	cfg.AppEnv = os.Getenv("APP_ENV")
 	cfg.FirebaseServiceAccountJSON = os.Getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
 	cfg.UnivaPayWebhookSecret = os.Getenv("UNIVAPAY_WEBHOOK_SECRET")
+	cfg.UnivaPayStoreID = os.Getenv("UNIVAPAY_STORE_ID")
+	cfg.UnivaPayStoreSecret = os.Getenv("UNIVAPAY_STORE_SECRET")
 
 	return cfg, nil
 }

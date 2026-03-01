@@ -133,13 +133,13 @@ func TestSubscriptionUsecase_Checkout(t *testing.T) {
 	}
 
 	tests := []struct {
-		name                          string
-		user                          *domain.User
-		tokenID                       string
-		repo                          *mockSubscriptionRepository
-		client                        *mockUnivaPayClient
-		wantErr                       bool
-		wantErrIs                     error
+		name                           string
+		user                           *domain.User
+		tokenID                        string
+		repo                           *mockSubscriptionRepository
+		client                         *mockUnivaPayClient
+		wantErr                        bool
+		wantErrIs                      error
 		wantUpdateSubscriptionIDCalled bool
 	}{
 		{
@@ -156,15 +156,15 @@ func TestSubscriptionUsecase_Checkout(t *testing.T) {
 					return "sub_abc123", nil
 				},
 			},
-			wantErr:                       false,
+			wantErr:                        false,
 			wantUpdateSubscriptionIDCalled: true,
 		},
 		{
-			name:    "既にactiveのユーザー",
-			user:    activeUser,
-			tokenID: "tok_xxx",
-			repo:    &mockSubscriptionRepository{},
-			client:  &mockUnivaPayClient{},
+			name:      "既にactiveのユーザー",
+			user:      activeUser,
+			tokenID:   "tok_xxx",
+			repo:      &mockSubscriptionRepository{},
+			client:    &mockUnivaPayClient{},
 			wantErr:   true,
 			wantErrIs: ErrAlreadySubscribed,
 		},
@@ -183,7 +183,7 @@ func TestSubscriptionUsecase_Checkout(t *testing.T) {
 					return "", errors.New("univapay api error")
 				},
 			},
-			wantErr:                       true,
+			wantErr:                        true,
 			wantUpdateSubscriptionIDCalled: false,
 		},
 		{

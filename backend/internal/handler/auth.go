@@ -27,8 +27,8 @@ type authUsecase interface {
 
 // AuthHandler は認証APIハンドラーを提供する。
 type AuthHandler struct {
-	usecase      authUsecase
-	logger       zerolog.Logger
+	usecase authUsecase
+	logger  zerolog.Logger
 	// secureCookie は true の場合、Cookie に Secure 属性を付与する（本番環境用）。
 	// 開発環境（localhost HTTP）では false にする。
 	secureCookie bool

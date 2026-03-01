@@ -15,8 +15,9 @@ import (
 	"github.com/RRRRRRR-777/SicouLab/backend/internal/config"
 	"github.com/RRRRRRR-777/SicouLab/backend/internal/firebase"
 	"github.com/RRRRRRR-777/SicouLab/backend/internal/handler"
-	"github.com/RRRRRRR-777/SicouLab/backend/internal/middleware"
+	"github.com/RRRRRRR-777/SicouLab/backend/internal/infrastructure/univapay"
 	"github.com/RRRRRRR-777/SicouLab/backend/internal/repository"
+	"github.com/RRRRRRR-777/SicouLab/backend/internal/router"
 	"github.com/RRRRRRR-777/SicouLab/backend/internal/usecase"
 )
 
@@ -58,38 +59,23 @@ func main() {
 
 	// サブスクリプション
 	subscriptionRepo := repository.NewSubscriptionRepository(db)
-	subscriptionUsecase := usecase.NewSubscriptionUsecase(subscriptionRepo, nil) // UnivaPayClientはTBD
+	univapayClient := univapay.NewClient(cfg.UnivaPayStoreID, cfg.UnivaPayStoreSecret)
+	subscriptionUsecase := usecase.NewSubscriptionUsecase(subscriptionRepo, univapayClient)
 	subscriptionHandler := handler.NewSubscriptionHandler(subscriptionUsecase, logger, cfg.UnivaPayWebhookSecret)
 
 	// ルーティング設定
-	mux := http.NewServeMux()
-	mux.Handle("GET /health", &handler.HealthHandler{})
-
-	// Go 1.22+: メソッドをHandleFuncに渡す場合、明示的にレシーバーをバインドする必要がある
-	mux.HandleFunc("POST /api/v1/auth/login", func(w http.ResponseWriter, r *http.Request) {
-		authHandler.ServeLogin(w, r)
-	})
-	mux.HandleFunc("GET /api/v1/auth/me", func(w http.ResponseWriter, r *http.Request) {
-		authHandler.ServeMe(w, r)
-	})
-	mux.HandleFunc("POST /api/v1/auth/logout", func(w http.ResponseWriter, r *http.Request) {
-		authHandler.ServeLogout(w, r)
-	})
-	mux.HandleFunc("GET /api/v1/plans", func(w http.ResponseWriter, r *http.Request) {
-		subscriptionHandler.ServeGetPlans(w, r)
-	})
-	mux.HandleFunc("POST /api/v1/univapay/checkout", func(w http.ResponseWriter, r *http.Request) {
-		middleware.RequireAuth(authUsecase)(http.HandlerFunc(subscriptionHandler.ServeCheckout)).ServeHTTP(w, r)
-	})
-	mux.HandleFunc("POST /api/v1/univapay/webhook", func(w http.ResponseWriter, r *http.Request) {
-		subscriptionHandler.ServeWebhook(w, r)
-	})
-
-	// ミドルウェアチェーン: Recovery → Logger → CORS → Handler
-	var h http.Handler = mux
-	h = middleware.CORS(cfg.AllowedOrigins)(h)
-	h = middleware.Logger(logger)(h)
-	h = middleware.Recovery(logger)(h)
+	routerBuilder := router.NewBuilder(
+		router.Handlers{
+			Health:       &handler.HealthHandler{},
+			Auth:         authHandler,
+			Subscription: subscriptionHandler,
+		},
+		router.Middlewares{
+			AuthUsecase: authUsecase,
+		},
+		cfg,
+	)
+	h := routerBuilder.Build(logger)
 
 	addr := ":" + cfg.Port
 	logger.Info().Str("addr", addr).Msg("サーバー起動")
