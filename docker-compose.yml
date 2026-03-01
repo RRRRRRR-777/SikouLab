@@ -72,10 +72,10 @@ services:
 
   cloudflared:
     image: cloudflare/cloudflared:latest
-    command: tunnel --url http://host.docker.internal:8080
-    depends_on:
-      backend:
-        condition: service_started
+    command: tunnel --no-autoupdate --config /etc/cloudflared/config-sicoulab.yml run sicoulab
+    restart: on-failure:5
+    volumes:
+      - ${HOME}/.cloudflared:/etc/cloudflared:ro
     networks:
       - sicoulab
     profiles:
