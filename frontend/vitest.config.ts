@@ -12,6 +12,7 @@ import react from "@vitejs/plugin-react";
  * - exclude: 除外対象のディレクトリを指定
  * - alias: パスエイリアスを設定（@/ → ./）
  * - setupFiles: テスト実行前のセットアップファイル
+ * - coverage: カバレッジ計測設定
  *
  * @see {@link https://vitest.dev/config/} 詳細設定
  * @example
@@ -31,7 +32,22 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     include: ["**/__tests__/**/*.{test,spec}.{js,ts,tsx}", "**/*.{test,spec}.{js,ts,tsx}"],
-    exclude: ["node_modules", ".next", "dist"],
+    exclude: ["node_modules", ".next", ".next-e2e", "dist", "e2e"],
     setupFiles: ["./vitest.setup.ts"],
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json", "html"],
+      exclude: [
+        "node_modules/",
+        ".next/",
+        ".next-e2e/",
+        "dist/",
+        "e2e/",
+        "**/*.d.ts",
+        "**/__tests__/**",
+        "**/*.config.{js,ts}",
+        "vitest.setup.ts",
+      ],
+    },
   },
 });

@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+out/
+dist/
+
+# Testing
+coverage/
+
+# Environment
+.env*.local
+
+# Debug
+*.log
+
+# IDE
+.vscode/
+.idea/
