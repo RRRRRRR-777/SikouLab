@@ -128,12 +128,18 @@ flowchart TD
     N -->|Yes| O[ダッシュボードへ遷移]
     N -->|No| P["タイムアウトエラートースト / もう一度試すボタン表示"]
 
+    %% Checkout後のステータス即時確認（レースコンディション対策）
+    L --> L2["UnivaPay GET /subscriptions/{id} でステータス確認"]
+    L2 -->|status=current| L3["subscription_status = active に即更新"]
+    L2 -->|status≠current| M
+    L3 --> M
+
     %% 非同期: Webhook
     L -.->|非同期| Q["Webhook 受信: POST /api/v1/univapay/webhook"]
     Q --> R{イベント種別}
-    R -->|SUBSCRIPTION_PAYMENT 成功| S["subscription_status = active"]
-    R -->|SUBSCRIPTION_PAYMENT 失敗| T["subscription_status = past_due"]
-    R -->|SUBSCRIPTION_CANCELED| U["subscription_status = canceled"]
+    R -->|subscription_payment + current| S["subscription_status = active"]
+    R -->|subscription_payment + その他| T["subscription_status = past_due"]
+    R -->|subscription_canceled| U["subscription_status = canceled"]
     S -.->|ポーリングが検知| O
 ```
 
@@ -174,6 +180,14 @@ sequenceDiagram
     UV-->>BE: { subscription_id, status: "unverified" }
     BE->>DB: users.univapay_customer_id = subscription_id（更新）
     DB-->>BE: 更新成功
+
+    %% レースコンディション対策: Webhook到着前にステータスを即時確認
+    BE->>UV: GET /subscriptions/{subscription_id}
+    UV-->>BE: { status: "current" }
+    Note over BE: status=current なら即座に active 化
+    BE->>DB: users.subscription_status = 'active'（即時更新）
+    DB-->>BE: 更新成功
+
     BE-->>FE: { status: "pending" }
 
     %% ウィジェット閉じてポーリング開始
@@ -186,7 +200,7 @@ sequenceDiagram
     end
 
     %% Webhook 受信（非同期）
-    UV-->>BE: POST /api/v1/univapay/webhook { event: "SUBSCRIPTION_PAYMENT", status: "successful" }
+    UV-->>BE: POST /api/v1/univapay/webhook { event: "subscription_payment", data: { id: "...", status: "current" } }
     BE->>DB: users.subscription_status = 'active'
     DB-->>BE: 更新成功
     BE-->>UV: 200 OK
@@ -200,10 +214,10 @@ sequenceDiagram
 
 | UnivaPay イベント | 条件 | users.subscription_status |
 |------------------|------|--------------------------|
-| `SUBSCRIPTION_PAYMENT` | status = successful | `active` |
-| `SUBSCRIPTION_PAYMENT` | status = failed | `past_due` |
-| `SUBSCRIPTION_FAILED` | - | `past_due` |
-| `SUBSCRIPTION_CANCELED` | - | `canceled` |
+| `subscription_payment` | status = current | `active` |
+| `subscription_payment` | status ≠ current | `past_due` |
+| `subscription_failure` | - | `past_due` |
+| `subscription_canceled` | - | `canceled` |
 
 ## 機能要件
 🟡 **中程度**
@@ -227,6 +241,12 @@ sequenceDiagram
   - Cookie セッション検証（RequireAuth ミドルウェア）
   - 既に `subscription_status = 'active'` のユーザーは 409 を返す
 
+- 機能仕様3: Checkout 後に UnivaPay ステータスを即時確認する（レースコンディション対策）
+  - subscription_id を DB 保存後、`GET /subscriptions/{id}` でステータスを取得
+  - ステータスが `current` であれば `subscription_status = 'active'` に即更新する
+  - ステータス取得失敗時はエラーにせず、Webhook での後続更新に任せる（フォールバック）
+  - 背景: UnivaPay が Checkout 完了前に Webhook を送信するため、Webhook が「ユーザー不在」で無視されるケースがある
+
 ### 機能要件3: Webhook 受信 API（1-5）
 
 - 機能仕様1: UnivaPay の Webhook イベントを受信して subscription_status を更新する
@@ -237,7 +257,7 @@ sequenceDiagram
     - サーバー側で `hmac.Equal` による定数時間比較で検証する（タイミング攻撃対策）
     - 検証失敗時は 401 を返す
     - シークレットは環境変数 `UNIVAPAY_WEBHOOK_SECRET` で管理する
-  - 対応イベント: `SUBSCRIPTION_PAYMENT`, `SUBSCRIPTION_FAILED`, `SUBSCRIPTION_CANCELED`
+  - 対応イベント: `subscription_payment`, `subscription_failure`, `subscription_canceled`
   - イベントと subscription_status のマッピングは上記テーブルに従う
 
 - 機能仕様2: 冪等性を確保する
@@ -264,7 +284,7 @@ sequenceDiagram
 🟢 **後回し可**
 
 ### 非機能要件1: セキュリティ
-- 非機能仕様1: Webhook エンドポイントは `Univapay-Signature` ヘッダーの HMAC-SHA256 署名検証で UnivaPay からのリクエストのみを受け付ける
+- 非機能仕様1: Webhook エンドポイントは `Authorization` ヘッダーの定数時間比較で UnivaPay からのリクエストのみを受け付ける
   - `hmac.Equal` による定数時間比較（タイミング攻撃対策）
   - シークレットは環境変数 `UNIVAPAY_WEBHOOK_SECRET` で管理
 - 非機能仕様2: `POST /api/v1/univapay/checkout` はセッション Cookie 認証済みユーザーのみ
@@ -329,7 +349,9 @@ sequenceDiagram
 
 | テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
 |------------|----------|------------|--------|
-| 正常: サブスク作成 | 機能要件2/機能仕様1 | transaction_token_id="tok_xxx"・user.subscription_status="trialing" | UnivaPay API 呼び出し済み・users.univapay_customer_id に subscription_id が保存される |
+| 正常: サブスク作成（ステータス current で即 active 化） | 機能要件2/機能仕様1,3 | transaction_token_id="tok_xxx"・user.subscription_status="trialing"・GetSubscription が "current" を返す | subscription_id 保存後に subscription_status='active' に即更新される |
+| 正常: ステータス未確定（unpaid）の場合は active 化しない | 機能要件2/機能仕様3 | GetSubscription が "unpaid" を返す | subscription_status は更新されない（Webhook に任せる） |
+| 正常: GetSubscription 失敗時もエラーにならない | 機能要件2/機能仕様3 | GetSubscription がエラーを返す | Checkout 自体は成功する（Webhook フォールバック） |
 | 既に active のユーザー | 機能要件2/機能仕様2 | user.subscription_status="active" | ErrAlreadySubscribed が返る（HTTP 409 相当） |
 | UnivaPay API エラー | 機能要件2/機能仕様1 | UnivaPay がエラーレスポンスを返す | error が返る（DB 更新はされない） |
 | DB 更新エラー | 機能要件2/機能仕様1 | subscription_id 保存時に DB エラー | error が返る |
@@ -349,11 +371,11 @@ sequenceDiagram
 
 | テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
 |------------|----------|------------|--------|
-| SUBSCRIPTION_PAYMENT 成功 | 機能要件3/機能仕様1 | event=SUBSCRIPTION_PAYMENT, status=successful | subscription_status='active' に更新 |
-| SUBSCRIPTION_PAYMENT 失敗 | 機能要件3/機能仕様1 | event=SUBSCRIPTION_PAYMENT, status=failed | subscription_status='past_due' に更新 |
-| SUBSCRIPTION_FAILED | 機能要件3/機能仕様1 | event=SUBSCRIPTION_FAILED | subscription_status='past_due' に更新 |
-| SUBSCRIPTION_CANCELED | 機能要件3/機能仕様1 | event=SUBSCRIPTION_CANCELED | subscription_status='canceled' に更新 |
-| 未知イベント種別 | 機能要件3/機能仕様1 | event="UNKNOWN_EVENT" | DB 更新なし・error なし（無視） |
+| subscription_payment + current | 機能要件3/機能仕様1 | event=subscription_payment, status=current | subscription_status='active' に更新 |
+| subscription_payment + unpaid | 機能要件3/機能仕様1 | event=subscription_payment, status=unpaid | subscription_status='past_due' に更新 |
+| subscription_failure | 機能要件3/機能仕様1 | event=subscription_failure | subscription_status='past_due' に更新 |
+| subscription_canceled | 機能要件3/機能仕様1 | event=subscription_canceled | subscription_status='canceled' に更新 |
+| 未知イベント種別 | 機能要件3/機能仕様1 | event="unknown_event" | DB 更新なし・error なし（無視） |
 | subscription_id に対応するユーザー不在 | 機能要件3/機能仕様1 | 存在しない subscription_id | DB 更新なし・error なし（ログのみ） |
 | 冪等性: 同一イベントを2回受信 | 機能要件3/機能仕様2 | 同じ subscription_id・同じイベントを2回呼び出す | 2回目も正常終了（エラーにならない） |
 | DB 更新エラー | 機能要件3/機能仕様1 | repository がエラーを返す | error が返る |
@@ -362,10 +384,41 @@ sequenceDiagram
 
 | テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
 |------------|----------|------------|--------|
-| Signature ヘッダーなし | 機能要件3/機能仕様1 | `Univapay-Signature` ヘッダー不在 | 401 |
-| Signature が不正値（HMAC 不一致） | 機能要件3/機能仕様1 | `Univapay-Signature: wrong_hmac` | 401 |
-| Signature が正しい・正常イベント | 機能要件3/機能仕様1 | 正しい HMAC-SHA256 署名 + 有効なペイロード | 200 |
+| Authorization ヘッダーなし | 機能要件3/機能仕様1 | `Authorization` ヘッダー不在 | 401 |
+| Authorization が不正値（不一致） | 機能要件3/機能仕様1 | `Authorization: wrong-secret` | 401 |
+| Authorization が正しい・正常イベント | 機能要件3/機能仕様1 | 正しい Webhook Secret + 有効なペイロード | 200 |
 | usecase エラー | 機能要件3/機能仕様1 | usecase がエラーを返す | 500 |
+
+#### Page: /subscription — プラン表示（機能要件4/機能仕様1）
+
+| テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
+|------------|----------|------------|--------|
+| ローディング中はスケルトンを表示 | 機能要件4/機能仕様1 | API レスポンス未到着 | ローディングUI が表示される |
+| プラン情報が正しく表示される | 機能要件4/機能仕様1 | GET /api/v1/plans 成功（1件: name="プレミアムプラン", amount=1980, currency="JPY"） | プラン名・「¥1,980 / 月」・機能一覧が表示される |
+| プラン取得APIエラー時にエラー表示 | 機能要件4/機能仕様1 | GET /api/v1/plans が 500 を返す | エラーメッセージが表示され、「サブスクリプションを開始する」ボタンが非活性 |
+| プランが0件の場合 | 機能要件4/機能仕様1 | GET /api/v1/plans が空配列を返す | 適切なメッセージが表示され、ボタンが非活性 |
+
+#### Page: /subscription — ウィジェット起動（機能要件4/機能仕様2）
+
+| テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
+|------------|----------|------------|--------|
+| ボタンクリックでウィジェット初期化 | 機能要件4/機能仕様2 | プラン取得成功後にボタンクリック | UnivaPay checkout が amount・currency・period=monthly を含んで呼ばれる |
+| プラン未取得時はボタン非活性 | 機能要件4/機能仕様2 | GET /api/v1/plans のレスポンス待ち中 | ボタンが disabled |
+| 処理中はボタンが非活性になる | 機能要件4/機能仕様2 | ウィジェット起動後〜完了まで | ボタンが disabled・ローディング表示 |
+
+#### Page: /subscription — 決済完了後フロー（機能要件4/機能仕様3）
+
+| テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
+|------------|----------|------------|--------|
+| トークンコールバック後にcheckout APIを呼ぶ | 機能要件4/機能仕様3 | ウィジェットから transaction_token_id="tok_xxx" コールバック | POST /api/v1/univapay/checkout が `{ transaction_token_id: "tok_xxx" }` で呼ばれる |
+| checkout成功後に「決済処理中...」を表示 | 機能要件4/機能仕様3 | POST checkout が `{ status: "pending" }` を返す | 処理中メッセージが表示される |
+| ポーリングでactive検知後にダッシュボードへ遷移 | 機能要件4/機能仕様3 | GET /auth/me が subscription_status="active" を返す | router.push("/") が呼ばれる |
+| ポーリング間隔が2秒 | 機能要件4/機能仕様3 | checkout成功後のポーリング | 2秒間隔で GET /auth/me が繰り返し呼ばれる |
+| 30秒タイムアウトでエラートースト表示 | 機能要件4/機能仕様3 | 30秒間 subscription_status が active にならない | エラートーストが表示される |
+| タイムアウト後に「もう一度試す」ボタンが表示される | 機能要件4/機能仕様3 | 30秒タイムアウト後 | 再試行ボタンが表示・クリック可能 |
+| checkout APIエラー（500）でエラートースト | 機能要件4/機能仕様3 | POST checkout が 500 を返す | エラートーストが表示され、ウィジェット前の状態に戻る |
+| 既にactive（409）でエラートースト | 機能要件4/機能仕様3 | POST checkout が 409 を返す | 「既に登録済み」のエラートーストが表示される |
+| ポーリング中のAPIエラーでポーリング継続 | 機能要件4/機能仕様3 | GET /auth/me が一時的に 500 を返す（次回は正常） | ポーリングが中断せず継続する |
 
 ### E2Eテスト（実装完了後に記載）
 
