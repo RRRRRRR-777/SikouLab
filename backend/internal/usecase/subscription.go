@@ -6,6 +6,29 @@ import (
 	"fmt"
 
 	"github.com/RRRRRRR-777/SicouLab/backend/internal/domain"
+	"github.com/rs/zerolog"
+)
+
+// UnivaPay Webhook イベント名定数。
+const (
+	EventSubscriptionPayment  = "subscription_payment"
+	EventSubscriptionFailure  = "subscription_failure"
+	EventSubscriptionCanceled = "subscription_canceled"
+)
+
+// UnivaPay サブスクリプションステータス定数。
+const (
+	UnivaPayStatusCurrent   = "current"
+	UnivaPayStatusUnpaid    = "unpaid"
+	UnivaPayStatusUnconfirmed = "unconfirmed"
+)
+
+// DB保存用 サブスクリプションステータス定数。
+const (
+	SubscriptionStatusActive    = "active"
+	SubscriptionStatusPastDue   = "past_due"
+	SubscriptionStatusCanceled  = "canceled"
+	SubscriptionStatusTrialing  = "trialing"
 )
 
 // ErrAlreadySubscribed は既にアクティブなサブスクリプションを持つユーザーへのエラー。
@@ -27,29 +50,31 @@ type SubscriptionRepository interface {
 
 // UnivaPayClient はUnivaPay APIのインターフェース。
 type UnivaPayClient interface {
-	// CreateSubscription はUnivaPayでサブスクリプションを作成し、サブスクリプションIDを返す。
-	CreateSubscription(ctx context.Context, tokenID string, amount int, currency string) (string, error)
+	// CreateSubscription はUnivaPayでサブスクリプションを作成し、サブスクリプションIDとストアUUIDを返す。
+	CreateSubscription(ctx context.Context, tokenID string, amount int, currency string) (string, string, error)
+	// GetSubscription はUnivaPayサブスクリプションのステータスを取得する。storeIDはストアUUID。
+	GetSubscription(ctx context.Context, storeID, subscriptionID string) (string, error)
 }
 
 // WebhookPayload はUnivaPay WebhookのペイロードJSON構造。
+//
+// UnivaPay の実際のペイロード形式に基づく:
+//
+//	{ "event": "subscription_payment", "data": { "id": "...", "status": "..." } }
 type WebhookPayload struct {
-	// Event はWebhookイベント名（例: "SUBSCRIPTION_PAYMENT"）。
+	// Event はWebhookイベント名（例: "subscription_payment"）。
 	Event string `json:"event"`
-	// Data はWebhookのデータ本体。
+	// Data はWebhookのデータ本体（サブスクリプション情報が直接格納される）。
 	Data WebhookData `json:"data"`
 }
 
 // WebhookData はWebhookペイロードのdataフィールド。
+//
+// UnivaPay はサブスクリプション情報を data 直下に格納する。
 type WebhookData struct {
-	// Subscriptions はサブスクリプション情報。
-	Subscriptions WebhookSubscription `json:"subscriptions"`
-}
-
-// WebhookSubscription はWebhookペイロード内のサブスクリプション情報。
-type WebhookSubscription struct {
 	// ID はUnivaPayサブスクリプションID。
 	ID string `json:"id"`
-	// Status はサブスクリプションのステータス（例: "successful", "failed"）。
+	// Status はサブスクリプションのステータス（例: "current", "unconfirmed"）。
 	Status string `json:"status"`
 }
 
@@ -57,13 +82,15 @@ type WebhookSubscription struct {
 type SubscriptionUsecase struct {
 	repo   SubscriptionRepository
 	client UnivaPayClient
+	logger zerolog.Logger
 }
 
 // NewSubscriptionUsecase はSubscriptionUsecaseを作成する。
-func NewSubscriptionUsecase(repo SubscriptionRepository, client UnivaPayClient) *SubscriptionUsecase {
+func NewSubscriptionUsecase(repo SubscriptionRepository, client UnivaPayClient, logger zerolog.Logger) *SubscriptionUsecase {
 	return &SubscriptionUsecase{
 		repo:   repo,
 		client: client,
+		logger: logger,
 	}
 }
 
@@ -76,35 +103,28 @@ func (u *SubscriptionUsecase) GetPlans(ctx context.Context) ([]domain.Plan, erro
 	return plans, nil
 }
 
-// Checkout はUnivaPayサブスクリプションを作成し、サブスクリプションIDをDBに保存する。
+// Checkout はUnivaPayサブスクリプションIDをDBに保存する。
+//
+// ウィジェット（checkout: "payment"モード）がサブスクリプション作成と3Dセキュア認証を
+// 一括処理するため、バックエンドはIDの保存のみを行う。
+// ステータスの更新はWebhookで処理される。
 //
 // userのSubscriptionStatusが"active"の場合はErrAlreadySubscribedを返す。
-// UnivaPay APIエラー時はDB更新を行わない。
-func (u *SubscriptionUsecase) Checkout(ctx context.Context, user *domain.User, tokenID string) error {
+func (u *SubscriptionUsecase) Checkout(ctx context.Context, user *domain.User, subscriptionID string) error {
 	// 既にアクティブなサブスクリプションを持つユーザーは新規作成不可
 	if user.SubscriptionStatus == "active" {
 		return ErrAlreadySubscribed
-	}
-
-	// プランを取得（現フェーズではplanID=1固定）
-	plan, err := u.repo.FindPlanByID(ctx, 1)
-	if err != nil {
-		return fmt.Errorf("プラン取得失敗: %w", err)
-	}
-	if plan == nil {
-		return fmt.Errorf("プランが見つかりません(ID=1)")
-	}
-
-	// UnivaPayでサブスクリプションを作成
-	subscriptionID, err := u.client.CreateSubscription(ctx, tokenID, plan.Amount, plan.Currency)
-	if err != nil {
-		return fmt.Errorf("UnivaPayサブスクリプション作成失敗: %w", err)
 	}
 
 	// サブスクリプションIDをDBに保存
 	if err := u.repo.UpdateUnivaPaySubscriptionID(ctx, user.ID, subscriptionID); err != nil {
 		return fmt.Errorf("サブスクリプションID保存失敗: %w", err)
 	}
+
+	u.logger.Info().
+		Int64("user_id", user.ID).
+		Str("subscription_id", subscriptionID).
+		Msg("[Checkout] サブスクリプションID保存完了")
 
 	return nil
 }
@@ -115,20 +135,28 @@ func (u *SubscriptionUsecase) Checkout(ctx context.Context, user *domain.User, t
 // 冪等性: 同一イベントを複数回受信しても安全に処理する（DB側でUPDATE冪等）。
 //
 // イベントマッピング:
-//   - SUBSCRIPTION_PAYMENT + successful → active
-//   - SUBSCRIPTION_PAYMENT + failed     → past_due
-//   - SUBSCRIPTION_FAILED               → past_due
-//   - SUBSCRIPTION_CANCELED             → canceled
-//   - その他                              → 無視（エラーなし）
+//   - subscription_payment + current → active
+//   - subscription_payment + その他   → past_due
+//   - subscription_failure           → past_due
+//   - subscription_canceled          → canceled
+//   - その他                           → 無視（エラーなし）
 func (u *SubscriptionUsecase) HandleWebhook(ctx context.Context, payload WebhookPayload) error {
+	u.logger.Debug().
+		Str("event", payload.Event).
+		Str("subscription_id", payload.Data.ID).
+		Str("status", payload.Data.Status).
+		Msg("[Webhook] 受信")
+
 	// イベントと決済ステータスからsubscription_statusへのマッピングを決定
-	newStatus, ok := resolveSubscriptionStatus(payload.Event, payload.Data.Subscriptions.Status)
+	newStatus, ok := resolveSubscriptionStatus(payload.Event, payload.Data.Status)
 	if !ok {
-		// 未知イベントは無視する
+		u.logger.Info().
+			Str("event", payload.Event).
+			Msg("[Webhook] 未知イベントを無視")
 		return nil
 	}
 
-	subscriptionID := payload.Data.Subscriptions.ID
+	subscriptionID := payload.Data.ID
 
 	// サブスクリプションIDに対応するユーザーを検索
 	user, err := u.repo.FindByUnivaPaySubscriptionID(ctx, subscriptionID)
@@ -138,8 +166,16 @@ func (u *SubscriptionUsecase) HandleWebhook(ctx context.Context, payload Webhook
 
 	// 対応するユーザーが存在しない場合は無視する
 	if user == nil {
+		u.logger.Info().
+			Str("subscription_id", subscriptionID).
+			Msg("[Webhook] 対応するユーザーが見つからないため無視")
 		return nil
 	}
+
+	u.logger.Info().
+		Int64("user_id", user.ID).
+		Str("new_status", newStatus).
+		Msg("[Webhook] ステータス更新")
 
 	// subscription_statusを更新
 	if err := u.repo.UpdateSubscriptionStatus(ctx, subscriptionID, newStatus); err != nil {
@@ -152,21 +188,19 @@ func (u *SubscriptionUsecase) HandleWebhook(ctx context.Context, payload Webhook
 // resolveSubscriptionStatus はWebhookイベントと決済ステータスからDB保存用のステータスを解決する。
 //
 // 戻り値のboolがfalseの場合は未知イベントを示す。
-func resolveSubscriptionStatus(event, paymentStatus string) (string, bool) {
+func resolveSubscriptionStatus(event, subscriptionStatus string) (string, bool) {
 	switch event {
-	case "SUBSCRIPTION_PAYMENT":
-		switch paymentStatus {
-		case "successful":
-			return "active", true
-		case "failed":
-			return "past_due", true
+	case EventSubscriptionPayment:
+		switch subscriptionStatus {
+		case UnivaPayStatusCurrent:
+			return SubscriptionStatusActive, true
 		default:
-			return "past_due", true
+			return SubscriptionStatusPastDue, true
 		}
-	case "SUBSCRIPTION_FAILED":
-		return "past_due", true
-	case "SUBSCRIPTION_CANCELED":
-		return "canceled", true
+	case EventSubscriptionFailure:
+		return SubscriptionStatusPastDue, true
+	case EventSubscriptionCanceled:
+		return SubscriptionStatusCanceled, true
 	default:
 		return "", false
 	}

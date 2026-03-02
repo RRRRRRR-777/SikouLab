@@ -1,3 +1,7 @@
+# .env が存在する場合は自動で読み込み、環境変数としてエクスポートする
+-include .env
+export
+
 .PHONY: dev run build test lint fmt migrate-up migrate-down seed docker-build check-doc swagger validate-api tunnel help
 
 # デフォルトターゲット

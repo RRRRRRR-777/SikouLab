@@ -101,20 +101,20 @@ func TestSubscriptionHandler_ServeCheckout(t *testing.T) {
 	}{
 		{
 			name:       "未認証（contextにUserなし）",
-			body:       `{"transaction_token_id":"tok_xxx"}`,
+			body:       `{"subscription_id":"sub_xxx"}`,
 			injectUser: nil,
 			uc:         &mockSubscriptionUsecase{},
 			wantStatus: http.StatusUnauthorized,
 		},
 		{
-			name:       "transaction_token_id が空文字",
-			body:       `{"transaction_token_id":""}`,
+			name:       "subscription_id が空文字",
+			body:       `{"subscription_id":""}`,
 			injectUser: validUser,
 			uc:         &mockSubscriptionUsecase{},
 			wantStatus: http.StatusBadRequest,
 		},
 		{
-			name:       "transaction_token_id フィールドなし",
+			name:       "subscription_id フィールドなし",
 			body:       `{}`,
 			injectUser: validUser,
 			uc:         &mockSubscriptionUsecase{},
@@ -122,7 +122,7 @@ func TestSubscriptionHandler_ServeCheckout(t *testing.T) {
 		},
 		{
 			name:       "正常",
-			body:       `{"transaction_token_id":"tok_xxx"}`,
+			body:       `{"subscription_id":"sub_xxx"}`,
 			injectUser: validUser,
 			uc: &mockSubscriptionUsecase{
 				checkoutFunc: func(_ context.Context, _ *domain.User, _ string) error {
@@ -134,7 +134,7 @@ func TestSubscriptionHandler_ServeCheckout(t *testing.T) {
 		},
 		{
 			name:       "既にactive",
-			body:       `{"transaction_token_id":"tok_xxx"}`,
+			body:       `{"subscription_id":"sub_xxx"}`,
 			injectUser: validUser,
 			uc: &mockSubscriptionUsecase{
 				checkoutFunc: func(_ context.Context, _ *domain.User, _ string) error {
@@ -145,7 +145,7 @@ func TestSubscriptionHandler_ServeCheckout(t *testing.T) {
 		},
 		{
 			name:       "その他usecaseエラー",
-			body:       `{"transaction_token_id":"tok_xxx"}`,
+			body:       `{"subscription_id":"sub_xxx"}`,
 			injectUser: validUser,
 			uc: &mockSubscriptionUsecase{
 				checkoutFunc: func(_ context.Context, _ *domain.User, _ string) error {
@@ -190,12 +190,10 @@ func TestSubscriptionHandler_ServeWebhook(t *testing.T) {
 	const webhookSecret = "test-webhook-secret"
 
 	validPayload := usecase.WebhookPayload{
-		Event: "SUBSCRIPTION_PAYMENT",
+		Event: "subscription_payment",
 		Data: usecase.WebhookData{
-			Subscriptions: usecase.WebhookSubscription{
-				ID:     "sub_abc123",
-				Status: "successful",
-			},
+			ID:     "sub_abc123",
+			Status: "current",
 		},
 	}
 	validBodyBytes, _ := json.Marshal(validPayload)

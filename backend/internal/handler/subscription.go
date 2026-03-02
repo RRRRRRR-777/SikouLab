@@ -40,7 +40,7 @@ func NewSubscriptionHandler(uc subscriptionUsecase, logger zerolog.Logger, webho
 
 // checkoutRequest はチェックアウトリクエストのJSON構造。
 type checkoutRequest struct {
-	TransactionTokenID string `json:"transaction_token_id"`
+	SubscriptionID string `json:"subscription_id"`
 }
 
 // ServeGetPlans はGET /api/v1/plans を処理し、アクティブなプラン一覧を返す。
@@ -79,15 +79,15 @@ func (h *SubscriptionHandler) ServeCheckout(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	// transaction_token_idが空の場合はバリデーションエラー
-	if req.TransactionTokenID == "" {
+	// subscription_idが空の場合はバリデーションエラー
+	if req.SubscriptionID == "" {
 		writeJSON(w, http.StatusBadRequest, errorResponse{
-			Code: "BAD_REQUEST", Message: "transaction_token_idは必須です",
+			Code: "BAD_REQUEST", Message: "subscription_idは必須です",
 		})
 		return
 	}
 
-	if err := h.usecase.Checkout(r.Context(), user, req.TransactionTokenID); err != nil {
+	if err := h.usecase.Checkout(r.Context(), user, req.SubscriptionID); err != nil {
 		if errors.Is(err, usecase.ErrAlreadySubscribed) {
 			writeJSON(w, http.StatusConflict, errorResponse{
 				Code: "ALREADY_SUBSCRIBED", Message: "既にサブスクリプションが有効です",

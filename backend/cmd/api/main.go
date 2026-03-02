@@ -60,7 +60,7 @@ func main() {
 	// サブスクリプション
 	subscriptionRepo := repository.NewSubscriptionRepository(db)
 	univapayClient := univapay.NewClient(cfg.UnivaPayStoreID, cfg.UnivaPayStoreSecret)
-	subscriptionUsecase := usecase.NewSubscriptionUsecase(subscriptionRepo, univapayClient)
+	subscriptionUsecase := usecase.NewSubscriptionUsecase(subscriptionRepo, univapayClient, logger)
 	subscriptionHandler := handler.NewSubscriptionHandler(subscriptionUsecase, logger, cfg.UnivaPayWebhookSecret)
 
 	// ルーティング設定

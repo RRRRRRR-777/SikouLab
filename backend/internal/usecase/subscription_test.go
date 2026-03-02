@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/RRRRRRR-777/SicouLab/backend/internal/domain"
+	"github.com/rs/zerolog"
 )
 
 // mockSubscriptionRepository はSubscriptionRepositoryのモック。
@@ -43,15 +44,8 @@ func (m *mockSubscriptionRepository) UpdateUnivaPaySubscriptionID(ctx context.Co
 	return m.updateUnivaPaySubscriptionIDFunc(ctx, userID, subscriptionID)
 }
 
-// mockUnivaPayClient はUnivaPayClientのモック。
-type mockUnivaPayClient struct {
-	createSubscriptionFunc func(ctx context.Context, tokenID string, amount int, currency string) (string, error)
-}
-
-// CreateSubscription はモックのサブスクリプション作成を実行する。
-func (m *mockUnivaPayClient) CreateSubscription(ctx context.Context, tokenID string, amount int, currency string) (string, error) {
-	return m.createSubscriptionFunc(ctx, tokenID, amount, currency)
-}
+// nopLogger はテスト用のno-opロガー。
+var nopLogger = zerolog.Nop()
 
 // TestSubscriptionUsecase_GetPlans はGetPlansユースケースの各パターンを検証する。
 func TestSubscriptionUsecase_GetPlans(t *testing.T) {
@@ -106,7 +100,7 @@ func TestSubscriptionUsecase_GetPlans(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			uc := NewSubscriptionUsecase(tt.repo, nil)
+			uc := NewSubscriptionUsecase(tt.repo, nil, nopLogger)
 
 			plans, err := uc.GetPlans(context.Background())
 
@@ -128,6 +122,9 @@ func TestSubscriptionUsecase_GetPlans(t *testing.T) {
 }
 
 // TestSubscriptionUsecase_Checkout はCheckoutユースケースの各パターンを検証する。
+//
+// ウィジェット（checkout: "payment"モード）がサブスクリプション作成を行うため、
+// バックエンドのCheckoutはサブスクリプションIDのDB保存のみを行う。
 func TestSubscriptionUsecase_Checkout(t *testing.T) {
 	trialingUser := &domain.User{
 		ID:                 1,
@@ -139,80 +136,45 @@ func TestSubscriptionUsecase_Checkout(t *testing.T) {
 	}
 
 	tests := []struct {
-		name                           string
-		user                           *domain.User
-		tokenID                        string
-		repo                           *mockSubscriptionRepository
-		client                         *mockUnivaPayClient
-		wantErr                        bool
-		wantErrIs                      error
-		wantUpdateSubscriptionIDCalled bool
+		name           string
+		user           *domain.User
+		subscriptionID string
+		repo           *mockSubscriptionRepository
+		wantErr        bool
+		wantErrIs      error
 	}{
 		{
-			name:    "正常: サブスク作成とsubscription_id保存",
-			user:    trialingUser,
-			tokenID: "tok_xxx",
+			name:           "正常: subscription_id保存成功",
+			user:           trialingUser,
+			subscriptionID: "sub_abc123",
 			repo: &mockSubscriptionRepository{
-				findPlanByIDFunc: func(_ context.Context, _ int64) (*domain.Plan, error) {
-					return &domain.Plan{ID: 1, Amount: 1000, Currency: "JPY"}, nil
-				},
-				updateUnivaPaySubscriptionIDFunc: func(_ context.Context, _ int64, _ string) error {
+				updateUnivaPaySubscriptionIDFunc: func(_ context.Context, userID int64, subID string) error {
+					if userID != 1 {
+						t.Errorf("期待されたuserID=1, got=%d", userID)
+					}
+					if subID != "sub_abc123" {
+						t.Errorf("期待されたsubscriptionID=sub_abc123, got=%s", subID)
+					}
 					return nil
 				},
 			},
-			client: &mockUnivaPayClient{
-				createSubscriptionFunc: func(_ context.Context, _ string, _ int, _ string) (string, error) {
-					return "sub_abc123", nil
-				},
-			},
-			wantErr:                        false,
-			wantUpdateSubscriptionIDCalled: true,
+			wantErr: false,
 		},
 		{
-			name:      "既にactiveのユーザー",
-			user:      activeUser,
-			tokenID:   "tok_xxx",
-			repo:      &mockSubscriptionRepository{},
-			client:    &mockUnivaPayClient{},
-			wantErr:   true,
-			wantErrIs: ErrAlreadySubscribed,
+			name:           "既にactiveのユーザー",
+			user:           activeUser,
+			subscriptionID: "sub_abc123",
+			repo:           &mockSubscriptionRepository{},
+			wantErr:        true,
+			wantErrIs:      ErrAlreadySubscribed,
 		},
 		{
-			name:    "UnivaPay APIエラー時はDB更新されない",
-			user:    trialingUser,
-			tokenID: "tok_xxx",
+			name:           "DB更新エラー時",
+			user:           trialingUser,
+			subscriptionID: "sub_abc123",
 			repo: &mockSubscriptionRepository{
-				findPlanByIDFunc: func(_ context.Context, _ int64) (*domain.Plan, error) {
-					return &domain.Plan{ID: 1, Amount: 1000, Currency: "JPY"}, nil
-				},
-				updateUnivaPaySubscriptionIDFunc: func(_ context.Context, _ int64, _ string) error {
-					t.Error("UpdateUnivaPaySubscriptionID が呼ばれてはいけない")
-					return nil
-				},
-			},
-			client: &mockUnivaPayClient{
-				createSubscriptionFunc: func(_ context.Context, _ string, _ int, _ string) (string, error) {
-					return "", errors.New("univapay api error")
-				},
-			},
-			wantErr:                        true,
-			wantUpdateSubscriptionIDCalled: false,
-		},
-		{
-			name:    "DB更新エラー時",
-			user:    trialingUser,
-			tokenID: "tok_xxx",
-			repo: &mockSubscriptionRepository{
-				findPlanByIDFunc: func(_ context.Context, _ int64) (*domain.Plan, error) {
-					return &domain.Plan{ID: 1, Amount: 1000, Currency: "JPY"}, nil
-				},
 				updateUnivaPaySubscriptionIDFunc: func(_ context.Context, _ int64, _ string) error {
 					return errors.New("db error")
-				},
-			},
-			client: &mockUnivaPayClient{
-				createSubscriptionFunc: func(_ context.Context, _ string, _ int, _ string) (string, error) {
-					return "sub_abc123", nil
 				},
 			},
 			wantErr: true,
@@ -221,9 +183,9 @@ func TestSubscriptionUsecase_Checkout(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			uc := NewSubscriptionUsecase(tt.repo, tt.client)
+			uc := NewSubscriptionUsecase(tt.repo, nil, nopLogger)
 
-			err := uc.Checkout(context.Background(), tt.user, tt.tokenID)
+			err := uc.Checkout(context.Background(), tt.user, tt.subscriptionID)
 
 			if tt.wantErr {
 				if err == nil {
@@ -257,14 +219,12 @@ func TestSubscriptionUsecase_HandleWebhook(t *testing.T) {
 		wantNewStatus string
 	}{
 		{
-			name: "SUBSCRIPTION_PAYMENT + successful",
+			name: "subscription_payment + current",
 			payload: WebhookPayload{
-				Event: "SUBSCRIPTION_PAYMENT",
+				Event: "subscription_payment",
 				Data: WebhookData{
-					Subscriptions: WebhookSubscription{
-						ID:     "sub_abc123",
-						Status: "successful",
-					},
+					ID:     "sub_abc123",
+					Status: "current",
 				},
 			},
 			repo: &mockSubscriptionRepository{
@@ -282,14 +242,12 @@ func TestSubscriptionUsecase_HandleWebhook(t *testing.T) {
 			wantNewStatus: "active",
 		},
 		{
-			name: "SUBSCRIPTION_PAYMENT + failed",
+			name: "subscription_payment + unpaid",
 			payload: WebhookPayload{
-				Event: "SUBSCRIPTION_PAYMENT",
+				Event: "subscription_payment",
 				Data: WebhookData{
-					Subscriptions: WebhookSubscription{
-						ID:     "sub_abc123",
-						Status: "failed",
-					},
+					ID:     "sub_abc123",
+					Status: "unpaid",
 				},
 			},
 			repo: &mockSubscriptionRepository{
@@ -307,14 +265,12 @@ func TestSubscriptionUsecase_HandleWebhook(t *testing.T) {
 			wantNewStatus: "past_due",
 		},
 		{
-			name: "SUBSCRIPTION_FAILED",
+			name: "subscription_failure",
 			payload: WebhookPayload{
-				Event: "SUBSCRIPTION_FAILED",
+				Event: "subscription_failure",
 				Data: WebhookData{
-					Subscriptions: WebhookSubscription{
-						ID:     "sub_abc123",
-						Status: "",
-					},
+					ID:     "sub_abc123",
+					Status: "",
 				},
 			},
 			repo: &mockSubscriptionRepository{
@@ -332,14 +288,12 @@ func TestSubscriptionUsecase_HandleWebhook(t *testing.T) {
 			wantNewStatus: "past_due",
 		},
 		{
-			name: "SUBSCRIPTION_CANCELED",
+			name: "subscription_canceled",
 			payload: WebhookPayload{
-				Event: "SUBSCRIPTION_CANCELED",
+				Event: "subscription_canceled",
 				Data: WebhookData{
-					Subscriptions: WebhookSubscription{
-						ID:     "sub_abc123",
-						Status: "",
-					},
+					ID:     "sub_abc123",
+					Status: "",
 				},
 			},
 			repo: &mockSubscriptionRepository{
@@ -359,12 +313,10 @@ func TestSubscriptionUsecase_HandleWebhook(t *testing.T) {
 		{
 			name: "未知イベント",
 			payload: WebhookPayload{
-				Event: "UNKNOWN_EVENT",
+				Event: "unknown_event",
 				Data: WebhookData{
-					Subscriptions: WebhookSubscription{
-						ID:     "sub_abc123",
-						Status: "",
-					},
+					ID:     "sub_abc123",
+					Status: "",
 				},
 			},
 			repo: &mockSubscriptionRepository{
@@ -382,12 +334,10 @@ func TestSubscriptionUsecase_HandleWebhook(t *testing.T) {
 		{
 			name: "subscription_idに対応するユーザー不在",
 			payload: WebhookPayload{
-				Event: "SUBSCRIPTION_PAYMENT",
+				Event: "subscription_payment",
 				Data: WebhookData{
-					Subscriptions: WebhookSubscription{
-						ID:     "sub_unknown",
-						Status: "successful",
-					},
+					ID:     "sub_unknown",
+					Status: "current",
 				},
 			},
 			repo: &mockSubscriptionRepository{
@@ -404,12 +354,10 @@ func TestSubscriptionUsecase_HandleWebhook(t *testing.T) {
 		{
 			name: "冪等性: 同一イベントを2回呼び出す",
 			payload: WebhookPayload{
-				Event: "SUBSCRIPTION_PAYMENT",
+				Event: "subscription_payment",
 				Data: WebhookData{
-					Subscriptions: WebhookSubscription{
-						ID:     "sub_abc123",
-						Status: "successful",
-					},
+					ID:     "sub_abc123",
+					Status: "current",
 				},
 			},
 			repo: &mockSubscriptionRepository{
@@ -425,12 +373,10 @@ func TestSubscriptionUsecase_HandleWebhook(t *testing.T) {
 		{
 			name: "DBエラー時",
 			payload: WebhookPayload{
-				Event: "SUBSCRIPTION_PAYMENT",
+				Event: "subscription_payment",
 				Data: WebhookData{
-					Subscriptions: WebhookSubscription{
-						ID:     "sub_abc123",
-						Status: "successful",
-					},
+					ID:     "sub_abc123",
+					Status: "current",
 				},
 			},
 			repo: &mockSubscriptionRepository{
@@ -447,7 +393,7 @@ func TestSubscriptionUsecase_HandleWebhook(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			uc := NewSubscriptionUsecase(tt.repo, nil)
+			uc := NewSubscriptionUsecase(tt.repo, nil, nopLogger)
 
 			err := uc.HandleWebhook(context.Background(), tt.payload)
 
@@ -483,14 +429,12 @@ func TestSubscriptionUsecase_HandleWebhook_Idempotency(t *testing.T) {
 		},
 	}
 
-	uc := NewSubscriptionUsecase(repo, nil)
+	uc := NewSubscriptionUsecase(repo, nil, nopLogger)
 	payload := WebhookPayload{
-		Event: "SUBSCRIPTION_PAYMENT",
+		Event: "subscription_payment",
 		Data: WebhookData{
-			Subscriptions: WebhookSubscription{
-				ID:     "sub_abc123",
-				Status: "successful",
-			},
+			ID:     "sub_abc123",
+			Status: "current",
 		},
 	}
 
