@@ -22,6 +22,8 @@ type Handlers struct {
 }
 
 // Middlewares はルーティングに必要なミドルウェアを集約した構造体。
+// AuthUsecase は middleware.RequireAuth が受け取る authSessionVerifier を満たす型を設定する。
+// テスト時はインターフェースを満たすモックを直接設定可能。
 type Middlewares struct {
 	AuthUsecase *usecase.AuthUsecase
 }

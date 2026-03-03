@@ -61,6 +61,12 @@ setup("authenticate", async ({ page }) => {
     { timeout: 15000 },
   );
 
+  // onAuthStateChanged → authApi.login のフロー完了を待機するため、先にリスナーを登録
+  const loginResponsePromise = page.waitForResponse(
+    (response) => response.url().includes("/api/v1/auth/login") && response.status() === 200,
+    { timeout: 15000 },
+  );
+
   // アプリのAuth instance経由でサインイン（localStorage永続化）
   await page.evaluate(
     async ({ email, password }) => {
@@ -70,8 +76,8 @@ setup("authenticate", async ({ page }) => {
     { email: testEmail, password: testPassword },
   );
 
-  // アプリの認証フロー（onAuthStateChanged → API呼び出し等）の完了を待機
-  await page.waitForTimeout(3000);
+  // 認証フロー完了を待機
+  await loginResponsePromise;
 
   // セッション情報を保存（cookies + localStorage。Firebase auth tokenはlocalStorageに格納済み）
   await page.context().storageState({ path: authFile });

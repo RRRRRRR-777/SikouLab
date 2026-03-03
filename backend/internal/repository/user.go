@@ -25,7 +25,7 @@ func NewUserRepository(db *sqlx.DB) *UserRepository {
 // 見つからない場合はnil, nilを返す（エラーではない）。
 func (r *UserRepository) FindByOAuth(ctx context.Context, provider, oauthUserID string) (*domain.User, error) {
 	var u domain.User
-	query := `SELECT * FROM users WHERE oauth_provider = $1 AND oauth_user_id = $2`
+	query := `SELECT id, oauth_provider, oauth_user_id, name, display_name, avatar_url, role, plan_id, univapay_customer_id, subscription_status, created_at, updated_at FROM users WHERE oauth_provider = $1 AND oauth_user_id = $2`
 	err := r.db.GetContext(ctx, &u, query, provider, oauthUserID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
@@ -73,7 +73,7 @@ func (r *UserRepository) Create(ctx context.Context, user *domain.User) (*domain
 // FindByID はIDでユーザーを検索する。
 func (r *UserRepository) FindByID(ctx context.Context, id int64) (*domain.User, error) {
 	var u domain.User
-	query := `SELECT * FROM users WHERE id = $1`
+	query := `SELECT id, oauth_provider, oauth_user_id, name, display_name, avatar_url, role, plan_id, univapay_customer_id, subscription_status, created_at, updated_at FROM users WHERE id = $1`
 	err := r.db.GetContext(ctx, &u, query, id)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil

@@ -206,10 +206,8 @@ test.describe("サブスクリプション登録", () => {
     const button = page.getByRole("button", { name: "サブスクリプションを開始する" });
     await button.click();
 
-    // ダッシュボード（/）に遷移することを確認
-    // waitForURLを待つ前に、ポーリングが完了するのを待つ
-    await page.waitForTimeout(10000);
-    expect(page.url()).toContain("/");
+    // ポーリングで active 検知後にダッシュボード（/）へ遷移することを確認
+    await page.waitForURL("/", { timeout: 15000 });
   });
 
   test("409既存登録済みエラー時のトースト表示", async ({ page }) => {

@@ -4,9 +4,6 @@
  * @description
  * Providersコンポーネントに AuthProvider が含まれていること、
  * および TanStack Query の QueryClientProvider が含まれていることを確認する。
- *
- * NOTE: 現状 providers.tsx に AuthProvider が統合されていないため、
- * AuthProvider の統合に関するテストは Red（失敗）状態になる。
  */
 
 import { describe, it, expect, vi } from "vitest";
@@ -77,8 +74,6 @@ describe("Providers", () => {
     /**
      * Providers コンポーネント内で useAuth を呼び出したとき、
      * AuthProvider が内包されていれば onAuthStateChangedHelper が呼ばれ isLoading が false になる。
-     * 現状 providers.tsx に AuthProvider が含まれていないため、
-     * isLoading はコンテキストのデフォルト値 true のままとなり、このテストは失敗する（Red状態）。
      */
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <Providers>{children}</Providers>

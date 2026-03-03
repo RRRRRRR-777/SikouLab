@@ -24,7 +24,7 @@ func NewSubscriptionRepository(db *sqlx.DB) *SubscriptionRepository {
 // FindActivePlans は is_active=true のプランを全件返す。
 func (r *SubscriptionRepository) FindActivePlans(ctx context.Context) ([]domain.Plan, error) {
 	var plans []domain.Plan
-	query := `SELECT * FROM plans WHERE is_active = true ORDER BY id`
+	query := `SELECT id, name, description, amount, currency, is_active, created_at, updated_at FROM plans WHERE is_active = true ORDER BY id`
 	if err := r.db.SelectContext(ctx, &plans, query); err != nil {
 		return nil, fmt.Errorf("アクティブプラン取得失敗: %w", err)
 	}
@@ -35,7 +35,7 @@ func (r *SubscriptionRepository) FindActivePlans(ctx context.Context) ([]domain.
 // 見つからない場合は nil, nil を返す（既存の FindByUnivaPaySubscriptionID と同じパターン）。
 func (r *SubscriptionRepository) FindPlanByID(ctx context.Context, planID int64) (*domain.Plan, error) {
 	var p domain.Plan
-	query := `SELECT * FROM plans WHERE id = $1`
+	query := `SELECT id, name, description, amount, currency, is_active, created_at, updated_at FROM plans WHERE id = $1`
 	err := r.db.GetContext(ctx, &p, query, planID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
@@ -49,8 +49,16 @@ func (r *SubscriptionRepository) FindPlanByID(ctx context.Context, planID int64)
 // UpdateSubscriptionStatus は univapay_customer_id でユーザーを特定して subscription_status を更新する。
 func (r *SubscriptionRepository) UpdateSubscriptionStatus(ctx context.Context, univapaySubscriptionID, status string) error {
 	query := `UPDATE users SET subscription_status = $1, updated_at = NOW() WHERE univapay_customer_id = $2`
-	if _, err := r.db.ExecContext(ctx, query, status, univapaySubscriptionID); err != nil {
+	result, err := r.db.ExecContext(ctx, query, status, univapaySubscriptionID)
+	if err != nil {
 		return fmt.Errorf("サブスクリプションステータス更新失敗: %w", err)
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("影響行数の取得失敗: %w", err)
+	}
+	if rows == 0 {
+		return fmt.Errorf("該当するユーザーが見つかりません(univapay_customer_id=%s)", univapaySubscriptionID)
 	}
 	return nil
 }
@@ -59,7 +67,7 @@ func (r *SubscriptionRepository) UpdateSubscriptionStatus(ctx context.Context, u
 // 見つからない場合は nil, nil を返す。
 func (r *SubscriptionRepository) FindByUnivaPaySubscriptionID(ctx context.Context, univapaySubscriptionID string) (*domain.User, error) {
 	var u domain.User
-	query := `SELECT * FROM users WHERE univapay_customer_id = $1`
+	query := `SELECT id, oauth_provider, oauth_user_id, name, display_name, avatar_url, role, plan_id, univapay_customer_id, subscription_status, created_at, updated_at FROM users WHERE univapay_customer_id = $1`
 	err := r.db.GetContext(ctx, &u, query, univapaySubscriptionID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
