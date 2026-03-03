@@ -1,0 +1,150 @@
+name: E2E Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: sicoulab_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      # Backend
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/sicoulab_e2e?sslmode=disable
+      SERVER_PORT: "8080"
+      SERVER_HOST: 0.0.0.0
+      ALLOWED_ORIGINS: http://localhost:3100
+      LOG_LEVEL: info
+      FIREBASE_PROJECT_ID: demo-sicoulab
+      APP_ENV: development
+      FIREBASE_AUTH_EMULATOR_HOST: localhost:9099
+      UNIVAPAY_STORE_ID: dummy
+      UNIVAPAY_STORE_SECRET: dummy
+      UNIVAPAY_WEBHOOK_SECRET: dummy
+      # Frontend
+      NEXT_PUBLIC_API_URL: http://localhost:8080/api/v1
+      NEXT_PUBLIC_FIREBASE_API_KEY: fake-api-key
+      NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: demo-sicoulab.firebaseapp.com
+      CI: "true"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache-dependency-path: backend/go.sum
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      # DB セットアップ
+      - name: Install golang-migrate
+        run: go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+
+      - name: Run migrations
+        run: migrate -path backend/migrations -database "$DATABASE_URL" up
+
+      - name: Apply seeds
+        run: |
+          set -e
+          for f in backend/seeds/*.sql; do
+            psql "$DATABASE_URL" -f "$f"
+          done
+
+      # Backend 起動
+      - name: Build backend
+        working-directory: backend
+        run: go build -o server ./cmd/api
+
+      - name: Start backend
+        working-directory: backend
+        run: ./server &
+
+      - name: Wait for backend health
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8080/health > /dev/null; then
+              echo "Backend is ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Backend failed to start"
+          exit 1
+
+      # Frontend セットアップ
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
+
+      - name: Install Playwright browsers
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      # Firebase Auth Emulator
+      - name: Install firebase-tools
+        run: npm install -g firebase-tools
+
+      - name: Start Firebase Auth Emulator
+        run: firebase emulators:start --only auth --project demo-sicoulab &
+
+      - name: Wait for Firebase Auth Emulator
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:9099/ > /dev/null; then
+              echo "Firebase Auth Emulator is ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Firebase Auth Emulator failed to start"
+          exit 1
+
+      # E2E テスト実行
+      - name: Run E2E tests
+        working-directory: frontend
+        run: npx playwright test
+
+      # Artifacts
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 14
+
+      - name: Upload test screenshots
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-screenshots
+          path: frontend/test-results/
+          retention-days: 14
