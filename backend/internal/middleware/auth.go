@@ -42,7 +42,7 @@ func writeAuthError(w http.ResponseWriter, status int, code, message string) {
 	_ = json.NewEncoder(w).Encode(authErrorResponse{Code: code, Message: message})
 }
 
-// RequireAuth はセッションCookieを検証してcontextにuserを設定するミドルウェア。
+// RequireAuth は認証済みユーザーのみにアクセスを制限するためのミドルウェアを返す。
 //
 // Cookieなし・トークン検証失敗・ユーザー不在の場合は全て401を返す。
 // 検証成功時はcontextにUserを設定してnextハンドラーを呼ぶ。
@@ -151,18 +151,18 @@ func RequireSubscription() func(http.Handler) http.Handler {
 	}
 }
 
-// UserFromContext はcontextからuserを取り出すヘルパー。
+// UserFromContext はハンドラーが認証済みユーザー情報を参照するために使用する。
 //
-// RequireAuthを通過したリクエストのcontextからユーザーを取得する。
+// RequireAuthを通過したリクエストのcontextに格納されたユーザーを返す。
 // contextにUserが設定されていない場合はnilを返す。
 func UserFromContext(ctx context.Context) *domain.User {
 	u, _ := ctx.Value(userContextKey).(*domain.User)
 	return u
 }
 
-// ContextWithUser はcontextにuserを設定するヘルパー。
+// ContextWithUser はテストや内部処理でユーザー情報を直接注入するために使用する。
 //
-// テストや内部利用での直接セット用。通常はRequireAuthが設定する。
+// 通常のリクエストフローではRequireAuthが自動的に設定する。
 func ContextWithUser(ctx context.Context, user *domain.User) context.Context {
 	return context.WithValue(ctx, userContextKey, user)
 }

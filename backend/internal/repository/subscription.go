@@ -31,7 +31,7 @@ func (r *SubscriptionRepository) FindActivePlans(ctx context.Context) ([]domain.
 	return plans, nil
 }
 
-// FindPlanByID はプランIDでプランを取得する。
+// FindPlanByID はCheckout時にプランの存在と金額を検証するために使用する。
 // 見つからない場合は nil, nil を返す（既存の FindByUnivaPaySubscriptionID と同じパターン）。
 func (r *SubscriptionRepository) FindPlanByID(ctx context.Context, planID int64) (*domain.Plan, error) {
 	var p domain.Plan
@@ -46,7 +46,7 @@ func (r *SubscriptionRepository) FindPlanByID(ctx context.Context, planID int64)
 	return &p, nil
 }
 
-// UpdateSubscriptionStatus は univapay_customer_id でユーザーを特定して subscription_status を更新する。
+// UpdateSubscriptionStatus はWebhookイベントに応じてユーザーの課金状態を反映するために使用する。
 func (r *SubscriptionRepository) UpdateSubscriptionStatus(ctx context.Context, univapaySubscriptionID, status string) error {
 	query := `UPDATE users SET subscription_status = $1, updated_at = NOW() WHERE univapay_customer_id = $2`
 	result, err := r.db.ExecContext(ctx, query, status, univapaySubscriptionID)

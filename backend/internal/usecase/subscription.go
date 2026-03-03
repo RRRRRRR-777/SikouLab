@@ -56,11 +56,10 @@ type UnivaPayClient interface {
 	GetSubscription(ctx context.Context, storeID, subscriptionID string) (string, error)
 }
 
-// WebhookPayload はUnivaPay WebhookのペイロードJSON構造。
+// WebhookPayload はUnivaPay Webhookのリクエストボディをデシリアライズするための構造体。
 //
-// UnivaPay の実際のペイロード形式に基づく:
-//
-//	{ "event": "subscription_payment", "data": { "id": "...", "status": "..." } }
+// UnivaPay の実際のペイロード形式に基づく。
+// 例: { "event": "subscription_payment", "data": { "id": "...", "status": "..." } }。
 type WebhookPayload struct {
 	// Event はWebhookイベント名（例: "subscription_payment"）。
 	Event string `json:"event"`
@@ -94,7 +93,7 @@ func NewSubscriptionUsecase(repo SubscriptionRepository, client UnivaPayClient, 
 	}
 }
 
-// GetPlans はアクティブなプラン一覧を取得する。
+// GetPlans はフロントエンドのプラン選択画面に表示するプラン一覧を提供する。
 func (u *SubscriptionUsecase) GetPlans(ctx context.Context) ([]domain.Plan, error) {
 	plans, err := u.repo.FindActivePlans(ctx)
 	if err != nil {
@@ -129,17 +128,17 @@ func (u *SubscriptionUsecase) Checkout(ctx context.Context, user *domain.User, s
 	return nil
 }
 
-// HandleWebhook はUnivaPay Webhookイベントを処理してsubscription_statusを更新する。
+// HandleWebhook はUnivaPayからの決済通知に基づいてユーザーの課金状態を同期する。
 //
 // 未知イベントや対応ユーザー不在の場合はエラーなしで無視する。
-// 冪等性: 同一イベントを複数回受信しても安全に処理する（DB側でUPDATE冪等）。
+// 冪等性を保証し、同一イベントを複数回受信しても安全に処理する。
 //
 // イベントマッピング:
 //   - subscription_payment + current → active
-//   - subscription_payment + その他   → past_due
-//   - subscription_failure           → past_due
-//   - subscription_canceled          → canceled
-//   - その他                           → 無視（エラーなし）
+//   - subscription_payment + その他 → past_due
+//   - subscription_failure → past_due
+//   - subscription_canceled → canceled
+//   - その他 → 無視。
 func (u *SubscriptionUsecase) HandleWebhook(ctx context.Context, payload WebhookPayload) error {
 	u.logger.Debug().
 		Str("event", payload.Event).

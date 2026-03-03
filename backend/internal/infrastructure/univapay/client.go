@@ -64,7 +64,7 @@ type univaPayErrorResponse struct {
 	Message string `json:"message"`
 }
 
-// GetSubscription はUnivaPayサブスクリプションのステータスを取得する。
+// GetSubscription はWebhook受信時にサブスクリプションの最新状態を確認するために使用する。
 //
 // GET /stores/{storeID}/subscriptions/{id} に対してリクエストを送信し、ステータス文字列を返す。
 // storeID はCreateSubscriptionのレスポンスから取得したストアUUIDを使用する。
@@ -94,11 +94,11 @@ func (c *Client) GetSubscription(ctx context.Context, storeID, subscriptionID st
 	return result.Status, nil
 }
 
-// CreateSubscription はUnivaPayでサブスクリプションを作成し、サブスクリプションIDとストアUUIDを返す。
+// CreateSubscription はユーザーの決済トークンを使って月額課金を開始する。
 //
-// POST /subscriptions に対してリクエストを送信する。
+// POST /subscriptions に対してリクエストを送信し、サブスクリプションIDとストアUUIDを返す。
 // period は "monthly" 固定（現フェーズの仕様）。
-// 戻り値: (subscriptionID, storeID, error)
+// 戻り値の storeID は後続の GetSubscription 呼び出しに必要となる。
 func (c *Client) CreateSubscription(ctx context.Context, tokenID string, amount int, currency string) (string, string, error) {
 	reqBody := subscriptionRequest{
 		TransactionTokenID: tokenID,

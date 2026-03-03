@@ -21,9 +21,10 @@ type Handlers struct {
 	Subscription *handler.SubscriptionHandler
 }
 
-// Middlewares はルーティングに必要なミドルウェアを集約した構造体。
-// AuthUsecase は middleware.RequireAuth が受け取る authSessionVerifier を満たす型を設定する。
-// テスト時はインターフェースを満たすモックを直接設定可能。
+// Middlewares はミドルウェアの依存をBuild時に注入するための構造体。
+//
+// AuthUsecase は middleware.RequireAuth が受け取る authSessionVerifier を満たす。
+// テスト時はインターフェースを満たすモックを直接差し替え可能。
 type Middlewares struct {
 	AuthUsecase *usecase.AuthUsecase
 }
@@ -44,9 +45,9 @@ func NewBuilder(handlers Handlers, middlewares Middlewares, cfg *config.Config) 
 	}
 }
 
-// Build はルーティング設定済みのhttp.Handlerを返す。
+// Build はハンドラーとミドルウェアを組み合わせてルーティング設定済みのhttp.Handlerを構築する。
 //
-// ミドルウェアチェーン: Recovery -> Logger -> CORS -> Handler
+// ミドルウェアチェーン: Recovery -> Logger -> CORS -> Handler。
 func (b *Builder) Build(logger zerolog.Logger) http.Handler {
 	mux := http.NewServeMux()
 
