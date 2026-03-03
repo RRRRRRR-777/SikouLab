@@ -23,7 +23,9 @@
 ### backend/internal/firebase
 
 - type Client
+  - func (Client) CreateSessionCookie
   - func (Client) VerifyIDToken
+  - func (Client) VerifySessionCookie
 - type FirebaseToken
 - type TokenVerifier
 - func NewClient
@@ -88,6 +90,7 @@
 ### backend/internal/usecase
 
 - type AuthUsecase
+  - func (AuthUsecase) CreateSessionCookie
   - func (AuthUsecase) GetCurrentUser
   - func (AuthUsecase) Login
 - type SubscriptionRepository
