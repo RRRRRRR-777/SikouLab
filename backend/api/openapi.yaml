@@ -5,12 +5,22 @@ info:
   version: 0.1.0
   description: SicouLab バックエンドAPI
 
+tags:
+  - name: auth
+    description: 認証・セッション管理API
+  - name: subscription
+    description: サブスクリプション管理API
+  - name: webhook
+    description: 外部サービス Webhook 受信API
+  - name: system
+    description: システム管理API
+
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:8080/api/v1
     description: ローカル開発環境
 
 paths:
-  /health:
+  /api/v1/health:
     get:
       summary: ヘルスチェック
       tags:
@@ -27,7 +37,232 @@ paths:
                     type: string
                     example: ok
 
+  /api/v1/auth/login:
+    post:
+      summary: ログイン
+      description: Firebase ID Tokenを検証し、セッションを開始する。初回ログイン時はユーザーを自動登録する。
+      tags:
+        - auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id_token
+              properties:
+                id_token:
+                  type: string
+                  description: Firebase ID Token（JWT形式）
+      responses:
+        "200":
+          description: ログイン成功
+          headers:
+            Set-Cookie:
+              description: セッションCookie（HttpOnly + Secure + SameSite=Lax, 有効期限7日）
+              schema:
+                type: string
+                example: session=<id_token>; Max-Age=604800; Path=/; HttpOnly; Secure; SameSite=Lax
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          description: リクエスト不正
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: 認証失敗（無効なID Token）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/auth/me:
+    get:
+      summary: セッション確認・ユーザー情報取得
+      description: 現在のセッションCookieを検証し、ユーザー情報を返す
+      tags:
+        - auth
+      security:
+        - SessionAuth: []
+      responses:
+        "200":
+          description: セッション有効
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "401":
+          description: 未認証（無効なセッション）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/auth/logout:
+    post:
+      summary: ログアウト
+      description: セッションCookieを削除する。認証不要（未認証状態でもCookie削除が成功する）。
+      tags:
+        - auth
+      responses:
+        "204":
+          description: ログアウト成功（セッションCookie削除）
+          headers:
+            Set-Cookie:
+              description: セッションCookie削除
+              schema:
+                type: string
+                example: session=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax
+        "401":
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/plans:
+    get:
+      summary: アクティブなプラン一覧取得
+      description: is_active=true のプランを全件返す。サブスクリプション登録画面で使用する。
+      tags:
+        - subscription
+      responses:
+        "200":
+          description: プラン一覧取得成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlansResponse"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/univapay/checkout:
+    post:
+      summary: UnivaPay サブスクリプション作成
+      description: |
+        フロントエンドの UnivaPay JS ウィジェットから取得した transaction_token_id を受け取り、
+        UnivaPay API でサブスクリプションを作成する。
+        作成した subscription_id を users.univapay_customer_id に保存し、{ status: "pending" } を返す。
+        subscription_status の更新は Webhook 経由で非同期に行われる。
+      tags:
+        - subscription
+      security:
+        - SessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckoutRequest"
+      responses:
+        "200":
+          description: サブスクリプション作成開始成功（Webhook で active になるまで pending 状態）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutResponse"
+        "400":
+          description: リクエスト不正（transaction_token_id が空・未指定）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: 既にサブスクリプションが active 状態
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: サーバーエラー（UnivaPay API エラー含む）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/univapay/webhook:
+    post:
+      summary: UnivaPay Webhook 受信
+      description: |
+        UnivaPay からの Webhook イベントを受信し、users.subscription_status を更新する。
+        認証は Authorization ヘッダーで行う（セッション Cookie 不要）。
+        対応イベント: SUBSCRIPTION_PAYMENT, SUBSCRIPTION_FAILED, SUBSCRIPTION_CANCELED
+      tags:
+        - webhook
+      security:
+        - WebhookAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebhookPayload"
+      responses:
+        "200":
+          description: Webhook 受信・処理成功
+        "401":
+          description: Webhook 認証失敗（Authorization ヘッダー不正または不在）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
+  securitySchemes:
+    SessionAuth:
+      type: apiKey
+      in: cookie
+      name: session
+      description: セッション認証（HttpOnly Cookie）
+    WebhookAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: |
+        UnivaPay Webhook 認証。
+        Authorization ヘッダーに共有シークレットを設定し、
+        サーバー側で hmac.Equal による定数時間比較で検証する（タイミング攻撃対策）。
+        シークレットは環境変数 UNIVAPAY_WEBHOOK_SECRET で管理する。
+
   schemas:
     ErrorResponse:
       type: object
@@ -41,6 +276,68 @@ components:
         message:
           type: string
           description: エラーメッセージ
+
+    User:
+      type: object
+      required:
+        - id
+        - name
+        - role
+        - created_at
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ユーザーID
+        name:
+          type: string
+          description: 表示名
+        display_name:
+          type: string
+          nullable: true
+          description: OAuthプロバイダから取得した表示名
+        avatar_url:
+          type: string
+          nullable: true
+          description: アバター画像URL
+        role:
+          type: string
+          enum: [admin, writer, user]
+          description: ユーザーロール
+        plan_id:
+          type: integer
+          format: int64
+          nullable: true
+          description: プランID
+        subscription_status:
+          type: string
+          enum: [active, canceled, past_due, trialing]
+          nullable: true
+          description: サブスクリプション状態
+        created_at:
+          type: string
+          format: date-time
+          description: 作成日時
+
+    LoginResponse:
+      type: object
+      required:
+        - user
+        - is_first_login
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        is_first_login:
+          type: boolean
+          description: 初回ログインかどうか（trueの場合はサブスクリプション登録へ誘導）
+
+    UserResponse:
+      type: object
+      required:
+        - user
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
 
     PaginationParams:
       type: object
@@ -56,6 +353,85 @@ components:
           maximum: 100
           default: 20
           description: 1ページあたりの件数
+
+    Plan:
+      type: object
+      required:
+        - id
+        - name
+        - amount
+        - currency
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: プランID
+        name:
+          type: string
+          description: プラン名
+        description:
+          type: string
+          nullable: true
+          description: プラン説明
+        amount:
+          type: integer
+          description: "月額料金（最小通貨単位。例: JPY の場合は円）"
+          example: 1980
+        currency:
+          type: string
+          description: 通貨コード（ISO-4217）
+          example: JPY
+
+    PlansResponse:
+      type: array
+      description: アクティブなプランの配列を直接返す
+      items:
+        $ref: "#/components/schemas/Plan"
+
+    CheckoutRequest:
+      type: object
+      required:
+        - subscription_id
+      properties:
+        subscription_id:
+          type: string
+          minLength: 1
+          description: UnivaPay JS ウィジェットの univapay:subscription-created イベントで取得したサブスクリプションID
+
+    CheckoutResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: [pending]
+          description: サブスクリプション作成開始状態（active への更新は Webhook 経由）
+
+    WebhookPayload:
+      type: object
+      required:
+        - event
+        - data
+      description: UnivaPay Webhook ペイロード。data 直下にサブスクリプション情報が格納される。
+      properties:
+        event:
+          type: string
+          description: イベント種別
+          example: subscription_payment
+        data:
+          type: object
+          description: サブスクリプション情報（data 直下にフラットに格納）
+          required:
+            - id
+            - status
+          properties:
+            id:
+              type: string
+              description: UnivaPay サブスクリプションID（users.univapay_customer_id と一致）
+            status:
+              type: string
+              description: "サブスクリプションの状態（例: current, unconfirmed）"
 
     CursorPaginationResponse:
       type: object

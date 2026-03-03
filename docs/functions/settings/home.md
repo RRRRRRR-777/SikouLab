@@ -5,7 +5,7 @@
 
 **構成要素**:
 - F-10-1: プロフィール設定（アバター、ユーザーID、表示名）
-- F-10-2: サブスクリプション管理（Stripe連携）
+- F-10-2: サブスクリプション管理（UnivaPay連携）
 - F-10-3: メールアドレス登録（ニュースレター用）
 - F-10-4: FAQ・問い合わせ（外部リンク）
 
@@ -133,7 +133,7 @@ erDiagram
         string avatar_url
         string role "admin/writer/user"
         bigint plan_id FK
-        string stripe_customer_id
+        string univapay_customer_id
         string subscription_status "active/canceled/past_due"
         datetime created_at
         datetime updated_at
@@ -143,6 +143,8 @@ erDiagram
         bigint id PK
         string name
         string description
+        integer amount "月額料金（最小通貨単位）"
+        string currency "通貨コード ISO-4217（例: JPY）"
         boolean is_active
         datetime created_at
         datetime updated_at
@@ -188,7 +190,7 @@ flowchart TD
 flowchart TD
     A[設定画面アクセス] --> B[サブスクリプション状態表示]
     B --> C{ユーザー操作}
-    C -->|管理ボタンクリック| D[StripeポータルURL生成]
+    C -->|管理ボタンクリック| D[UnivaPayポータルURL生成]
     D --> E[外部サイトへリダイレクト]
     E --> F[ポータルで操作完了]
     F --> G[設定画面に戻る]
@@ -279,14 +281,14 @@ sequenceDiagram
     participant Front as フロントエンド
     participant API as バックエンドAPI
     participant DB as データベース
-    participant Stripe as Stripe API
+    participant UnivaPay as UnivaPay API
 
     %% 初期表示
     User->>Front: 設定画面にアクセス
     Front->>API: GET /api/subscriptions/me
     API->>DB: ユーザー情報取得（plan_id, subscription_status）
-    API->>Stripe: サブスクリプション詳細取得
-    Stripe-->>API: サブスクリプション情報
+    API->>UnivaPay: サブスクリプション詳細取得
+    UnivaPay-->>API: サブスクリプション情報
     DB-->>API: プラン情報
     API-->>Front: サブスクリプション状態
     Front->>User: プラン情報表示（プレミアムプラン、$1,980/月、有効）
@@ -294,10 +296,10 @@ sequenceDiagram
     %% 管理ボタンクリック
     User->>Front: 「管理」ボタンクリック
     Front->>API: POST /api/subscriptions/portal
-    API->>Stripe: カスタマーポータルURL生成
-    Stripe-->>API: ポータルURL
+    API->>UnivaPay: カスタマーポータルURL生成
+    UnivaPay-->>API: ポータルURL
     API-->>Front: { portal_url: "https://..." }
-    Front->>User: Stripeカスタマーポータルへリダイレクト
+    Front->>User: UnivaPayカスタマーポータルへリダイレクト
 ```
 
 ### F-10-3 メールアドレス登録
@@ -381,7 +383,7 @@ sequenceDiagram
   - 料金（例: $1,980/月）
   - ステータスバッジ（有効/期限切れ等）
 
-- 機能仕様2: Stripeカスタマーポータルへ遷移する
+- 機能仕様2: UnivaPayカスタマーポータルへ遷移する
   - 「管理」ボタンクリックでポータルURL生成
   - 外部サイトへリダイレクト
 
@@ -471,7 +473,7 @@ sequenceDiagram
 1. ユーザーが設定画面にアクセス
 2. サブスクリプションセクションで現在のプランを確認
 3. 「管理」ボタンをクリック
-4. Stripeカスタマーポータルが開く
+4. UnivaPayカスタマーポータルが開く
 5. プラン変更や支払い方法の更新を行う
 
 ### シナリオ4: アバター削除（TBD可）
@@ -521,7 +523,7 @@ sequenceDiagram
 | アバター変更 | 機能要件2/機能仕様1 | 有効な画像ファイル | avatar_urlが更新される |
 | アバター削除 | 機能要件2/機能仕様2 | 削除実行 | avatar_url = NULLになる |
 | サブスクリプション状態取得 | 機能要件3/機能仕様1 | 現在の状態取得 | プラン名・料金・ステータスが返される |
-| ポータルURL生成 | 機能要件3/機能仕様2 | 管理ボタンクリック | StripeポータルURLが返される |
+| ポータルURL生成 | 機能要件3/機能仕様2 | 管理ボタンクリック | UnivaPayポータルURLが返される |
 | 購読状況取得 | 機能要件4/機能仕様1 | 現在の購読状況取得 | is_activeとemailが返される |
 | メールアドレス登録 | 機能要件5/機能仕様1 | 正常なメールアドレスで登録 | newsletter_subscriptionsに作成される |
 | メール形式バリデーション | 機能要件5/機能仕様1 | 不正な形式の拒否 | 400エラーが返される |
@@ -602,8 +604,8 @@ sequenceDiagram
 | アバター削除API（DELETE /api/users/avatar） | 1 | S3削除 + DB更新（NULL設定） |
 | プロフィール設定UI | 5 | アバター表示/変更/削除、表示名フォーム、自動保存、トースト |
 | **F-10-2 サブスクリプション管理（8sp）** |||
-| サブスクリプション状態取得API | 3 | Stripe API連携 + DB統合、2データソース結合 |
-| カスタマーポータルURL生成API | 2 | Stripe SDK経由のURL生成 |
+| サブスクリプション状態取得API | 3 | UnivaPay API連携 + DB統合、2データソース結合 |
+| カスタマーポータルURL生成API | 2 | UnivaPay SDK経由のURL生成 |
 | サブスクリプションカードUI | 3 | ステータスバッジ、プラン表示、管理ボタン |
 | **F-10-3 メールアドレス登録（17sp）** |||
 | 購読状況取得API（GET） | 1 | 単純なDB読み取り |
@@ -621,12 +623,12 @@ sequenceDiagram
 
 ### リスク要因
 
-- Stripeカスタマーポータル: 初回連携の手間（+1-2sp）
+- UnivaPayカスタマーポータル: 初回連携の手間（+1-2sp）
 - 暗号化保存: メールアドレスの暗号化実装（+3sp程度）
 - 禁止ドメインチェック: 使い捨てメールリスト管理（+1-2sp）
 
 ### 依存関係
 
 - F-01（ログイン機能）: ユーザー認証が前提
-- Stripe: カスタマーポータル機能の有効化が必要
+- UnivaPay: カスタマーポータル機能の有効化が必要
 - ストレージ基盤: アバターアップロード機能に必要

@@ -81,7 +81,7 @@ erDiagram
         string avatar_url
         string role "admin/writer/user"
         bigint plan_id FK
-        string stripe_customer_id
+        string univapay_customer_id
         string subscription_status "active/canceled/past_due"
         datetime created_at
         datetime updated_at

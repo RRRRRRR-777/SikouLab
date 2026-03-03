@@ -19,6 +19,15 @@ export const metadata: Metadata = {
   description: "SicouLab - 受動的な情報体験プラットフォーム",
 };
 
+/**
+ * ルートレイアウト
+ *
+ * アプリケーション全体のHTMLルート構造と共通プロバイダーを定義する。
+ *
+ * @param root0 - ページのプロパティ
+ * @param root0.children - 子コンポーネント
+ * @returns ルートHTML構造
+ */
 export default function RootLayout({
   children,
 }: Readonly<{

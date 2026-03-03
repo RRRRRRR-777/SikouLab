@@ -10,7 +10,7 @@ services:
       - API_URL=http://backend:8080
     depends_on:
       backend:
-        condition: service_started
+        condition: service_healthy
     networks:
       - sicoulab
 
@@ -28,6 +28,11 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - sicoulab
 
@@ -69,6 +74,17 @@ services:
       - ./frontend/docs:/usr/share/nginx/html:ro
     profiles:
       - docs
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate --config /etc/cloudflared/config-sicoulab.yml run sicoulab
+    restart: on-failure:5
+    volumes:
+      - ${HOME}/.cloudflared:/etc/cloudflared:ro
+    networks:
+      - sicoulab
+    profiles:
+      - tunnel
 
 volumes:
   postgres_data:

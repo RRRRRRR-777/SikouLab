@@ -35,10 +35,13 @@
 - [014: 検索エンジン](adr/014-search-engine.md)
 - [015: インフラ環境構築](adr/015-deploy-platform.md)
 - [016: Phase 0横断的決定事項](adr/016-phase0-cross-cutting-decisions.md)
+- [017: CSRF対策](adr/017-csrf-protection.md)
+- [018: E2Eテスト認証方式](adr/018-e2e-auth-strategy.md)
 
 ## 機能仕様書
 - **認証機能（F-01）**
   - [ログイン](functions/auth/login.md)
+  - [サブスクリプション初回登録](functions/subscription/checkout.md)
 - **ダッシュボード機能（F-02）**
   - [ダッシュボード](functions/dashboard/home.md)
 - **銘柄機能（F-03）**

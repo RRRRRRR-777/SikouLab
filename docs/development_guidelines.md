@@ -75,7 +75,7 @@
 
 ### 1.6 外部サービス連携
 - **認証**: OAuth（Google / Apple 等）
-- **課金**: Stripe
+- **課金**: UnivaPay
 - **アナリティクス**: Metabase
 
 ### 1.7 API連携
@@ -123,9 +123,38 @@ frontend/
 ### 2.2 フロントエンド
 - **単体テスト**: 実施
 - **E2Eテスト**: Playwright
+  - 認証方式: Firebase Auth Emulator（ADR-018 参照）
+  - テスト対象ブラウザ: Mobile Safari（iPhone 14）、Desktop Chrome
+  - テストファイル配置: `frontend/e2e/`
 - **VRT（Visual Regression Testing）**: Playwright標準機能（toHaveScreenshot）
   - ベースライン画像はCloud Storageに保存
   - CI環境はDockerで統一（フォント差異対策）
+
+#### E2Eテスト実行方法
+
+```bash
+# テスト実行（Emulator起動 → 認証 → テスト → Emulator停止を自動実行）
+make -C frontend test-e2e
+```
+
+> `test-e2e` はFirebase Auth Emulatorの起動・停止を自動で行う。
+> frontend / backend / postgres は事前に起動済みであること。
+
+#### E2E関連Makefileターゲット
+
+| コマンド | 説明 |
+|---------|------|
+| `make -C frontend test-e2e` | Emulator起動 → E2Eテスト実行 → Emulator停止 |
+| `make -C frontend e2e-up` | サービス起動（Docker） + DB準備 |
+| `make -C frontend e2e-down` | サービス停止 + ボリューム削除 |
+| `make -C frontend e2e-reset-db` | DBリセット（マイグレーション + シード） |
+| `make -C frontend e2e-auth` | 認証セットアップのみ（Emulator起動込み） |
+| `make -C frontend test-vrt` | VRT直接実行（未構築） |
+
+#### 前提条件
+
+- `firebase-tools` がインストール済み（`npm install -g firebase-tools`）
+- ADR: [018-e2e-auth-strategy](adr/018-e2e-auth-strategy.md)
 
 ### 2.3 TDD（テスト駆動開発）
 - **進め方**: Red → Green → Refactor サイクルで開発
