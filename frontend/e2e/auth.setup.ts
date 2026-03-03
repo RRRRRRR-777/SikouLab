@@ -8,7 +8,11 @@ const authFile = ".auth/user.json";
  * 1. Emulator REST APIでテストユーザーを作成
  * 2. アプリページに遷移（FirebaseはEmulatorに接続 + localStorage永続化済み）
  * 3. アプリのAuth instanceで直接サインイン（window.__E2E_SIGN_IN__）
- * 4. storageState保存（localStorage経由でセッション引き継ぎ）
+ * 4. 取得したID Tokenで直接バックエンドログインAPIを呼び、セッションCookieを取得
+ * 5. storageState保存（cookies + localStorage経由でセッション引き継ぎ）
+ *
+ * 注意: onAuthStateChangedは/loginページではauthApi.loginをスキップするため、
+ * E2Eではpage.request.postで直接バックエンドを呼ぶ。
  *
  * 前提条件:
  *   - Firebase Auth Emulator が localhost:9099 で起動済み
@@ -61,23 +65,24 @@ setup("authenticate", async ({ page }) => {
     { timeout: 15000 },
   );
 
-  // onAuthStateChanged → authApi.login のフロー完了を待機するため、先にリスナーを登録
-  const loginResponsePromise = page.waitForResponse(
-    (response) => response.url().includes("/api/v1/auth/login") && response.status() === 200,
-    { timeout: 15000 },
-  );
-
-  // アプリのAuth instance経由でサインイン（localStorage永続化）
-  await page.evaluate(
+  // Firebase Auth経由でサインインし、ID Tokenを取得する。
+  // onAuthStateChangedは/loginページではauthApi.loginをスキップするため、
+  // ID Tokenを返してもらい、直接バックエンドのログインAPIを呼ぶ。
+  const idToken = await page.evaluate(
     async ({ email, password }) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (window as any).__E2E_SIGN_IN__(email, password);
+      const { user } = await (window as any).__E2E_SIGN_IN__(email, password);
+      return await user.getIdToken();
     },
     { email: testEmail, password: testPassword },
   );
 
-  // 認証フロー完了を待機
-  await loginResponsePromise;
+  // バックエンドのログインAPIを直接呼び、セッションCookieを取得する
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/api/v1";
+  const loginRes = await page.request.post(`${apiUrl}/auth/login`, {
+    data: { id_token: idToken },
+  });
+  expect(loginRes.ok()).toBeTruthy();
 
   // セッション情報を保存（cookies + localStorage。Firebase auth tokenはlocalStorageに格納済み）
   await page.context().storageState({ path: authFile });
