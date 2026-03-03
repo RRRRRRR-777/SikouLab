@@ -94,7 +94,7 @@ erDiagram
         string role "admin/writer/user"
         bigint plan_id FK
         string univapay_customer_id
-        string subscription_status "active/canceled/past_due"
+        string subscription_status "active/canceled/past_due/trialing/inactive"
         datetime created_at
         datetime updated_at
     }

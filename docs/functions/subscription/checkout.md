@@ -82,7 +82,7 @@ erDiagram
         string role "admin/writer/user"
         bigint plan_id FK
         string univapay_customer_id
-        string subscription_status "active/canceled/past_due/trialing"
+        string subscription_status "active/canceled/past_due/trialing/inactive"
         datetime created_at
         datetime updated_at
     }
@@ -252,7 +252,7 @@ sequenceDiagram
 - 機能仕様1: UnivaPay の Webhook イベントを受信して subscription_status を更新する
   - エンドポイント: `POST /api/v1/univapay/webhook`
   - **セッション Cookie 認証不要**（UnivaPay サーバーからのリクエストのため）
-  - Webhook 認証: `Univapay-Signature` ヘッダーの **HMAC-SHA256 署名検証**
+  - Webhook 認証: `Authorization` ヘッダーの **HMAC-SHA256 署名検証**
     - UnivaPay がリクエストボディを共有シークレットで HMAC-SHA256 署名して送信する
     - サーバー側で `hmac.Equal` による定数時間比較で検証する（タイミング攻撃対策）
     - 検証失敗時は 401 を返す

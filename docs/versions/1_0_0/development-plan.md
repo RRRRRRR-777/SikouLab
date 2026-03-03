@@ -55,7 +55,7 @@
 
 | 作業 | 内容 |
 |------|------|
-| docker-compose | PostgreSQL 16コンテナ定義（既存docker-compose.ymlに追記） |
+| docker-compose | PostgreSQL 17コンテナ定義（既存docker-compose.ymlに追記） |
 | DB接続 | sqlxによる接続プール設定 |
 | マイグレーション | golang-migrate CLI + Makefile統合 |
 | 初期マイグレーション | plansテーブル（マスタデータ） |

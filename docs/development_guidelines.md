@@ -123,7 +123,7 @@ frontend/
 ### 2.2 フロントエンド
 - **単体テスト**: 実施
 - **E2Eテスト**: Playwright
-  - 認証方式: storageState（手動OAuth → セッション保存 → テストで再利用）
+  - 認証方式: Firebase Auth Emulator（ADR-018 参照）
   - テスト対象ブラウザ: Mobile Safari（iPhone 14）、Desktop Chrome
   - テストファイル配置: `frontend/e2e/`
 - **VRT（Visual Regression Testing）**: Playwright標準機能（toHaveScreenshot）
