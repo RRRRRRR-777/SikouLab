@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/RRRRRRR-777/SicouLab/backend/internal/domain"
 	"github.com/RRRRRRR-777/SicouLab/backend/internal/firebase"
@@ -40,7 +41,7 @@ func (u *AuthUsecase) Login(ctx context.Context, idToken string) (user *domain.U
 	// IDトークンを検証
 	ft, err := u.firebaseClient.VerifyIDToken(ctx, idToken)
 	if err != nil {
-		return nil, false, fmt.Errorf("%w: %w", ErrInvalidToken, err)
+		return nil, false, fmt.Errorf("%w: %s", ErrInvalidToken, err.Error())
 	}
 
 	// 既存ユーザーを検索
@@ -62,7 +63,7 @@ func (u *AuthUsecase) Login(ctx context.Context, idToken string) (user *domain.U
 		DisplayName:        ft.Name,
 		AvatarURL:          ft.Picture,
 		Role:               "user",
-		SubscriptionStatus: "active",
+		SubscriptionStatus: "inactive",
 	}
 
 	created, err := u.userRepo.Create(ctx, newUser)
@@ -73,11 +74,16 @@ func (u *AuthUsecase) Login(ctx context.Context, idToken string) (user *domain.U
 	return created, true, nil
 }
 
-// GetCurrentUser はセッションのID Tokenを検証してユーザーを返す。
+// CreateSessionCookie はID Tokenからサーバー側セッション Cookie を生成する。
+func (u *AuthUsecase) CreateSessionCookie(ctx context.Context, idToken string, expiresIn time.Duration) (string, error) {
+	return u.firebaseClient.CreateSessionCookie(ctx, idToken, expiresIn)
+}
+
+// GetCurrentUser はセッション Cookie を検証してユーザーを返す。
 func (u *AuthUsecase) GetCurrentUser(ctx context.Context, sessionToken string) (*domain.User, error) {
-	ft, err := u.firebaseClient.VerifyIDToken(ctx, sessionToken)
+	ft, err := u.firebaseClient.VerifySessionCookie(ctx, sessionToken)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %w", ErrInvalidToken, err)
+		return nil, fmt.Errorf("%w: %s", ErrInvalidToken, err.Error())
 	}
 
 	user, err := u.userRepo.FindByOAuth(ctx, ft.Provider, ft.UID)

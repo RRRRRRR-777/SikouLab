@@ -6,6 +6,8 @@ package config
 
 import (
 	"errors"
+	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -42,8 +44,10 @@ type Config struct {
 // Load は.envファイルおよび環境変数から設定を読み込む。
 // 必須の環境変数が未設定の場合はエラーを返す。
 func Load() (*Config, error) {
-	if err := godotenv.Load(); err != nil {
-		return nil, errors.New(".envファイルの読み込みに失敗しました。.env.sampleを参考に.envを作成してください")
+	// .envは開発環境専用。CI/本番では環境変数を直接設定するためファイル不在は正常。
+	// ただし構文エラーは設定ミスなので検知する。
+	if err := godotenv.Load(); err != nil && !os.IsNotExist(err) {
+		return nil, fmt.Errorf(".envファイルの構文エラー: %w", err)
 	}
 
 	cfg := &Config{}
@@ -87,6 +91,14 @@ func Load() (*Config, error) {
 	cfg.AppEnv = os.Getenv("APP_ENV")
 	cfg.FirebaseServiceAccountJSON = os.Getenv("FIREBASE_SERVICE_ACCOUNT_JSON")
 	cfg.UnivaPayWebhookSecret = os.Getenv("UNIVAPAY_WEBHOOK_SECRET")
+
+	// Webhookシークレット未設定の警告
+	if cfg.UnivaPayWebhookSecret == "" {
+		if cfg.AppEnv == "production" {
+			return nil, errors.New("本番環境では UNIVAPAY_WEBHOOK_SECRET の設定が必須です")
+		}
+		log.Println("WARNING: UNIVAPAY_WEBHOOK_SECRET is not set. Webhook verification will reject all requests.")
+	}
 	cfg.UnivaPayStoreID = os.Getenv("UNIVAPAY_STORE_ID")
 	cfg.UnivaPayStoreSecret = os.Getenv("UNIVAPAY_STORE_SECRET")
 

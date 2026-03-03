@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/rs/zerolog"
 
@@ -23,6 +24,8 @@ const (
 type authUsecase interface {
 	Login(ctx context.Context, idToken string) (*domain.User, bool, error)
 	GetCurrentUser(ctx context.Context, sessionToken string) (*domain.User, error)
+	// CreateSessionCookie はID Tokenからサーバー側セッション Cookie を生成する。
+	CreateSessionCookie(ctx context.Context, idToken string, expiresIn time.Duration) (string, error)
 }
 
 // AuthHandler は認証APIハンドラーを提供する。
@@ -105,6 +108,17 @@ func (h *AuthHandler) ServeLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Firebase Admin SDK でサーバー側セッション Cookie を生成する。
+	// ID Tokenは1時間で失効するが、SessionCookieは指定した有効期限まで有効。
+	sessionCookie, err := h.usecase.CreateSessionCookie(r.Context(), req.IDToken, time.Duration(sessionCookieMaxAge)*time.Second)
+	if err != nil {
+		h.logger.Error().Err(err).Msg("セッションCookie生成失敗")
+		writeJSON(w, http.StatusInternalServerError, errorResponse{
+			Code: "INTERNAL_ERROR", Message: "サーバーエラーが発生しました",
+		})
+		return
+	}
+
 	// セッションCookieを設定
 	//
 	// Cookie属性:
@@ -113,7 +127,7 @@ func (h *AuthHandler) ServeLogin(w http.ResponseWriter, r *http.Request) {
 	// - SameSite=Lax: CSRF対策しつつ、外部リンクからの遷移を許可
 	http.SetCookie(w, &http.Cookie{
 		Name:     sessionCookieName,
-		Value:    req.IDToken,
+		Value:    sessionCookie,
 		MaxAge:   sessionCookieMaxAge,
 		Path:     "/",
 		HttpOnly: true,

@@ -36,6 +36,8 @@ export interface CheckoutWidgetConfig {
   onSuccess: (subscriptionId: string) => void;
   /** 決済エラーコールバック */
   onError?: (error: Error) => void;
+  /** ウィジェットがキャンセル・クローズされた時のコールバック */
+  onClose?: () => void;
 }
 
 /** checkout.js の CDN URL */
@@ -131,6 +133,15 @@ export async function openCheckoutWidget(
     "univapay:error",
     ((event: CustomEvent<{ message: string }>) => {
       config.onError?.(new Error(event.detail?.message ?? "決済エラー"));
+    }) as EventListener,
+    { once: true },
+  );
+
+  // ウィジェットクローズイベント（キャンセル時）
+  window.addEventListener(
+    "univapay:closed",
+    (() => {
+      config.onClose?.();
     }) as EventListener,
     { once: true },
   );

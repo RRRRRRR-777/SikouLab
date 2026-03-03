@@ -19,6 +19,7 @@ import {
 } from "@/lib/subscription/subscription-api";
 import { openCheckoutWidget } from "@/lib/subscription/univapay";
 import { authApi } from "@/lib/auth/auth-api";
+import { isAxiosError } from "axios";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /** 画面の状態 */
@@ -109,10 +110,7 @@ export function SubscriptionPage() {
           await subscriptionApi.checkout(subscriptionId);
           startPolling();
         } catch (error: unknown) {
-          const axiosError = error as {
-            response?: { status?: number; data?: { message?: string } };
-          };
-          if (axiosError.response?.status === 409) {
+          if (isAxiosError(error) && error.response?.status === 409) {
             toast.error("既に登録済みです");
           } else {
             toast.error("決済処理に失敗しました");
@@ -123,6 +121,11 @@ export function SubscriptionPage() {
       onError: () => {
         toast.error("決済処理に失敗しました");
         setState("ready");
+      },
+      onClose: () => {
+        // ウィジェットがキャンセル・クローズされた場合、processing の時のみ ready に戻す。
+        // onSuccess 後（polling/timeout）に onClose が来ても状態を壊さない。
+        setState((prev) => (prev === "processing" ? "ready" : prev));
       },
     });
   }, [plans, startPolling]);

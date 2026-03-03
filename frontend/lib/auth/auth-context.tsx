@@ -72,7 +72,7 @@ const defaultValue: AuthContextValue = {
 /**
  * 認証コンテキスト
  */
-const AuthContext = createContext<AuthContextValue>(defaultValue);
+const AuthContext = createContext<AuthContextValue | null>(null);
 
 /**
  * 認証プロバイダーのプロパティ
@@ -200,16 +200,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Firebaseサインアウト
       await firebaseSignOut();
 
-      // バックエンドでログアウト
-      await authApi.logout();
+      // バックエンドでログアウト（失敗しても /login 遷移を継続する）
+      try {
+        await authApi.logout();
+      } catch (apiError) {
+        logWarn("API logout failed, proceeding with cleanup", { apiError });
+      }
 
       setUser(null);
       router.push("/login");
       toast.success("ログアウトしました");
     } catch (error) {
       logError("Logout failed", { error });
-      toast.error("ログアウトに失敗しました");
-      throw error;
+      // Firebase signOut 失敗時もクライアント状態をクリアして /login へ誘導
+      setUser(null);
+      router.push("/login");
+      toast.error("ログアウトに失敗しました。再度ログインしてください");
     } finally {
       setIsLoading(false);
     }

@@ -70,6 +70,27 @@ VALUES (
 )
 ON CONFLICT (oauth_provider, oauth_user_id) DO NOTHING;
 
+-- テスト用未課金ユーザー（初回ログイン後、サブスク未登録の状態）
+INSERT INTO users (
+    oauth_provider,
+    oauth_user_id,
+    name,
+    display_name,
+    avatar_url,
+    role,
+    subscription_status
+)
+VALUES (
+    'google',
+    'test_inactive_001',
+    'Test Inactive User',
+    'テスト未課金ユーザー',
+    'https://example.com/avatar/inactive.png',
+    'user',
+    'inactive'
+)
+ON CONFLICT (oauth_provider, oauth_user_id) DO NOTHING;
+
 -- テスト用ユーザー設定
 INSERT INTO user_settings (user_id, sidebar_article_expanded, sidebar_admin_expanded)
 SELECT id, true, false FROM users WHERE oauth_user_id LIKE 'test_%'

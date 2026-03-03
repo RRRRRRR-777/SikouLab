@@ -92,8 +92,8 @@ export function getFirebaseAuth(): Auth {
   initializeFirebaseApp();
   authInstance = getAuth();
 
-  // E2Eテスト用: Firebase Auth Emulatorに接続
-  if (EMULATOR_HOST) {
+  // E2Eテスト用: Firebase Auth Emulatorに接続（本番環境では無効化）
+  if (EMULATOR_HOST && process.env.NODE_ENV !== "production") {
     connectAuthEmulator(authInstance, `http://${EMULATOR_HOST}`, { disableWarnings: true });
 
     // storageStateでセッションを引き継ぐため、IndexedDBではなくlocalStorageに永続化

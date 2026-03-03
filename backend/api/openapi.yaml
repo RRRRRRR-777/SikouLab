@@ -118,11 +118,9 @@ paths:
   /api/v1/auth/logout:
     post:
       summary: ログアウト
-      description: セッションCookieを削除する
+      description: セッションCookieを削除する。認証不要（未認証状態でもCookie削除が成功する）。
       tags:
         - auth
-      security:
-        - SessionAuth: []
       responses:
         "204":
           description: ログアウト成功（セッションCookie削除）
@@ -258,10 +256,10 @@ components:
     WebhookAuth:
       type: apiKey
       in: header
-      name: Univapay-Signature
+      name: Authorization
       description: |
-        UnivaPay Webhook 署名検証。
-        UnivaPay がリクエストボディを HMAC-SHA256 で署名して送信する。
+        UnivaPay Webhook 認証。
+        Authorization ヘッダーに共有シークレットを設定し、
         サーバー側で hmac.Equal による定数時間比較で検証する（タイミング攻撃対策）。
         シークレットは環境変数 UNIVAPAY_WEBHOOK_SECRET で管理する。
 
@@ -385,24 +383,20 @@ components:
           example: JPY
 
     PlansResponse:
-      type: object
-      required:
-        - plans
-      properties:
-        plans:
-          type: array
-          items:
-            $ref: "#/components/schemas/Plan"
+      type: array
+      description: アクティブなプランの配列を直接返す
+      items:
+        $ref: "#/components/schemas/Plan"
 
     CheckoutRequest:
       type: object
       required:
-        - transaction_token_id
+        - subscription_id
       properties:
-        transaction_token_id:
+        subscription_id:
           type: string
           minLength: 1
-          description: UnivaPay JS ウィジェットのコールバックで取得した transaction_token_id
+          description: UnivaPay JS ウィジェットの univapay:subscription-created イベントで取得したサブスクリプションID
 
     CheckoutResponse:
       type: object
@@ -419,25 +413,25 @@ components:
       required:
         - event
         - data
-      description: UnivaPay Webhook ペイロード
+      description: UnivaPay Webhook ペイロード。data 直下にサブスクリプション情報が格納される。
       properties:
         event:
           type: string
           description: イベント種別
-          example: SUBSCRIPTION_PAYMENT
+          example: subscription_payment
         data:
           type: object
-          description: イベントデータ
+          description: サブスクリプション情報（data 直下にフラットに格納）
+          required:
+            - id
+            - status
           properties:
-            subscriptions:
-              type: object
-              properties:
-                id:
-                  type: string
-                  description: UnivaPay サブスクリプションID（users.univapay_customer_id と一致）
-                status:
-                  type: string
-                  description: "決済状態（SUBSCRIPTION_PAYMENT イベント時のみ）。successful / failed"
+            id:
+              type: string
+              description: UnivaPay サブスクリプションID（users.univapay_customer_id と一致）
+            status:
+              type: string
+              description: "サブスクリプションの状態（例: current, unconfirmed）"
 
     CursorPaginationResponse:
       type: object

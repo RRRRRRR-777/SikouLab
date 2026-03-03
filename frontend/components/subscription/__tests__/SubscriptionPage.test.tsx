@@ -10,6 +10,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor, fireEvent, act } from "@testing-library/react";
+import { AxiosError } from "axios";
 import { SubscriptionPage } from "../SubscriptionPage";
 
 // --- モック変数のホイスティング ---
@@ -280,9 +281,9 @@ describe("SubscriptionPage", () => {
 
     it("既にactive（409）でエラートースト", async () => {
       setupCheckoutFlow();
-      mockCheckout.mockRejectedValue({
-        response: { status: 409, data: { message: "既に登録済みです" } },
-      });
+      const axiosError = new AxiosError("Request failed with status code 409");
+      axiosError.response = { status: 409, data: { message: "既に登録済みです" } } as import("axios").AxiosResponse;
+      mockCheckout.mockRejectedValue(axiosError);
 
       render(<SubscriptionPage />);
 

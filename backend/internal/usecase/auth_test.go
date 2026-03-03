@@ -12,12 +12,31 @@ import (
 
 // mockTokenVerifier はFirebase TokenVerifierのモック。
 type mockTokenVerifier struct {
-	verifyFunc func(ctx context.Context, idToken string) (*firebase.FirebaseToken, error)
+	verifyFunc              func(ctx context.Context, idToken string) (*firebase.FirebaseToken, error)
+	createSessionCookieFunc func(ctx context.Context, idToken string, expiresIn time.Duration) (string, error)
+	verifySessionCookieFunc func(ctx context.Context, sessionCookie string) (*firebase.FirebaseToken, error)
 }
 
 // VerifyIDToken はモックのIDトークン検証を実行する。
 func (m *mockTokenVerifier) VerifyIDToken(ctx context.Context, idToken string) (*firebase.FirebaseToken, error) {
 	return m.verifyFunc(ctx, idToken)
+}
+
+// CreateSessionCookie はモックのセッションCookie生成を実行する。
+func (m *mockTokenVerifier) CreateSessionCookie(ctx context.Context, idToken string, expiresIn time.Duration) (string, error) {
+	if m.createSessionCookieFunc != nil {
+		return m.createSessionCookieFunc(ctx, idToken, expiresIn)
+	}
+	return "mock-session-cookie", nil
+}
+
+// VerifySessionCookie はモックのセッションCookie検証を実行する。
+func (m *mockTokenVerifier) VerifySessionCookie(ctx context.Context, sessionCookie string) (*firebase.FirebaseToken, error) {
+	if m.verifySessionCookieFunc != nil {
+		return m.verifySessionCookieFunc(ctx, sessionCookie)
+	}
+	// デフォルトはVerifyIDTokenと同じ動作
+	return m.verifyFunc(ctx, sessionCookie)
 }
 
 // mockUserRepo はUserRepositoryのモック。

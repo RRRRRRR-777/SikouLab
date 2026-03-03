@@ -15,8 +15,9 @@ import (
 
 // mockAuthUsecase はauthUsecaseインターフェースのモック。
 type mockAuthUsecase struct {
-	loginFunc          func(ctx context.Context, idToken string) (*domain.User, bool, error)
-	getCurrentUserFunc func(ctx context.Context, sessionToken string) (*domain.User, error)
+	loginFunc               func(ctx context.Context, idToken string) (*domain.User, bool, error)
+	getCurrentUserFunc      func(ctx context.Context, sessionToken string) (*domain.User, error)
+	createSessionCookieFunc func(ctx context.Context, idToken string, expiresIn time.Duration) (string, error)
 }
 
 // Login はモックのLogin処理を実行する。
@@ -27,6 +28,14 @@ func (m *mockAuthUsecase) Login(ctx context.Context, idToken string) (*domain.Us
 // GetCurrentUser はモックのGetCurrentUser処理を実行する。
 func (m *mockAuthUsecase) GetCurrentUser(ctx context.Context, sessionToken string) (*domain.User, error) {
 	return m.getCurrentUserFunc(ctx, sessionToken)
+}
+
+// CreateSessionCookie はモックのセッションCookie生成を実行する。
+func (m *mockAuthUsecase) CreateSessionCookie(_ context.Context, _ string, _ time.Duration) (string, error) {
+	if m.createSessionCookieFunc != nil {
+		return m.createSessionCookieFunc(context.Background(), "", 0)
+	}
+	return "mock-session-cookie", nil
 }
 
 // TestAuthHandler_ServeLogin はServeLoginハンドラーの各パターンを検証する。

@@ -29,9 +29,23 @@ const LOG_LEVEL_PRIORITY: Record<string, number> = {
  * @param request - Next.jsリクエスト
  * @returns 成功レスポンス
  */
+/** 許可するログレベル */
+const ALLOWED_LEVELS = ["error", "warn", "info", "debug"] as const;
+
+/** メッセージの最大文字数 */
+const MAX_MESSAGE_LENGTH = 1000;
+
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const entry: LogEntry = await request.json();
+
+    // バリデーション: 不正なログレベルやメッセージを拒否
+    if (!entry.level || !ALLOWED_LEVELS.includes(entry.level as (typeof ALLOWED_LEVELS)[number])) {
+      return NextResponse.json({ error: "Invalid log level" }, { status: 400 });
+    }
+    if (!entry.message || typeof entry.message !== "string" || entry.message.length > MAX_MESSAGE_LENGTH) {
+      return NextResponse.json({ error: "Invalid message" }, { status: 400 });
+    }
 
     // LOG_LEVEL 環境変数で指定したレベル以上のみ出力（デフォルト: info）
     const configuredLevel = process.env.LOG_LEVEL ?? "info";
