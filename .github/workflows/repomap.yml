@@ -10,12 +10,7 @@ on:
     branches:
       - main
       - 'feature/**'
-  pull_request:
-    paths:
-      - 'backend/**/*.go'
-      - 'frontend/**/*.ts'
-      - 'frontend/**/*.tsx'
-      - 'tools/repomap/**'
+      - 'ticket/**'
 
 jobs:
   update-repomap:
