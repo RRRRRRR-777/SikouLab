@@ -83,3 +83,34 @@ func (r *UserRepository) FindByID(ctx context.Context, id int64) (*domain.User, 
 	}
 	return &u, nil
 }
+
+// UpdateDisplayName は表示名を更新し、更新後のユーザーを返す。
+func (r *UserRepository) UpdateDisplayName(ctx context.Context, userID int64, displayName string) (*domain.User, error) {
+	var u domain.User
+	query := `UPDATE users SET display_name = $1, updated_at = NOW() WHERE id = $2 RETURNING id, oauth_provider, oauth_user_id, name, display_name, avatar_url, role, plan_id, univapay_customer_id, subscription_status, created_at, updated_at`
+	err := r.db.GetContext(ctx, &u, query, displayName, userID)
+	if err != nil {
+		return nil, fmt.Errorf("表示名更新失敗: %w", err)
+	}
+	return &u, nil
+}
+
+// UpdateAvatarURL はアバターURLを更新する。
+func (r *UserRepository) UpdateAvatarURL(ctx context.Context, userID int64, avatarURL string) error {
+	query := `UPDATE users SET avatar_url = $1, updated_at = NOW() WHERE id = $2`
+	_, err := r.db.ExecContext(ctx, query, avatarURL, userID)
+	if err != nil {
+		return fmt.Errorf("アバターURL更新失敗: %w", err)
+	}
+	return nil
+}
+
+// ClearAvatarURL はアバターURLをNULLに更新する。
+func (r *UserRepository) ClearAvatarURL(ctx context.Context, userID int64) error {
+	query := `UPDATE users SET avatar_url = NULL, updated_at = NOW() WHERE id = $1`
+	_, err := r.db.ExecContext(ctx, query, userID)
+	if err != nil {
+		return fmt.Errorf("アバターURL削除失敗: %w", err)
+	}
+	return nil
+}

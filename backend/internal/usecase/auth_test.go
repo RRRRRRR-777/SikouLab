@@ -79,7 +79,7 @@ func TestAuthUsecase_Login(t *testing.T) {
 		OAuthUserID:        "firebase-uid-123",
 		Name:               "Test User",
 		DisplayName:        "Test User",
-		AvatarURL:          "https://example.com/avatar.png",
+		AvatarURL:          ptrStr("https://example.com/avatar.png"),
 		Role:               "user",
 		SubscriptionStatus: "active",
 		CreatedAt:          now,

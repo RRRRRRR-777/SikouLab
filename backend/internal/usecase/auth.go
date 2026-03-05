@@ -61,7 +61,7 @@ func (u *AuthUsecase) Login(ctx context.Context, idToken string) (user *domain.U
 		OAuthUserID:        ft.UID,
 		Name:               ft.Name,
 		DisplayName:        ft.Name,
-		AvatarURL:          ft.Picture,
+		AvatarURL:          &ft.Picture,
 		Role:               "user",
 		SubscriptionStatus: "inactive",
 	}

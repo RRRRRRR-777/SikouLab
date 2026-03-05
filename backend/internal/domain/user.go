@@ -17,8 +17,8 @@ type User struct {
 	Name string `db:"name"`
 	// DisplayName は表示名。
 	DisplayName string `db:"display_name"`
-	// AvatarURL はアバター画像のURL。
-	AvatarURL string `db:"avatar_url"`
+	// AvatarURL はアバター画像のURL。NULLの場合はnil。
+	AvatarURL *string `db:"avatar_url"`
 	// Role はユーザーのロール（"admin", "writer", "user"）。
 	Role string `db:"role"`
 	// PlanID は契約プランのID。
