@@ -9,5 +9,7 @@
   "excludePrivate": true,
   "excludeExternals": true,
   "plugin": [],
-  "exclude": ["**/*.test.ts", "**/*.test.tsx", "**/__tests__/**", "vitest.config.ts"]
+  "exclude": ["**/*.test.ts", "**/*.test.tsx", "**/__tests__/**", "vitest.config.ts"],
+  "searchInComments": true,
+  "searchInDocuments": true
 }

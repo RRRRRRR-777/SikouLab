@@ -22,6 +22,26 @@ make run
 make build
 ```
 
+## 環境変数
+
+`.env.sample` をコピーして `.env` を作成してください。
+
+```bash
+cp .env.sample .env
+```
+
+### Firebase（Google Cloud）認証
+
+ローカル開発では [Application Default Credentials (ADC)](https://cloud.google.com/docs/authentication/application-default-credentials) を使用します。`FIREBASE_SERVICE_ACCOUNT_JSON` の設定は不要です。
+
+```bash
+# 初回のみ実行
+gcloud auth application-default login
+
+# ログイン状況の確認
+gcloud auth application-default print-access-token
+```
+
 ## Docker
 
 ```bash

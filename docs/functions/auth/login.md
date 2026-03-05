@@ -58,15 +58,15 @@ Pencil未定義（実装のみ）
 │  │            OAuthプロバイダでログイン               │  │
 │  │                                                   │  │
 │  │  ┌──────────────────────────────────────────┐    │  │
-│  │  │ [G]  Google で続ける                      │    │  │
+│  │  │ [G]  Google でログイン                      │    │  │
 │  │  └──────────────────────────────────────────┘    │  │
 │  │                                                   │  │
 │  │  ┌──────────────────────────────────────────┐    │  │
-│  │  │   Apple で続ける                          │    │  │
+│  │  │   Apple でログイン                          │    │  │
 │  │  └──────────────────────────────────────────┘    │  │
 │  │                                                   │  │
 │  │  ┌──────────────────────────────────────────┐    │  │
-│  │  │   X で続ける                               │    │  │
+│  │  │   X でログイン                               │    │  │
 │  │  └──────────────────────────────────────────┘    │  │
 │  │                                                   │  │
 │  └───────────────────────────────────────────────────┘  │
@@ -94,7 +94,7 @@ erDiagram
         string role "admin/writer/user"
         bigint plan_id FK
         string univapay_customer_id
-        string subscription_status "active/canceled/past_due"
+        string subscription_status "active/canceled/past_due/trialing/inactive"
         datetime created_at
         datetime updated_at
     }
@@ -103,6 +103,7 @@ erDiagram
         bigint id PK
         bigint user_id FK
         boolean sidebar_article_expanded "記事タブの折りたたみ状態"
+        boolean sidebar_admin_expanded "管理タブの折りたたみ状態"
         datetime created_at
         datetime updated_at
     }
@@ -111,6 +112,8 @@ erDiagram
         bigint id PK
         string name
         string description
+        integer amount "月額料金（最小通貨単位）"
+        string currency "通貨コード ISO-4217（例: JPY）"
         boolean is_active
         datetime created_at
         datetime updated_at
@@ -161,7 +164,7 @@ sequenceDiagram
     User->>Firebase: 認証実行
     Firebase-->>Front: ID Token
 
-    Front->>API: POST /api/auth/verify {id_token}
+    Front->>API: POST /api/v1/auth/login {id_token}
     API->>Firebase: ID Token検証
     Firebase-->>API: ユーザー情報（uid, email, name, picture）
 
@@ -262,31 +265,200 @@ sequenceDiagram
 3. ログイン画面へ遷移
 
 ## テストケース
-🟡 **中程度**
+🟢 **実装済み**
 
-**記載タイミング**: 単体テストは大枠のみ設計段階、詳細はTDD実装時。E2Eテストは実装完了後
+### 単体テスト（バックエンド）
 
-### 単体テスト（設計段階は大枠のみ、詳細はTDD実装時に追記）
+#### Usecase: Login（機能要件1、機能要件2）
 
-| テスト項目 | 観点 | 期待値 |
-|------------|------|--------|
-| ID Token検証 | Firebaseから取得したID Tokenの検証 | 有効なトークンの場合はユーザー情報が返される |
-| ID Token検証（無効） | 無効なID Tokenの場合のエラー処理 | 401認証エラーが返される |
-| ユーザー情報取得 | Firebaseからユーザー情報取得 | uid, email, name, pictureが取得できる |
-| 初回ログイン処理 | ユーザー作成・user_settings作成・UnivaPayカスタマー作成 | users, user_settingsテーブルにレコード作成、univapay_customer_idが保存される |
-| 既存ユーザーログイン | ユーザー取得・サブスクリプション状態確認 | ユーザー情報とサブスクリプション状態が返される |
-| ログアウト処理 | Firebaseサインアウト・セッション削除 | Firebaseセッションが無効化され、本システム側のセッションも削除される |
-| セッション確認 | 有効なセッションでユーザー情報取得 | ユーザー情報が返される |
-| セッション確認（無効） | 無効なセッションで401エラー | 認証エラーが返される |
+| テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
+|------------|----------|------------|--------|
+| TC-AUTH-01 | 機能要件1/機能仕様1 | 有効なID Token（既存ユーザー） | 正常系 | ユーザー情報が返される、isFirstLogin=false |
+| TC-AUTH-02 | 機能要件1/機能仕様1 | 無効なID Token | 異常系 | ErrInvalidTokenが返される |
+| TC-AUTH-03 | 機能要件2/機能仕様1 | 初回ログイン（ユーザー不在） | 正常系 | isFirstLogin=true、Createが呼ばれる |
+| TC-AUTH-04 | 機能要件2/機能仕様2 | 初回ログイン + UnivaPay APIエラー | 異常系 | ユーザー作成済みだがunivapay_customer_idはnull、500エラー |
+
+#### Usecase: GetCurrentUser（機能要件3）
+
+| テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
+|------------|----------|------------|--------|
+| TC-AUTH-05 | 機能要件3/機能仕様1 | 有効なセッショントークン | 正常系 | ユーザー情報が返される |
+| TC-AUTH-06 | 機能要件3/機能仕様1 | 無効なセッショントークン | 異常系 | ErrInvalidTokenが返される |
+
+#### Middleware: RequireAuth（機能要件4）
+
+| テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
+|------------|----------|------------|--------|
+| TC-AUTH-07 | 機能要件4/機能仕様1 | Cookieあり・有効なトークン | 正常系 | 200、next handler実行、contextにUser設定 |
+| TC-AUTH-08 | 機能要件4/機能仕様1 | Cookieなし | 異常系 | 401 |
+| TC-AUTH-09 | 機能要件4/機能仕様1 | Cookieあり・無効なトークン（検証失敗） | 異常系 | 401 |
+| TC-AUTH-10 | 機能要件4/機能仕様1 | トークン有効だがDBにユーザー不在 | 異常系 | 401 |
+
+#### Middleware: RequireRole（機能要件4）
+
+| テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
+|------------|----------|------------|--------|
+| TC-AUTH-11 | 機能要件4/機能仕様1 | admin + adminエンドポイント | 正常系 | 200 |
+| TC-AUTH-12 | 機能要件4/機能仕様1 | user + adminエンドポイント | 異常系 | 403 |
+| TC-AUTH-13 | 機能要件4/機能仕様1 | writer + adminエンドポイント | 異常系 | 403 |
+| TC-AUTH-14 | 機能要件4/機能仕様1 | writer + writerエンドポイント | 正常系 | 200 |
+| TC-AUTH-15 | 機能要件4/機能仕様1 | user + writerエンドポイント | 異常系 | 403 |
+| TC-AUTH-16 | 機能要件4/機能仕様1 | admin + writerエンドポイント（階層権限） | 正常系 | 200（admin > writer > user） |
+| TC-AUTH-17 | 機能要件4/機能仕様1 | contextにUser不在 | 異常系 | 401 |
+| TC-AUTH-18 | 機能要件4/機能仕様1 | 不明なrole | 異常系 | 403 |
+
+#### Middleware: RequireSubscription（機能要件4）
+
+| テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
+|------------|----------|------------|--------|
+| TC-AUTH-19 | 機能要件4/機能仕様1 | subscription_status=active | 正常系 | 200 |
+| TC-AUTH-20 | 機能要件4/機能仕様1 | subscription_status=canceled | 異常系 | 403 |
+| TC-AUTH-21 | 機能要件4/機能仕様1 | subscription_status=past_due | 異常系 | 403 |
+| TC-AUTH-22 | 機能要件4/機能仕様1 | contextにUser不在 | 異常系 | 401 |
+
+#### Handler: POST /api/v1/auth/login（機能要件1、機能要件5）
+
+| テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
+|------------|----------|------------|--------|
+| TC-AUTH-23 | 機能要件5/機能仕様1 | 本番環境 | 正常系 | 200、Cookie Secure=true、HttpOnly=true、SameSite=Lax、MaxAge=604800 |
+| TC-AUTH-24 | 機能要件5/機能仕様1 | 開発環境 | 正常系 | 200、Cookie Secure=false、HttpOnly=true、SameSite=Lax、MaxAge=604800 |
+| TC-AUTH-25 | 機能要件1/機能仕様1 | id_tokenが空文字 | 境界値 | 400 |
+| TC-AUTH-26 | 機能要件1/機能仕様1 | 不正なJSONボディ | 異常系 | 400 |
+| TC-AUTH-27 | 機能要件1/機能仕様1 | ErrInvalidToken | 異常系 | 401 |
+| TC-AUTH-28 | 機能要件1/機能仕様1 | その他のエラー | 異常系 | 500 |
+
+#### Handler: GET /api/v1/auth/me（機能要件3）
+
+| テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
+|------------|----------|------------|--------|
+| TC-AUTH-29 | 機能要件3/機能仕様1 | 有効なCookie | 正常系 | 200、ユーザー情報 |
+| TC-AUTH-30 | 機能要件3/機能仕様1 | Cookie不在 | 異常系 | 401 |
+| TC-AUTH-31 | 機能要件3/機能仕様1 | ErrInvalidToken | 異常系 | 401 |
+| TC-AUTH-32 | 機能要件3/機能仕様1 | その他のエラー | 異常系 | 500 |
+
+#### Handler: POST /api/v1/auth/logout（機能要件3）
+
+| テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
+|------------|----------|------------|--------|
+| TC-AUTH-33 | 機能要件3/機能仕様2 | 本番環境のログアウト | 正常系 | 204、Cookie value=""、MaxAge=-1、Secure=true |
+| TC-AUTH-34 | 機能要件3/機能仕様2 | 開発環境のログアウト | 正常系 | 204、Cookie value=""、MaxAge=-1、Secure=false |
+
+---
+
+### 単体テスト（フロントエンド）
+
+#### Middleware: パスマッチング（機能要件4）
+
+| テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
+|------------|----------|------------|--------|
+| TC-FE-01 | 機能要件4/機能仕様1 | `'/'` は完全一致のみ | 正常系 | `/login` や `/articles` にはマッチしない |
+| TC-FE-02 | 機能要件4/機能仕様1 | 非ルートパスはサブパスにマッチ | 正常系 | `/articles/123` は `/articles` にマッチ、`/articles-legacy` はマッチしない |
+| TC-FE-03 | 機能要件4/機能仕様1 | 公開パス・保護パスの判定 | 正常系 | `/login` は公開、`/` と `/articles/2026` は保護 |
+
+#### Middleware: ルートガード（機能要件4）
+
+| テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
+|------------|----------|------------|--------|
+| TC-FE-04 | 機能要件4/機能仕様1 | セッションなし + 保護パス | 異常系 | 307、Location: /login |
+| TC-FE-05 | 機能要件4/機能仕様1 | セッションあり + /login | 正常系 | 307、Location: / |
+| TC-FE-06 | 機能要件4/機能仕様1 | セッションなし + /subscription | 正常系 | 200（通過・NextResponse.next()） |
+| TC-FE-07 | 機能要件4/機能仕様1 | セッションあり + 保護パス | 正常系 | 200（通過・NextResponse.next()） |
+
+#### Providers（機能要件1、機能要件3）
+
+| テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
+|------------|----------|------------|--------|
+| TC-FE-08 | 機能要件1/機能仕様1 | AuthProviderが含まれている | 正常系 | isLoading=false、useAuthが使える |
+| TC-FE-09 | 機能要件1/機能仕様1 | QueryClientProviderが含まれている | 正常系 | useQueryClientが値を返す |
+
+#### 認証APIクライアント（機能要件1、機能要件3）
+
+| テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
+|------------|----------|------------|--------|
+| TC-FE-10 | 機能要件1/機能仕様1 | authApi.login 成功 | 正常系 | user情報、is_first_login=false |
+| TC-FE-11 | 機能要件2/機能仕様1 | authApi.login 初回ログイン | 正常系 | is_first_login=true |
+| TC-FE-12 | 機能要件1/機能仕様1 | authApi.login 無効なID Token | 異常系 | 401エラー |
+| TC-FE-13 | 機能要件1/機能仕様1 | authApi.login ネットワークエラー | 異常系 | Network Error |
+| TC-FE-14 | 機能要件3/機能仕様1 | authApi.getMe 成功 | 正常系 | user情報 |
+| TC-FE-15 | 機能要件3/機能仕様1 | authApi.getMe 未認証 | 異常系 | 401エラー |
+| TC-FE-16 | 機能要件3/機能仕様2 | authApi.logout 成功 | 正常系 | 204 No Content |
+| TC-FE-17 | 機能要件3/機能仕様2 | authApi.logout 未認証 | 異常系 | 401エラー |
+
+#### 認証コンテキスト（機能要件1、機能要件3）
+
+| テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
+|------------|----------|------------|--------|
+| TC-FE-18 | 機能要件1/機能仕様1 | 初期状態 | 正常系 | user=null、isLoading=false、isAuthenticated=false |
+| TC-FE-19 | 機能要件1/機能仕様1 | loginWithGoogle 成功 | 正常系 | user情報がセット、isAuthenticated=true |
+| TC-FE-20 | 機能要件2/機能仕様1 | loginWithGoogle 初回ログイン | 正常系 | `/subscription` へpush |
+| TC-FE-21 | 機能要件1/機能仕様1 | loginWithApple 成功 | 正常系 | isAuthenticated=true |
+| TC-FE-22 | 機能要件1/機能仕様1 | loginWithX 成功 | 正常系 | isAuthenticated=true |
+| TC-FE-23 | 機能要件3/機能仕様2 | logout 成功 | 正常系 | user=null、isAuthenticated=false |
+| TC-FE-24 | 機能要件4/機能仕様1 | ログインページでの動作 | 正常系 | getMe未呼び出し、authApi.login未呼び出し、user=null |
+| TC-FE-25 | 機能要件3/機能仕様1 | refresh 成功 | 正常系 | getMeが呼ばれる |
+| TC-FE-26 | 機能要件5/機能仕様2 | onAuthStateChanged getIdToken呼び出し | 正常系 | getIdToken(forceRefresh=true) が呼ばれ、authApi.login が呼ばれる |
+| TC-FE-27 | 機能要件5/機能仕様2 | トークンリフレッシュ成功 | 正常系 | user情報がセット、isAuthenticated=true |
+| TC-FE-28 | 機能要件5/機能仕様2 | getIdToken失敗 | 異常系 | user=null、isAuthenticated=false |
+| TC-FE-29 | 機能要件5/機能仕様2 | login失敗（401等） | 異常系 | user=null、isAuthenticated=false |
+
+#### ログイン画面（機能要件1）
+
+| テスト項目 | 対応仕様 | 入力・条件 | 期待値 |
+|------------|----------|------------|--------|
+| TC-FE-30 | 機能要件1/機能仕様1 | 画面表示（ロゴとタイトル） | 正常系 | "SikouLab"、利用規約文言が表示される |
+| TC-FE-31 | 機能要件1/機能仕様1 | 画面表示（OAuthボタン） | 正常系 | Google / Apple / X のボタンが表示される |
+| TC-FE-32 | 機能要件1/機能仕様1 | Googleボタンクリック | 正常系 | `loginWithGoogle` が1回呼ばれる |
+| TC-FE-33 | 機能要件1/機能仕様1 | Appleボタンクリック | 正常系 | `loginWithApple` が1回呼ばれる |
+| TC-FE-34 | 機能要件1/機能仕様1 | Xボタンクリック | 正常系 | `loginWithX` が1回呼ばれる |
+| TC-FE-35 | 機能要件1/機能仕様1 | アクセシビリティ | 正常系 | 各ボタンに `type="button"` が設定されている |
+| TC-FE-36 | 機能要件1/機能仕様1 | ダークモード対応 | 正常系 | 基本要素が表示される |
+
+---
 
 ### E2Eテスト（実装完了後に記載）
 
-| テストシナリオ | 観点 | 期待値 |
-|----------------|------|--------|
-| 初回ログインフロー | 未ログイン→Firebase認証→ユーザー作成→サブスク画面遷移 | TBD（実装完了後に記載） |
-| 既存ユーザーログインフロー | 未ログイン→Firebase認証→ダッシュボード遷移 | TBD（実装完了後に記載） |
-| ログアウトフロー | ログイン済み→Firebaseサインアウト→ログイン画面遷移 | TBD（実装完了後に記載） |
-| 保護されたページへのアクセス | 未ログイン状態で保護ページアクセス→ログイン画面へリダイレクト | TBD（実装完了後に記載） |
+| テストシナリオ | 対応仕様 | 観点 | 期待値 |
+|----------------|----------|------|--------|
+| 初回ログインフロー | 機能要件2 | 正常系 | 未ログイン→Firebase認証→ユーザー作成→サブスク画面遷移 |
+| 既存ユーザーログインフロー | 機能要件1 | 正常系 | 未ログイン→Firebase認証→ダッシュボード遷移 |
+| ログアウトフロー | 機能要件3 | 正常系 | ログイン済み→Firebaseサインアウト→ログイン画面遷移 |
+| 保護されたページへのアクセス | 機能要件4 | 異常系 | 未ログイン状態で保護ページアクセス→ログイン画面へリダイレクト |
+
+---
+
+## カバレッジマトリックス
+
+### バックエンド（Usecase + Middleware + Handler）
+
+| テストケース | 正常系 | 異常系 | 境界値 | 分岐網羅 | 状態遷移 |
+|------------|--------|--------|--------|----------|----------|
+| TC-AUTH-01~04 | ✓ | ✓ | | ✓ | |
+| TC-AUTH-05~06 | ✓ | ✓ | | | |
+| TC-AUTH-07~10 | ✓ | ✓ | | ✓ | |
+| TC-AUTH-11~18 | ✓ | ✓ | | ✓ | |
+| TC-AUTH-19~22 | ✓ | ✓ | | | |
+| TC-AUTH-23~28 | ✓ | ✓ | ✓ | ✓ | |
+| TC-AUTH-29~32 | ✓ | ✓ | | | |
+| TC-AUTH-33~34 | ✓ | | | | |
+
+### フロントエンド（Middleware + Providers + API + Context + UI）
+
+| テストケース | 正常系 | 異常系 | 境界値 | 分岐網羅 | 状態遷移 |
+|------------|--------|--------|--------|----------|----------|
+| TC-FE-01~03 | ✓ | | | ✓ | |
+| TC-FE-04~07 | ✓ | ✓ | | ✓ | |
+| TC-FE-08~09 | ✓ | | | | |
+| TC-FE-10~17 | ✓ | ✓ | | ✓ | |
+| TC-FE-18~29 | ✓ | ✓ | | ✓ | ✓ |
+| TC-FE-30~36 | ✓ | | | ✓ | |
+
+### 網羅性まとめ
+
+- **正常系**: 有効なToken、初回ログイン、既存ユーザー、セッション管理、権限チェック、OAuthプロバイダ、Cookie設定
+- **異常系**: 無効Token、期限切れ、Cookie不在、権限エラー、サブスクリプション状態エラー、ネットワークエラー
+- **境界値**: 空文字、不正JSON、JWTフォーマット境界、環境（本番/開発）
+- **分岐網羅**: OAuthプロバイダ、初回/既存ユーザー、サブスクリプション状態、role階層、公開/保護パス
+- **状態遷移**: 未ログイン→ログイン→ログアウト、トークンリフレッシュ、セッション期限切れ
 
 ## 影響範囲一覧
 
@@ -308,9 +480,9 @@ sequenceDiagram
 
 ## API仕様（参考）
 
-### ID Token検証
+### ログイン
 ```http
-POST /api/auth/verify
+POST /api/v1/auth/login
 Content-Type: application/json
 
 {
@@ -318,14 +490,14 @@ Content-Type: application/json
 }
 ```
 
-### ログアウト
-```http
-POST /api/auth/logout
-```
-
 ### セッション確認
 ```http
-GET /api/auth/me
+GET /api/v1/auth/me
+```
+
+### ログアウト
+```http
+POST /api/v1/auth/logout
 ```
 
 ## 作業見積もり

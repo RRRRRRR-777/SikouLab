@@ -36,12 +36,15 @@
   * 概要: デプロイフローの選定。GitHub Environment承認を採用。
     トリガー、承認プロセス、ロールバック方針を記載。
 - [017: CSRF対策](adr/017-csrf-protection.md)
+* docs/adr/018-e2e-auth-strategy.md
+  * 概要: E2Eテスト認証方式の選定。Firebase Auth Emulatorを採用。storageState+手動OAuth、Admin SDKカスタムトークン、バックエンド認証バイパスを比較し、CI対応・セキュリティ・Firebase公式推奨を理由に選定。
 * docs/adr/007-log-monitoring.md
   * 概要: ログ監視方式の選定。Cloud Logging + Cloud Monitoring（GCP完結）を採用。
     障害発生時のフロー、通知先（Cloud Consoleアプリ）、将来拡張（LLM分析）を記載。
 * docs/adr/008-api-integration.md
   * 概要: フロントエンドとバックエンドのAPI連携方針。axios + httpOnly Cookie（SameSite=Lax）を採用。
     認証方式、型定義管理、エラーハンドリング、将来のモバイル対応方針を記載。
+    本番環境はCloud Load BalancingのURLパスルーティングでBFF構成（CORS不要）。開発環境はNEXT_PUBLIC_API_URL（http://localhost:8080/api/v1）で直接接続。
 * docs/adr/009-frontend-directory-structure.md
   * 概要: Next.js 15（App Router）のベストプラクティスに沿ったフロントエンドディレクトリ構成。
     app/はルーティング専用、components/features/で機能別整理、lib/utils/storesの役割を定義。
@@ -102,6 +105,11 @@
   * 概要: ログイン機能（F-01）の詳細設計書。Google / Apple / XによるOAuth認証、初回ログイン時のユーザー登録・UnivaPayカスタマー作成、
     セッション管理（httpOnly Cookie）、ログアウトの仕様を定義。
     画面設計図・シーケンス図・API仕様・機能要件・非機能要件・テストケースを含む。
+* docs/functions/subscription/checkout.md
+  * 概要: サブスクリプション初回登録フロー（KAN-42 BE・KAN-44 FE）の詳細設計書。初回ログイン後に表示される登録画面。
+    UnivaPay JS ウィジェット（ポップアップ型）でカード情報を入力してサブスクリプションを開始する。
+    Webhook 受信（SUBSCRIPTION_PAYMENT）で subscription_status を更新し、ダッシュボードへ遷移する。
+    API 設計（GET /plans・POST /univapay/checkout・POST /univapay/webhook）・シーケンス図・テストケースを含む。
 
 ### 記事機能（F-04）
 * docs/functions/article/home.md

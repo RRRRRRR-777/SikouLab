@@ -359,7 +359,8 @@ flowchart TD
 ※ ログアウトは設定画面（F-10）内に配置
 
 **折りたたみ状態の永続化**
-- `user_settings`テーブルの`sidebar_article_expanded`カラムで管理
+- `user_settings`テーブルの`sidebar_article_expanded`カラムで記事タブを管理
+- `user_settings`テーブルの`sidebar_admin_expanded`カラムで管理タブを管理（admin/writerのみ）
 - ログイン時・ページ遷移時に状態を復元
 
 ### 3.4 主要画面レイアウト方針

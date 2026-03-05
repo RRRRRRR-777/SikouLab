@@ -5,6 +5,170 @@ paths:
 
 # frontendディレクトリルール
 
+## モバイルファースト原則
+
+### ブレークポイント定義（プロジェクト共通）
+
+| 名称 | 範囲 | Tailwindプレフィックス |
+|------|------|----------------------|
+| モバイル | < 768px | （なし・ベース） |
+| タブレット | 768px〜1023px | `md:` |
+| デスクトップ | ≥ 1024px | `lg:` |
+
+### 記述原則
+
+- **ベースクラス = モバイル**として書き、`md:` / `lg:` で上書きする
+- 情報を「非表示」にするのではなく「形を変える」を優先する
+
+### 禁止パターン
+
+| アンチパターン | 問題 | 代替 |
+|---|---|---|
+| `hidden md:flex` | スマホで消える | `flex flex-col md:flex-row`（形を変える） |
+| `hidden lg:block` | スマホ・タブレットで消える | レイアウトを工夫して表示維持 |
+
+### 例外（許容する非表示）
+
+同じ情報を**別の形で提供している場合のみ** `hidden` を許容する。
+その際は必ずコメントで「モバイルでは〇〇で代替」と明記すること。
+
+```tsx
+{/* デスクトップのサイドナビ。モバイルではドロワーナビ（Sidebar コンポーネント）で代替 */}
+<nav className="hidden lg:flex ...">...</nav>
+```
+
+## モバイルUI実装ルール
+
+### タッチターゲット
+- ボタン・リンクは最小 **44×44px** を確保する（WCAG 2.1 / Apple HIG 準拠）
+- Tailwindでは `min-h-[44px] min-w-[44px]` または `h-11 w-11`（44px）で担保
+
+### フォントサイズ
+- 本文は最小 `text-base`（16px）以上にする
+- 16px未満だとiOSが自動ズームし、UXが壊れる
+
+### フォーム最適化
+- `type` 属性でモバイルキーボードを最適化する
+
+| 入力内容 | type属性 |
+|---|---|
+| メールアドレス | `type="email"` |
+| 電話番号 | `type="tel"` |
+| 数値 | `type="number"` または `inputMode="numeric"` |
+| 検索 | `type="search"` |
+
+### 横スクロール禁止
+- ルートレイアウトに `overflow-x: hidden` を設定する
+- テーブル・コードブロックなど固定幅コンテンツは `overflow-x: auto` のラッパーで囲む
+
+### 画像
+- Next.js `<Image>` に `sizes` 属性を必ず指定する
+
+```tsx
+<Image
+  src="..."
+  alt="..."
+  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+/>
+```
+
+### Safe Area（ノッチ・ホームバー対応）
+- iPhoneのノッチ・ホームバーに被る要素（フローティングボタン等）は `env(safe-area-inset-*)` で回避する
+- `tailwind.config` に `safe-area` プラグインを追加するか、インラインで指定する
+
+```tsx
+{/* ホームバーに被らないよう safe-area-inset-bottom を加算 */}
+<div className="fixed bottom-6 right-6 pb-[env(safe-area-inset-bottom)]">
+```
+
+### hover: スタイル
+- タッチデバイスでは `hover:` は基本的に発火しないため、全デバイスで許容する
+- ただし hover に**重要な情報**を載せてはならない（タッチで見えないため）
+
+### z-index 管理（プロジェクト共通定義）
+
+| 用途 | z-index | Tailwindクラス |
+|---|---|---|
+| ヘッダー（sticky） | 30 | `z-30` |
+| サイドバー・ドロワー | 40 | `z-40` |
+| フローティングボタン | 40 | `z-40` |
+| モーダル・ダイアログ | 50 | `z-50` |
+| トースト通知 | 60 | `z-[60]` |
+
+- この定義外の値を使う場合はコメントで理由を明記する
+
+## ダークモード原則
+
+### 基本方針
+
+- **OS設定に追従**する（`prefers-color-scheme`）。手動切り替えは将来拡張
+- Tailwindの `dark:` プレフィックスを使用する（`darkMode: "class"` 設定済み前提）
+- **ハードコードした色は使わない** — 必ずCSSカスタムプロパティまたはTailwindセマンティックトークンで定義する
+
+### カラートークン定義（プロジェクト共通）
+
+CLAUDE.mdのカラーコードに基づく定義。`globals.css` の `:root` / `.dark` で管理する。
+
+| トークン名 | ライトモード | ダークモード | 用途 |
+|-----------|------------|------------|------|
+| `--color-bg` | `#FFFFFF` | `#000000` | メイン背景 |
+| `--color-text` | `#000000` | `#FFFFFF` | サブタイトル・見出し |
+| `--color-primary` | `#E86D00` | `#E86D00` | ボタン・ジャンル名・ラベル（共通） |
+| `--color-ticker` | `#63B7E2` | `#63B7E2` | 銘柄コード（共通） |
+| `--color-muted` | `#D5D5D5` | `#EBEBEB` | 日付・時間などサブテキスト |
+
+```css
+/* globals.css */
+:root {
+  --color-bg: #FFFFFF;
+  --color-text: #000000;
+  --color-primary: #E86D00;
+  --color-ticker: #63B7E2;
+  --color-muted: #D5D5D5;
+}
+
+.dark {
+  --color-bg: #000000;
+  --color-text: #FFFFFF;
+  --color-muted: #EBEBEB;
+  /* primary / ticker はライト・ダーク共通のため省略 */
+}
+```
+
+### 記述原則
+
+- ベースクラス = ライトモード として書き、`dark:` で上書きする
+- プライマリカラー（`#E86D00`）・ティッカー色（`#63B7E2`）はモード間で変わらないため `dark:` 不要
+
+### 禁止パターン
+
+| アンチパターン | 問題 | 代替 |
+|---|---|---|
+| `bg-white dark:bg-black` を直書き | トークン管理外になる | `bg-[var(--color-bg)]` または Tailwindカスタムトークン |
+| `text-gray-500` のみ（dark:なし） | ダークで読めない色になる | `text-[var(--color-muted)]` |
+| インラインstyleに色を直書き | ダークモード切り替え不可 | CSSカスタムプロパティ経由 |
+
+### 実装パターン
+
+```tsx
+{/* 背景・テキストはトークンで指定 */}
+<div className="bg-[var(--color-bg)] text-[var(--color-text)]">
+
+{/* プライマリカラーはモード不問で同色 */}
+<button className="bg-[#E86D00] text-white">
+
+{/* サブテキスト（日付等） */}
+<span className="text-[var(--color-muted)]">2026-02-26</span>
+
+{/* 境界線など微妙な色はTailwindのdark:で対応 */}
+<div className="border border-gray-200 dark:border-gray-800">
+```
+
+### shadcn/ui との連携
+
+- shadcn/uiのデフォルトCSSトークン（`--background`, `--foreground` 等）は上記プロジェクトトークンと**別管理**
+- shadcn/uiコンポーネントを使う場合はshadcnのトークン体系に乗る。プロジェクトトークンを混在させない
+
 ## UI/UX原則
 * **受動的体験を最優先** - ユーザーは「読む」ことが主目的
 * **チャット前提UIは完全排除**
@@ -169,3 +333,19 @@ make -C frontend docker-build
 ### 参考情報
 - [JSDoc Reference - TypeScript](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html)
 - [JSDoc & TypeDoc Guide](https://dev.to/mirzaleka/learn-how-to-document-javascripttypescript-code-using-jsdoc-typedoc-359h)
+
+## APIレスポンスの防御的処理
+
+外部APIのレスポンスを `setState` や変数に代入する際は、必ず fallback を設ける。
+
+```typescript
+// ✅ 正しい — fallback で undefined を防ぐ
+setPlans(res.plans ?? []);
+
+// ❌ 危険 — res.plans が undefined なら state が undefined になる
+setPlans(res.plans);
+```
+
+- 配列型: `?? []`
+- オブジェクト型: `?? {}` またはデフォルト値
+- プリミティブ型: `?? ""` / `?? 0` / `?? null`

@@ -24,6 +24,8 @@ erDiagram
         bigint id PK
         string name
         string description
+        integer amount "月額料金（最小通貨単位）"
+        string currency "通貨コード ISO-4217（例: JPY）"
         boolean is_active
         datetime created_at
         datetime updated_at
@@ -33,6 +35,7 @@ erDiagram
         bigint id PK
         bigint user_id FK
         boolean sidebar_article_expanded "記事タブの折りたたみ状態"
+        boolean sidebar_admin_expanded "管理タブの折りたたみ状態"
         datetime created_at
         datetime updated_at
     }
@@ -517,6 +520,7 @@ erDiagram
 | id | bigint | 主キー | PK |
 | user_id | bigint | ユーザーID | FK, NOT NULL, UNIQUE |
 | sidebar_article_expanded | boolean | 記事タブの折りたたみ状態 | DEFAULT true |
+| sidebar_admin_expanded | boolean | 管理タブの折りたたみ状態 | DEFAULT false |
 | created_at | datetime | 作成日時 | NOT NULL |
 | updated_at | datetime | 更新日時 | NOT NULL |
 
