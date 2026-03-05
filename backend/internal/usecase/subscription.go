@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
 
 	"github.com/RRRRRRR-777/SicouLab/backend/internal/domain"
 	"github.com/rs/zerolog"
@@ -33,6 +34,21 @@ const (
 
 // ErrAlreadySubscribed は既にアクティブなサブスクリプションを持つユーザーへのエラー。
 var ErrAlreadySubscribed = errors.New("既にサブスクリプションが有効です")
+
+// ポータルURLのデフォルト値。
+const defaultPortalURL = "https://widget.univapay.com/portal"
+
+// SubscriptionInfo は認証済みユーザーのサブスクリプション状態をハンドラーに返すための構造体。
+type SubscriptionInfo struct {
+	// PlanName はプラン名（サブスク未登録の場合は空文字）。
+	PlanName string
+	// Amount は月額料金（最小通貨単位、サブスク未登録の場合は0）。
+	Amount int
+	// Currency は通貨コード ISO-4217（サブスク未登録の場合は空文字）。
+	Currency string
+	// Status はサブスクリプション状態。
+	Status string
+}
 
 // SubscriptionRepository はプランとsubscription_statusのDB操作インターフェース。
 type SubscriptionRepository interface {
@@ -79,18 +95,24 @@ type WebhookData struct {
 
 // SubscriptionUsecase はサブスクリプション機能のユースケースを提供する。
 type SubscriptionUsecase struct {
-	repo   SubscriptionRepository
-	client UnivaPayClient
-	logger zerolog.Logger
+	repo          SubscriptionRepository
+	client        UnivaPayClient
+	logger        zerolog.Logger
+	portalBaseURL string
 }
 
 // NewSubscriptionUsecase はSubscriptionUsecaseを作成する。
-func NewSubscriptionUsecase(repo SubscriptionRepository, client UnivaPayClient, logger zerolog.Logger) *SubscriptionUsecase {
-	return &SubscriptionUsecase{
+// portalBaseURLが空の場合はデフォルトのUnivaPayポータルURLを使用する。
+func NewSubscriptionUsecase(repo SubscriptionRepository, client UnivaPayClient, logger zerolog.Logger, portalBaseURL ...string) *SubscriptionUsecase {
+	u := &SubscriptionUsecase{
 		repo:   repo,
 		client: client,
 		logger: logger,
 	}
+	if len(portalBaseURL) > 0 {
+		u.portalBaseURL = portalBaseURL[0]
+	}
+	return u
 }
 
 // GetPlans はフロントエンドのプラン選択画面に表示するプラン一覧を提供する。
@@ -111,7 +133,7 @@ func (u *SubscriptionUsecase) GetPlans(ctx context.Context) ([]domain.Plan, erro
 // userのSubscriptionStatusが"active"の場合はErrAlreadySubscribedを返す。
 func (u *SubscriptionUsecase) Checkout(ctx context.Context, user *domain.User, subscriptionID string) error {
 	// 既にアクティブなサブスクリプションを持つユーザーは新規作成不可
-	if user.SubscriptionStatus == "active" {
+	if user.SubscriptionStatus == SubscriptionStatusActive {
 		return ErrAlreadySubscribed
 	}
 
@@ -182,6 +204,54 @@ func (u *SubscriptionUsecase) HandleWebhook(ctx context.Context, payload Webhook
 	}
 
 	return nil
+}
+
+// GetMySubscription は認証済みユーザーのサブスクリプション状態を返す。
+//
+// plan_idがNULL（サブスク未登録）の場合はゼロ値のSubscriptionInfoを返し、エラーにはしない。
+func (u *SubscriptionUsecase) GetMySubscription(ctx context.Context, user *domain.User) (*SubscriptionInfo, error) {
+	info := &SubscriptionInfo{
+		Status: user.SubscriptionStatus,
+	}
+
+	if user.PlanID == nil {
+		return info, nil
+	}
+
+	plan, err := u.repo.FindPlanByID(ctx, *user.PlanID)
+	if err != nil {
+		return nil, fmt.Errorf("プラン情報取得失敗: %w", err)
+	}
+
+	if plan != nil {
+		info.PlanName = plan.Name
+		info.Amount = plan.Amount
+		info.Currency = plan.Currency
+	}
+
+	return info, nil
+}
+
+// GeneratePortalURL はUnivaPayカスタマーポータルURLを生成する。
+//
+// univapay_customer_idがNULL（サブスク未登録）の場合はErrNotFoundを返す。
+func (u *SubscriptionUsecase) GeneratePortalURL(_ context.Context, user *domain.User) (string, error) {
+	if user.UnivaPayCustomerID == nil {
+		return "", ErrNotFound
+	}
+
+	baseURL := u.portalBaseURL
+	if baseURL == "" {
+		baseURL = defaultPortalURL
+	}
+
+	portalURL := baseURL + "?customer=" + url.QueryEscape(*user.UnivaPayCustomerID)
+
+	u.logger.Info().
+		Int64("user_id", user.ID).
+		Msg("[Portal] ポータルURL生成")
+
+	return portalURL, nil
 }
 
 // resolveSubscriptionStatus はWebhookイベントと決済ステータスからDB保存用のステータスを解決する。
