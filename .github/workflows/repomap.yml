@@ -9,8 +9,6 @@ on:
       - 'tools/repomap/**'
     branches:
       - main
-      - 'feature/**'
-      - 'ticket/**'
 
 jobs:
   update-repomap:
