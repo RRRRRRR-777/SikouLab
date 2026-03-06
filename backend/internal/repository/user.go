@@ -25,7 +25,7 @@ func NewUserRepository(db *sqlx.DB) *UserRepository {
 // 見つからない場合はnil, nilを返す（エラーではない）。
 func (r *UserRepository) FindByOAuth(ctx context.Context, provider, oauthUserID string) (*domain.User, error) {
 	var u domain.User
-	query := `SELECT id, oauth_provider, oauth_user_id, name, display_name, avatar_url, role, plan_id, univapay_customer_id, subscription_status, created_at, updated_at FROM users WHERE oauth_provider = $1 AND oauth_user_id = $2`
+	query := `SELECT id, oauth_provider, oauth_user_id, email, name, display_name, avatar_url, role, plan_id, univapay_customer_id, subscription_status, created_at, updated_at FROM users WHERE oauth_provider = $1 AND oauth_user_id = $2`
 	err := r.db.GetContext(ctx, &u, query, provider, oauthUserID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
@@ -46,12 +46,12 @@ func (r *UserRepository) Create(ctx context.Context, user *domain.User) (*domain
 
 	// ユーザー作成
 	userQuery := `
-		INSERT INTO users (oauth_provider, oauth_user_id, name, display_name, avatar_url, role, subscription_status)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		INSERT INTO users (oauth_provider, oauth_user_id, email, name, display_name, avatar_url, role, subscription_status)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 		RETURNING *`
 	var created domain.User
 	err = tx.GetContext(ctx, &created, userQuery,
-		user.OAuthProvider, user.OAuthUserID, user.Name, user.DisplayName, user.AvatarURL, user.Role, user.SubscriptionStatus)
+		user.OAuthProvider, user.OAuthUserID, user.Email, user.Name, user.DisplayName, user.AvatarURL, user.Role, user.SubscriptionStatus)
 	if err != nil {
 		return nil, fmt.Errorf("ユーザー作成失敗: %w", err)
 	}
@@ -73,7 +73,7 @@ func (r *UserRepository) Create(ctx context.Context, user *domain.User) (*domain
 // FindByID はIDでユーザーを検索する。
 func (r *UserRepository) FindByID(ctx context.Context, id int64) (*domain.User, error) {
 	var u domain.User
-	query := `SELECT id, oauth_provider, oauth_user_id, name, display_name, avatar_url, role, plan_id, univapay_customer_id, subscription_status, created_at, updated_at FROM users WHERE id = $1`
+	query := `SELECT id, oauth_provider, oauth_user_id, email, name, display_name, avatar_url, role, plan_id, univapay_customer_id, subscription_status, created_at, updated_at FROM users WHERE id = $1`
 	err := r.db.GetContext(ctx, &u, query, id)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
@@ -87,7 +87,7 @@ func (r *UserRepository) FindByID(ctx context.Context, id int64) (*domain.User, 
 // UpdateDisplayName は表示名を更新し、更新後のユーザーを返す。
 func (r *UserRepository) UpdateDisplayName(ctx context.Context, userID int64, displayName string) (*domain.User, error) {
 	var u domain.User
-	query := `UPDATE users SET display_name = $1, updated_at = NOW() WHERE id = $2 RETURNING id, oauth_provider, oauth_user_id, name, display_name, avatar_url, role, plan_id, univapay_customer_id, subscription_status, created_at, updated_at`
+	query := `UPDATE users SET display_name = $1, updated_at = NOW() WHERE id = $2 RETURNING id, oauth_provider, oauth_user_id, email, name, display_name, avatar_url, role, plan_id, univapay_customer_id, subscription_status, created_at, updated_at`
 	err := r.db.GetContext(ctx, &u, query, displayName, userID)
 	if err != nil {
 		return nil, fmt.Errorf("表示名更新失敗: %w", err)
@@ -95,7 +95,17 @@ func (r *UserRepository) UpdateDisplayName(ctx context.Context, userID int64, di
 	return &u, nil
 }
 
-// UpdateAvatarURL はアバターURLを更新する。
+// UpdateEmail はユーザーのメールアドレスを新しい値に置き換える。
+func (r *UserRepository) UpdateEmail(ctx context.Context, userID int64, email string) error {
+	query := `UPDATE users SET email = $1, updated_at = NOW() WHERE id = $2`
+	_, err := r.db.ExecContext(ctx, query, email, userID)
+	if err != nil {
+		return fmt.Errorf("メールアドレス更新失敗: %w", err)
+	}
+	return nil
+}
+
+// UpdateAvatarURL はアバター画像のURLを新しい値に置き換える。
 func (r *UserRepository) UpdateAvatarURL(ctx context.Context, userID int64, avatarURL string) error {
 	query := `UPDATE users SET avatar_url = $1, updated_at = NOW() WHERE id = $2`
 	_, err := r.db.ExecContext(ctx, query, avatarURL, userID)

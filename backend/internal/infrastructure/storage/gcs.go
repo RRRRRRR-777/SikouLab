@@ -45,7 +45,7 @@ func (s *GCSStorage) Save(ctx context.Context, prefix string, id int64, data []b
 	return key, nil
 }
 
-// Delete はGCSからオブジェクトを削除する。
+// Delete は指定キーのオブジェクトをGCSから除去する。
 // オブジェクトが存在しない場合はエラーなしで完了する。
 func (s *GCSStorage) Delete(ctx context.Context, key string) error {
 	err := s.bucket.Object(key).Delete(ctx)
