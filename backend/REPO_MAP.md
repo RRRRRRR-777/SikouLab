@@ -105,6 +105,7 @@
   - func (UserRepository) FindByOAuth
   - func (UserRepository) UpdateAvatarURL
   - func (UserRepository) UpdateDisplayName
+  - func (UserRepository) UpdateEmail
 - func NewDB
 - func NewNewsletterRepository
 - func NewSubscriptionRepository
