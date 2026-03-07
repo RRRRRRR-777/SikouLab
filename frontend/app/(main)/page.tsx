@@ -2,6 +2,8 @@
  * ダッシュボードプレースホルダー
  *
  * 本実装前の確認用。サイドバー・ヘッダーのレイアウト確認に使用する。
+ *
+ * @returns ダッシュボードページ
  */
 export default function Home() {
   return (

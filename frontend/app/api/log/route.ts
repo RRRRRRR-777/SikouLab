@@ -21,20 +21,18 @@ const LOG_LEVEL_PRIORITY: Record<string, number> = {
   debug: 3,
 };
 
-/**
- * POST /api/log ハンドラー
- *
- * クライアントからのログを受け取り、LOG_LEVEL 以上のレベルのみサーバーコンソールに出力する。
- *
- * @param request - Next.jsリクエスト
- * @returns 成功レスポンス
- */
 /** 許可するログレベル */
 const ALLOWED_LEVELS = ["error", "warn", "info", "debug"] as const;
 
 /** メッセージの最大文字数 */
 const MAX_MESSAGE_LENGTH = 1000;
 
+/**
+ * クライアントからのログを受け取り、LOG_LEVEL以上のレベルのみサーバーコンソールに出力する。
+ *
+ * @param request - Next.jsリクエスト
+ * @returns 処理結果のJSONレスポンス
+ */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const entry: LogEntry = await request.json();

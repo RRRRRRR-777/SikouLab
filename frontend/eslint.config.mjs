@@ -15,6 +15,7 @@ const eslintConfig = defineConfig([
     "build/**",
     "docs/**",
     "next-env.d.ts",
+    "coverage/**",
   ]),
   // JSDocコメント品質チェック（エクスポートされた関数・コンポーネント・型が対象）
   {

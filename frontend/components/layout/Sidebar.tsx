@@ -42,14 +42,20 @@ const navItems: NavItem[] = [
  * アプリケーションのサイドバーコンポーネント。
  * デスクトップでは固定表示、モバイル/タブレットではスライドオーバーで表示する。
  *
- * @param open - モバイル時のサイドバー開閉状態
- * @param setOpen - モバイル時のサイドバー開閉状態を変更するコールバック
+ * @param open - コンポーネントのプロパティ
+ * @param open.open - モバイル時のサイドバー開閉状態
+ * @param open.setOpen - モバイル時のサイドバー開閉状態を変更するコールバック
+ * @returns サイドバーコンポーネント
  */
 export function Sidebar({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) {
   const pathname = usePathname();
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
 
-  /** 折りたたみ可能なナビ項目のトグル処理。 */
+  /**
+   * 折りたたみ可能なナビ項目のトグル処理。
+   *
+   * @param label - トグルするナビ項目のラベル
+   */
   const toggleExpand = (label: string) => {
     setExpandedItems((prev) => ({ ...prev, [label]: !prev[label] }));
   };

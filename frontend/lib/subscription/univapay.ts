@@ -47,6 +47,8 @@ const CHECKOUT_SCRIPT_URL = "https://widget.univapay.com/client/checkout.js";
  * checkout.js スクリプトを動的にロードする
  *
  * 既にロード済みの場合はスキップする。
+ *
+ * @returns スクリプトロード完了のPromise
  */
 function loadCheckoutScript(): Promise<void> {
   if (window.UnivapayCheckout) {
@@ -83,6 +85,7 @@ function loadCheckoutScript(): Promise<void> {
  * token-created イベントで transaction_token_id を取得し、onSuccess コールバックを呼ぶ。
  *
  * @param config - ウィジェット設定（金額・通貨・コールバック）
+ * @returns ウィジェット起動のPromise
  */
 export async function openCheckoutWidget(
   config: CheckoutWidgetConfig,

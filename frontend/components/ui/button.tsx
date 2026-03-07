@@ -36,6 +36,16 @@ const buttonVariants = cva(
   }
 );
 
+/**
+ * 汎用ボタンコンポーネント。バリアント・サイズの切り替えに対応する。
+ *
+ * @param root0 - コンポーネントのプロパティ
+ * @param root0.className - 追加のCSSクラス
+ * @param root0.variant - ボタンのバリアント
+ * @param root0.size - ボタンのサイズ
+ * @param root0.asChild - Slot.Rootとしてレンダリングするかどうか
+ * @returns ボタン要素
+ */
 function Button({
   className,
   variant = "default",
