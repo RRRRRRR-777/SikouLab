@@ -13,6 +13,8 @@ type User struct {
 	OAuthProvider string `db:"oauth_provider"`
 	// OAuthUserID はOAuthプロバイダ側のユーザーID。
 	OAuthUserID string `db:"oauth_user_id"`
+	// Email はOAuthプロバイダから取得したメールアドレス。NULLの場合はnil。
+	Email *string `db:"email"`
 	// Name はユーザー名。
 	Name string `db:"name"`
 	// DisplayName は表示名。

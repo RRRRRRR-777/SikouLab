@@ -19,6 +19,7 @@ type UserRepository interface {
 	FindByOAuth(ctx context.Context, provider, oauthUserID string) (*domain.User, error)
 	Create(ctx context.Context, user *domain.User) (*domain.User, error)
 	FindByID(ctx context.Context, id int64) (*domain.User, error)
+	UpdateEmail(ctx context.Context, userID int64, email string) error
 }
 
 // AuthUsecase は認証ユースケースを提供する。
@@ -52,13 +53,25 @@ func (u *AuthUsecase) Login(ctx context.Context, idToken string) (user *domain.U
 
 	// 既存ユーザーが見つかった場合
 	if existing != nil {
+		// emailが未保存の既存ユーザーにFirebaseのemailを補完する
+		if (existing.Email == nil || *existing.Email == "") && ft.Email != "" {
+			if err := u.userRepo.UpdateEmail(ctx, existing.ID, ft.Email); err != nil {
+				return nil, false, fmt.Errorf("メールアドレス更新失敗: %w", err)
+			}
+			existing.Email = &ft.Email
+		}
 		return existing, false, nil
 	}
 
 	// 新規ユーザーを作成
+	var emailPtr *string
+	if ft.Email != "" {
+		emailPtr = &ft.Email
+	}
 	newUser := &domain.User{
 		OAuthProvider:      ft.Provider,
 		OAuthUserID:        ft.UID,
+		Email:              emailPtr,
 		Name:               ft.Name,
 		DisplayName:        ft.Name,
 		AvatarURL:          &ft.Picture,

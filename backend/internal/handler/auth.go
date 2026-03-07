@@ -60,6 +60,7 @@ type userResponse struct {
 	ID                 int64  `json:"id"`
 	OAuthProvider      string `json:"oauth_provider"`
 	OAuthUserID        string `json:"oauth_user_id"`
+	Email              string `json:"email"`
 	Name               string `json:"name"`
 	DisplayName        string `json:"display_name"`
 	AvatarURL          string `json:"avatar_url"`
@@ -201,6 +202,7 @@ func toUserResponse(u *domain.User, storageBaseURL string) userResponse {
 		ID:                 u.ID,
 		OAuthProvider:      u.OAuthProvider,
 		OAuthUserID:        u.OAuthUserID,
+		Email:              derefString(u.Email),
 		Name:               u.Name,
 		DisplayName:        u.DisplayName,
 		AvatarURL:          avatarURL,

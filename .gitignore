@@ -90,3 +90,4 @@ tmp/
 build-errors.log
 .playwright-mcp
 screenshots/
+*.png

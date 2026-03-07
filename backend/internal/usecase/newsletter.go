@@ -83,7 +83,6 @@ func (u *NewsletterUsecase) Subscribe(ctx context.Context, userID int64, email s
 
 	u.logger.Info().
 		Int64("user_id", userID).
-		Str("email", email).
 		Msg("[Newsletter] 購読登録完了")
 
 	return sub, nil
@@ -124,7 +123,6 @@ func (u *NewsletterUsecase) UpdateEmail(ctx context.Context, userID int64, email
 
 	u.logger.Info().
 		Int64("user_id", userID).
-		Str("email", email).
 		Msg("[Newsletter] メールアドレス変更完了")
 
 	return sub, nil

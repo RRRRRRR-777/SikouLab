@@ -107,13 +107,13 @@ export function EmailSection() {
       ) : (
         <div className="mt-4 space-y-4">
           {/* ログイン用メールアドレス（読み取り専用） */}
-          {user?.oauthProvider && (
+          {user?.email && (
             <div>
               <label className="text-lg font-bold text-[var(--color-text)]">
                 ログイン用メールアドレス
               </label>
               <p className="mt-1 text-lg font-medium text-[var(--color-text-secondary)]">
-                OAuthプロバイダから取得
+                {user.email}
               </p>
             </div>
           )}
