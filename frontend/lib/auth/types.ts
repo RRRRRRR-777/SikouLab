@@ -15,6 +15,10 @@ export interface User {
   id: number;
   /** OAuthプロバイダ識別子（例: "google.com", "apple.com"） */
   oauth_provider: string;
+  /** OAuthプロバイダのユーザーID（Firebase UID） */
+  oauth_user_id: string;
+  /** OAuthプロバイダから取得したメールアドレス（読み取り専用） */
+  email: string;
   /** 表示名 */
   name: string;
   /** OAuthプロバイダから取得した表示名 */
@@ -41,6 +45,10 @@ export interface AuthUser {
   id: number;
   /** OAuthプロバイダ識別子 */
   oauthProvider: string;
+  /** OAuthプロバイダのユーザーID（Firebase UID） */
+  oauthUserId: string;
+  /** OAuthプロバイダから取得したメールアドレス（読み取り専用） */
+  email: string;
   /** 表示名 */
   name: string;
   /** OAuthプロバイダから取得した表示名 */
@@ -102,6 +110,8 @@ export function toAuthUser(user: User): AuthUser {
   return {
     id: user.id,
     oauthProvider: user.oauth_provider,
+    oauthUserId: user.oauth_user_id,
+    email: user.email,
     name: user.name,
     displayName: user.display_name,
     avatarUrl: user.avatar_url,

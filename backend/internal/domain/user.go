@@ -13,12 +13,14 @@ type User struct {
 	OAuthProvider string `db:"oauth_provider"`
 	// OAuthUserID はOAuthプロバイダ側のユーザーID。
 	OAuthUserID string `db:"oauth_user_id"`
+	// Email はOAuthプロバイダから取得したメールアドレス。NULLの場合はnil。
+	Email *string `db:"email"`
 	// Name はユーザー名。
 	Name string `db:"name"`
 	// DisplayName は表示名。
 	DisplayName string `db:"display_name"`
-	// AvatarURL はアバター画像のURL。
-	AvatarURL string `db:"avatar_url"`
+	// AvatarURL はアバター画像のURL。NULLの場合はnil。
+	AvatarURL *string `db:"avatar_url"`
 	// Role はユーザーのロール（"admin", "writer", "user"）。
 	Role string `db:"role"`
 	// PlanID は契約プランのID。

@@ -37,6 +37,7 @@
 - [016: Phase 0横断的決定事項](adr/016-phase0-cross-cutting-decisions.md)
 - [017: CSRF対策](adr/017-csrf-protection.md)
 - [018: E2Eテスト認証方式](adr/018-e2e-auth-strategy.md)
+- [019: 画像ストレージの選定](adr/019-image-storage.md)
 
 ## 機能仕様書
 - **認証機能（F-01）**

@@ -34,13 +34,14 @@ type AuthHandler struct {
 	logger  zerolog.Logger
 	// secureCookie は true の場合、Cookie に Secure 属性を付与する（本番環境用）。
 	// 開発環境（localhost HTTP）では false にする。
-	secureCookie bool
+	secureCookie   bool
+	storageBaseURL string
 }
 
 // NewAuthHandler はAuthHandlerを作成する。
 // secureCookie は本番環境では true、開発環境では false を渡す。
-func NewAuthHandler(uc authUsecase, logger zerolog.Logger, secureCookie bool) *AuthHandler {
-	return &AuthHandler{usecase: uc, logger: logger, secureCookie: secureCookie}
+func NewAuthHandler(uc authUsecase, logger zerolog.Logger, secureCookie bool, storageBaseURL string) *AuthHandler {
+	return &AuthHandler{usecase: uc, logger: logger, secureCookie: secureCookie, storageBaseURL: storageBaseURL}
 }
 
 // loginRequest はログインリクエストのJSON構造。
@@ -58,6 +59,8 @@ type loginResponse struct {
 type userResponse struct {
 	ID                 int64  `json:"id"`
 	OAuthProvider      string `json:"oauth_provider"`
+	OAuthUserID        string `json:"oauth_user_id"`
+	Email              string `json:"email"`
 	Name               string `json:"name"`
 	DisplayName        string `json:"display_name"`
 	AvatarURL          string `json:"avatar_url"`
@@ -80,14 +83,14 @@ func (h *AuthHandler) ServeLogin(w http.ResponseWriter, r *http.Request) {
 	var req loginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeJSON(w, http.StatusBadRequest, errorResponse{
-			Code: "BAD_REQUEST", Message: "リクエストが不正です",
+			Code: codeBadRequest, Message: "リクエストが不正です",
 		})
 		return
 	}
 
 	if req.IDToken == "" {
 		writeJSON(w, http.StatusBadRequest, errorResponse{
-			Code: "BAD_REQUEST", Message: "リクエストが不正です",
+			Code: codeBadRequest, Message: "リクエストが不正です",
 		})
 		return
 	}
@@ -103,7 +106,7 @@ func (h *AuthHandler) ServeLogin(w http.ResponseWriter, r *http.Request) {
 		}
 		h.logger.Error().Err(err).Msg("ログイン失敗: サーバーエラー")
 		writeJSON(w, http.StatusInternalServerError, errorResponse{
-			Code: "INTERNAL_ERROR", Message: "サーバーエラーが発生しました",
+			Code: codeInternalError, Message: "サーバーエラーが発生しました",
 		})
 		return
 	}
@@ -114,7 +117,7 @@ func (h *AuthHandler) ServeLogin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.logger.Error().Err(err).Msg("セッションCookie生成失敗")
 		writeJSON(w, http.StatusInternalServerError, errorResponse{
-			Code: "INTERNAL_ERROR", Message: "サーバーエラーが発生しました",
+			Code: codeInternalError, Message: "サーバーエラーが発生しました",
 		})
 		return
 	}
@@ -136,7 +139,7 @@ func (h *AuthHandler) ServeLogin(w http.ResponseWriter, r *http.Request) {
 	})
 
 	writeJSON(w, http.StatusOK, loginResponse{
-		User:         toUserResponse(user),
+		User:         toUserResponse(user, h.storageBaseURL),
 		IsFirstLogin: isFirstLogin,
 	})
 }
@@ -147,7 +150,7 @@ func (h *AuthHandler) ServeMe(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie(sessionCookieName)
 	if err != nil {
 		writeJSON(w, http.StatusUnauthorized, errorResponse{
-			Code: "UNAUTHORIZED", Message: "認証が必要です",
+			Code: codeUnauthorized, Message: "認証が必要です",
 		})
 		return
 	}
@@ -157,20 +160,20 @@ func (h *AuthHandler) ServeMe(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, usecase.ErrInvalidToken) {
 			h.logger.Warn().Err(err).Msg("セッション確認失敗: 無効なトークン")
 			writeJSON(w, http.StatusUnauthorized, errorResponse{
-				Code: "UNAUTHORIZED", Message: "認証が必要です",
+				Code: codeUnauthorized, Message: "認証が必要です",
 			})
 			return
 		}
 		h.logger.Error().Err(err).Msg("セッション確認失敗: サーバーエラー")
 		writeJSON(w, http.StatusInternalServerError, errorResponse{
-			Code: "INTERNAL_ERROR", Message: "サーバーエラーが発生しました",
+			Code: codeInternalError, Message: "サーバーエラーが発生しました",
 		})
 		return
 	}
 
 	writeJSON(w, http.StatusOK, struct {
 		User userResponse `json:"user"`
-	}{User: toUserResponse(user)})
+	}{User: toUserResponse(user, h.storageBaseURL)})
 }
 
 // ServeLogout はユーザーのログアウト状態を確立するため、セッションCookieを無効化する。
@@ -189,18 +192,25 @@ func (h *AuthHandler) ServeLogout(w http.ResponseWriter, r *http.Request) {
 }
 
 // toUserResponse はドメインモデルをレスポンス構造に変換する。
-func toUserResponse(u *domain.User) userResponse {
+// storageBaseURL が指定された場合、AvatarURLをフルURLに解決する。
+func toUserResponse(u *domain.User, storageBaseURL string) userResponse {
+	avatarURL := derefString(u.AvatarURL)
+	if avatarURL != "" && storageBaseURL != "" {
+		avatarURL = resolveStorageURL(storageBaseURL, u.AvatarURL)
+	}
 	return userResponse{
 		ID:                 u.ID,
 		OAuthProvider:      u.OAuthProvider,
+		OAuthUserID:        u.OAuthUserID,
+		Email:              derefString(u.Email),
 		Name:               u.Name,
 		DisplayName:        u.DisplayName,
-		AvatarURL:          u.AvatarURL,
+		AvatarURL:          avatarURL,
 		Role:               u.Role,
 		PlanID:             u.PlanID,
 		SubscriptionStatus: u.SubscriptionStatus,
-		CreatedAt:          u.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-		UpdatedAt:          u.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		CreatedAt:          u.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:          u.UpdatedAt.Format(time.RFC3339),
 	}
 }
 

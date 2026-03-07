@@ -10,7 +10,6 @@ import (
 	"github.com/rs/zerolog"
 
 	"github.com/RRRRRRR-777/SicouLab/backend/internal/domain"
-	"github.com/RRRRRRR-777/SicouLab/backend/internal/middleware"
 	"github.com/RRRRRRR-777/SicouLab/backend/internal/usecase"
 )
 
@@ -20,6 +19,8 @@ type subscriptionUsecase interface {
 	GetPlans(ctx context.Context) ([]domain.Plan, error)
 	Checkout(ctx context.Context, user *domain.User, tokenID string) error
 	HandleWebhook(ctx context.Context, payload usecase.WebhookPayload) error
+	GetMySubscription(ctx context.Context, user *domain.User) (*usecase.SubscriptionInfo, error)
+	GeneratePortalURL(ctx context.Context, user *domain.User) (string, error)
 }
 
 // SubscriptionHandler はサブスクリプションAPIハンドラーを提供する。
@@ -49,7 +50,7 @@ func (h *SubscriptionHandler) ServeGetPlans(w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		h.logger.Error().Err(err).Msg("プラン一覧取得失敗")
 		writeJSON(w, http.StatusInternalServerError, errorResponse{
-			Code: "INTERNAL_ERROR", Message: "サーバーエラーが発生しました",
+			Code: codeInternalError, Message: "サーバーエラーが発生しました",
 		})
 		return
 	}
@@ -62,19 +63,15 @@ func (h *SubscriptionHandler) ServeGetPlans(w http.ResponseWriter, r *http.Reque
 // 認証済みユーザーのcontextが必要。transaction_token_idが必須。
 // 既にactiveの場合は409、その他エラーは500を返す。
 func (h *SubscriptionHandler) ServeCheckout(w http.ResponseWriter, r *http.Request) {
-	// contextからユーザーを取得（RequireAuth通過後を前提）
-	user := middleware.UserFromContext(r.Context())
+	user := requireUser(w, r)
 	if user == nil {
-		writeJSON(w, http.StatusUnauthorized, errorResponse{
-			Code: "UNAUTHORIZED", Message: "認証が必要です",
-		})
 		return
 	}
 
 	var req checkoutRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeJSON(w, http.StatusBadRequest, errorResponse{
-			Code: "BAD_REQUEST", Message: "リクエストが不正です",
+			Code: codeBadRequest, Message: "リクエストが不正です",
 		})
 		return
 	}
@@ -82,7 +79,7 @@ func (h *SubscriptionHandler) ServeCheckout(w http.ResponseWriter, r *http.Reque
 	// subscription_idが空の場合はバリデーションエラー
 	if req.SubscriptionID == "" {
 		writeJSON(w, http.StatusBadRequest, errorResponse{
-			Code: "BAD_REQUEST", Message: "subscription_idは必須です",
+			Code: codeBadRequest, Message: "subscription_idは必須です",
 		})
 		return
 	}
@@ -96,7 +93,7 @@ func (h *SubscriptionHandler) ServeCheckout(w http.ResponseWriter, r *http.Reque
 		}
 		h.logger.Error().Err(err).Msg("チェックアウト失敗")
 		writeJSON(w, http.StatusInternalServerError, errorResponse{
-			Code: "INTERNAL_ERROR", Message: "サーバーエラーが発生しました",
+			Code: codeInternalError, Message: "サーバーエラーが発生しました",
 		})
 		return
 	}
@@ -113,7 +110,7 @@ func (h *SubscriptionHandler) ServeWebhook(w http.ResponseWriter, r *http.Reques
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
 		writeJSON(w, http.StatusUnauthorized, errorResponse{
-			Code: "UNAUTHORIZED", Message: "認証が必要です",
+			Code: codeUnauthorized, Message: "認証が必要です",
 		})
 		return
 	}
@@ -121,7 +118,7 @@ func (h *SubscriptionHandler) ServeWebhook(w http.ResponseWriter, r *http.Reques
 	// 定数時間比較（タイミング攻撃対策）
 	if !hmac.Equal([]byte(authHeader), []byte(h.webhookSecret)) {
 		writeJSON(w, http.StatusUnauthorized, errorResponse{
-			Code: "UNAUTHORIZED", Message: "認証が必要です",
+			Code: codeUnauthorized, Message: "認証が必要です",
 		})
 		return
 	}
@@ -130,7 +127,7 @@ func (h *SubscriptionHandler) ServeWebhook(w http.ResponseWriter, r *http.Reques
 	var payload usecase.WebhookPayload
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		writeJSON(w, http.StatusBadRequest, errorResponse{
-			Code: "BAD_REQUEST", Message: "ペイロードのデコードに失敗しました",
+			Code: codeBadRequest, Message: "ペイロードのデコードに失敗しました",
 		})
 		return
 	}
@@ -139,10 +136,74 @@ func (h *SubscriptionHandler) ServeWebhook(w http.ResponseWriter, r *http.Reques
 	if err := h.usecase.HandleWebhook(r.Context(), payload); err != nil {
 		h.logger.Error().Err(err).Msg("Webhookイベント処理失敗")
 		writeJSON(w, http.StatusInternalServerError, errorResponse{
-			Code: "INTERNAL_ERROR", Message: "サーバーエラーが発生しました",
+			Code: codeInternalError, Message: "サーバーエラーが発生しました",
 		})
 		return
 	}
 
 	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+}
+
+// subscriptionResponse はサブスクリプション状態のJSONレスポンス構造。
+type subscriptionResponse struct {
+	PlanName string `json:"plan_name"`
+	Amount   int    `json:"amount"`
+	Currency string `json:"currency"`
+	Status   string `json:"status"`
+}
+
+// portalResponse はポータルURLのJSONレスポンス構造。
+type portalResponse struct {
+	PortalURL string `json:"portal_url"`
+}
+
+// ServeGetMySubscription はGET /api/v1/subscriptions/me を処理し、認証済みユーザーのサブスクリプション状態を返す。
+func (h *SubscriptionHandler) ServeGetMySubscription(w http.ResponseWriter, r *http.Request) {
+	user := requireUser(w, r)
+	if user == nil {
+		return
+	}
+
+	info, err := h.usecase.GetMySubscription(r.Context(), user)
+	if err != nil {
+		h.logger.Error().Err(err).Msg("サブスクリプション状態取得失敗")
+		writeJSON(w, http.StatusInternalServerError, errorResponse{
+			Code: codeInternalError, Message: "サーバーエラーが発生しました",
+		})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, subscriptionResponse{
+		PlanName: info.PlanName,
+		Amount:   info.Amount,
+		Currency: info.Currency,
+		Status:   info.Status,
+	})
+}
+
+// ServeGeneratePortalURL はPOST /api/v1/subscriptions/portal を処理し、UnivaPayカスタマーポータルURLを返す。
+func (h *SubscriptionHandler) ServeGeneratePortalURL(w http.ResponseWriter, r *http.Request) {
+	user := requireUser(w, r)
+	if user == nil {
+		return
+	}
+
+	url, err := h.usecase.GeneratePortalURL(r.Context(), user)
+	if err != nil {
+		if errors.Is(err, usecase.ErrNotFound) {
+			writeJSON(w, http.StatusNotFound, errorResponse{
+				Code: codeNotFound, Message: "サブスクリプションが登録されていません",
+			})
+			return
+		}
+		h.logger.Error().Err(err).Msg("ポータルURL生成失敗")
+		writeJSON(w, http.StatusInternalServerError, errorResponse{
+			Code: codeInternalError, Message: "サーバーエラーが発生しました",
+		})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, portalResponse{
+		PortalURL: url,
+	})
 }

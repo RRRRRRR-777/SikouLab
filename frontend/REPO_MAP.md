@@ -6,12 +6,17 @@
 
 - frontend/app/(main)/layout.tsx → MainLayout
 - frontend/app/(main)/page.tsx → Home
+- frontend/app/(main)/settings/page.tsx → SettingsPageRoute
 - frontend/app/layout.tsx → RootLayout
 - frontend/app/login/page.tsx → Login
 - frontend/app/subscription/page.tsx → Subscription
 
 ## Components
 
+### frontend/components
+
+- frontend/components/GlobalErrorHandler.tsx
+  - GlobalErrorHandler
 ### frontend/components/auth
 
 - frontend/components/auth/LoginPage.tsx
@@ -22,6 +27,22 @@
   - Header
 - frontend/components/layout/Sidebar.tsx
   - Sidebar
+### frontend/components/newsletter
+
+- frontend/components/newsletter/NewsletterWidget.tsx
+  - NewsletterWidget
+### frontend/components/settings
+
+- frontend/components/settings/EmailSection.tsx
+  - EmailSection
+- frontend/components/settings/FaqSection.tsx
+  - FaqSection
+- frontend/components/settings/ProfileSection.tsx
+  - ProfileSection
+- frontend/components/settings/SettingsPage.tsx
+  - SettingsPage
+- frontend/components/settings/SubscriptionSection.tsx
+  - SubscriptionSection
 ### frontend/components/subscription
 
 - frontend/components/subscription/SubscriptionPage.tsx
@@ -70,6 +91,16 @@
   - logWarn
   - logInfo
   - logDebug
+- frontend/lib/settings/settings-api.ts
+  - UpdateProfileRequest
+  - UserResponse
+  - AvatarResponse
+  - SubscriptionResponse
+  - PortalResponse
+  - NewsletterSubscriptionResponse
+  - NewsletterSubscribeRequest
+  - NewsletterUpdateRequest
+  - settingsApi
 - frontend/lib/subscription/subscription-api.ts
   - Plan
   - subscriptionApi
@@ -78,6 +109,8 @@
   - openCheckoutWidget
 - frontend/lib/utils.ts
   - cn
+- frontend/lib/validation.ts
+  - EMAIL_REGEX
 
 ## Other
 

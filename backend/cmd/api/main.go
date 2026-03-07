@@ -15,6 +15,7 @@ import (
 	"github.com/RRRRRRR-777/SicouLab/backend/internal/config"
 	"github.com/RRRRRRR-777/SicouLab/backend/internal/firebase"
 	"github.com/RRRRRRR-777/SicouLab/backend/internal/handler"
+	"github.com/RRRRRRR-777/SicouLab/backend/internal/infrastructure/storage"
 	"github.com/RRRRRRR-777/SicouLab/backend/internal/infrastructure/univapay"
 	"github.com/RRRRRRR-777/SicouLab/backend/internal/repository"
 	"github.com/RRRRRRR-777/SicouLab/backend/internal/router"
@@ -55,7 +56,7 @@ func main() {
 	// リポジトリ・ユースケース・ハンドラーの初期化
 	userRepo := repository.NewUserRepository(db)
 	authUsecase := usecase.NewAuthUsecase(firebaseClient, userRepo)
-	authHandler := handler.NewAuthHandler(authUsecase, logger, strings.EqualFold(cfg.AppEnv, "production"))
+	authHandler := handler.NewAuthHandler(authUsecase, logger, strings.EqualFold(cfg.AppEnv, "production"), cfg.StorageBaseURL)
 
 	// サブスクリプション
 	subscriptionRepo := repository.NewSubscriptionRepository(db)
@@ -63,12 +64,32 @@ func main() {
 	subscriptionUsecase := usecase.NewSubscriptionUsecase(subscriptionRepo, univapayClient, logger)
 	subscriptionHandler := handler.NewSubscriptionHandler(subscriptionUsecase, logger, cfg.UnivaPayWebhookSecret)
 
+	// ユーザープロフィール
+	var objectStorage usecase.ObjectStorage
+	if cfg.GCSBucketName != "" {
+		gcsStorage, gcsErr := storage.NewGCSStorage(ctx, cfg.GCSBucketName)
+		if gcsErr != nil {
+			logger.Fatal().Err(gcsErr).Msg("GCSストレージ初期化失敗")
+		}
+		defer gcsStorage.Close()
+		objectStorage = gcsStorage
+	}
+	userUsecase := usecase.NewUserUsecase(userRepo, objectStorage)
+	userHandler := handler.NewUserHandler(userUsecase, logger, cfg.StorageBaseURL)
+
+	// ニュースレター
+	newsletterRepo := repository.NewNewsletterRepository(db)
+	newsletterUsecase := usecase.NewNewsletterUsecase(newsletterRepo, logger)
+	newsletterHandler := handler.NewNewsletterHandler(newsletterUsecase, logger)
+
 	// ルーティング設定
 	routerBuilder := router.NewBuilder(
 		router.Handlers{
 			Health:       &handler.HealthHandler{},
 			Auth:         authHandler,
 			Subscription: subscriptionHandler,
+			User:         userHandler,
+			Newsletter:   newsletterHandler,
 		},
 		router.Middlewares{
 			AuthUsecase: authUsecase,

@@ -88,3 +88,6 @@ go.work.sum
 TODO.md
 tmp/
 build-errors.log
+.playwright-mcp
+screenshots/
+*.png

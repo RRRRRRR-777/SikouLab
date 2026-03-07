@@ -44,6 +44,7 @@ type mockUserRepo struct {
 	findByOAuthFunc func(ctx context.Context, provider, oauthUserID string) (*domain.User, error)
 	createFunc      func(ctx context.Context, user *domain.User) (*domain.User, error)
 	findByIDFunc    func(ctx context.Context, id int64) (*domain.User, error)
+	updateEmailFunc func(ctx context.Context, userID int64, email string) error
 }
 
 // FindByOAuth はモックのOAuth検索を実行する。
@@ -59,6 +60,14 @@ func (m *mockUserRepo) Create(ctx context.Context, user *domain.User) (*domain.U
 // FindByID はモックのID検索を実行する。
 func (m *mockUserRepo) FindByID(ctx context.Context, id int64) (*domain.User, error) {
 	return m.findByIDFunc(ctx, id)
+}
+
+// UpdateEmail はモックのメールアドレス更新を実行する。
+func (m *mockUserRepo) UpdateEmail(ctx context.Context, userID int64, email string) error {
+	if m.updateEmailFunc != nil {
+		return m.updateEmailFunc(ctx, userID, email)
+	}
+	return nil
 }
 
 // TestAuthUsecase_Login はログインユースケースの各パターンを検証する。
@@ -79,7 +88,7 @@ func TestAuthUsecase_Login(t *testing.T) {
 		OAuthUserID:        "firebase-uid-123",
 		Name:               "Test User",
 		DisplayName:        "Test User",
-		AvatarURL:          "https://example.com/avatar.png",
+		AvatarURL:          ptrStr("https://example.com/avatar.png"),
 		Role:               "user",
 		SubscriptionStatus: "active",
 		CreatedAt:          now,

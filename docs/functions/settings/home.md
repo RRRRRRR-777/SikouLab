@@ -128,6 +128,7 @@ erDiagram
         bigint id PK
         string oauth_provider
         string oauth_user_id
+        string email "OAuthプロバイダから取得（読み取り専用）"
         string name
         string display_name
         string avatar_url
@@ -632,3 +633,4 @@ sequenceDiagram
 - F-01（ログイン機能）: ユーザー認証が前提
 - UnivaPay: カスタマーポータル機能の有効化が必要
 - ストレージ基盤: アバターアップロード機能に必要
+

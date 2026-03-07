@@ -180,6 +180,7 @@ describe("useAuth", () => {
         user: {
           id: 2,
           oauth_provider: "google.com",
+          oauth_user_id: "firebase-uid-new",
           name: "New User",
           display_name: "New User",
           avatar_url: null,

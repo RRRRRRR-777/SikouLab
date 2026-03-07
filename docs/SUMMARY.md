@@ -69,6 +69,8 @@
   * 概要: インフラ環境構築。Cloud Runを採用。コスト最適・運用負荷最小・一人運用適合性を理由に選定。
 * docs/adr/016-phase0-cross-cutting-decisions.md
   * 概要: Phase 0横断的決定事項。ログ（zerolog）、ログレベル（標準4レベル）、スケルトン表示（あり）、エラー表示（トースト）、未定義画面（テキストベース）を決定。
+* docs/adr/019-image-storage.md
+  * 概要: 画像ストレージの選定。本番はCloud Storage（GCP）、ローカル開発はfake-gcs-serverを採用。MinIO・LocalStorage拡張と比較し、SDK統一・環境変数切替の容易さ・GCPエコシステム適合を理由に選定。
 
 ## バージョン別ドキュメント（versions/）
 * docs/versions/1_0_0/requirements.md

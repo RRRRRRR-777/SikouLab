@@ -19,6 +19,8 @@ type Handlers struct {
 	Health       *handler.HealthHandler
 	Auth         *handler.AuthHandler
 	Subscription *handler.SubscriptionHandler
+	User         *handler.UserHandler
+	Newsletter   *handler.NewsletterHandler
 }
 
 // Middlewares はミドルウェアの依存をBuild時に注入するための構造体。
@@ -69,8 +71,59 @@ func (b *Builder) Build(logger zerolog.Logger) http.Handler {
 		),
 	)
 
+	// Subscription: 認証必須エンドポイント（サブスク状態取得・ポータル）
+	mux.Handle("GET /api/v1/subscriptions/me",
+		middleware.RequireAuth(b.middlewares.AuthUsecase)(
+			http.HandlerFunc(b.handlers.Subscription.ServeGetMySubscription),
+		),
+	)
+	mux.Handle("POST /api/v1/subscriptions/portal",
+		middleware.RequireAuth(b.middlewares.AuthUsecase)(
+			http.HandlerFunc(b.handlers.Subscription.ServeGeneratePortalURL),
+		),
+	)
+
 	// Webhook: 認証なし（独自の署名検証）
 	mux.HandleFunc("POST /api/v1/univapay/webhook", b.handlers.Subscription.ServeWebhook)
+
+	// User Profile: 認証必須エンドポイント
+	mux.Handle("PATCH /api/v1/users/me",
+		middleware.RequireAuth(b.middlewares.AuthUsecase)(
+			http.HandlerFunc(b.handlers.User.ServeUpdateProfile),
+		),
+	)
+	mux.Handle("POST /api/v1/users/avatar",
+		middleware.RequireAuth(b.middlewares.AuthUsecase)(
+			http.HandlerFunc(b.handlers.User.ServeUploadAvatar),
+		),
+	)
+	mux.Handle("DELETE /api/v1/users/avatar",
+		middleware.RequireAuth(b.middlewares.AuthUsecase)(
+			http.HandlerFunc(b.handlers.User.ServeDeleteAvatar),
+		),
+	)
+
+	// Newsletter: 認証必須エンドポイント
+	mux.Handle("GET /api/v1/newsletter/subscription",
+		middleware.RequireAuth(b.middlewares.AuthUsecase)(
+			http.HandlerFunc(b.handlers.Newsletter.ServeGetSubscription),
+		),
+	)
+	mux.Handle("POST /api/v1/newsletter/subscribe",
+		middleware.RequireAuth(b.middlewares.AuthUsecase)(
+			http.HandlerFunc(b.handlers.Newsletter.ServeSubscribe),
+		),
+	)
+	mux.Handle("POST /api/v1/newsletter/unsubscribe",
+		middleware.RequireAuth(b.middlewares.AuthUsecase)(
+			http.HandlerFunc(b.handlers.Newsletter.ServeUnsubscribe),
+		),
+	)
+	mux.Handle("PUT /api/v1/newsletter/subscription",
+		middleware.RequireAuth(b.middlewares.AuthUsecase)(
+			http.HandlerFunc(b.handlers.Newsletter.ServeUpdateEmail),
+		),
+	)
 
 	// ミドルウェアチェーン適用
 	var h http.Handler = mux

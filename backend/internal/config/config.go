@@ -39,6 +39,10 @@ type Config struct {
 	UnivaPayStoreID string
 	// UnivaPayStoreSecret は UnivaPay ストアシークレット（APIトークンのシークレット部分）。
 	UnivaPayStoreSecret string
+	// GCSBucketName はGoogle Cloud Storageのバケット名。
+	GCSBucketName string
+	// StorageBaseURL はストレージオブジェクトのベースURL（例: "https://storage.googleapis.com/bucket-name"）。
+	StorageBaseURL string
 }
 
 // Load は.envファイルおよび環境変数から設定を読み込む。
@@ -101,6 +105,8 @@ func Load() (*Config, error) {
 	}
 	cfg.UnivaPayStoreID = os.Getenv("UNIVAPAY_STORE_ID")
 	cfg.UnivaPayStoreSecret = os.Getenv("UNIVAPAY_STORE_SECRET")
+	cfg.GCSBucketName = os.Getenv("GCS_BUCKET_NAME")
+	cfg.StorageBaseURL = os.Getenv("STORAGE_BASE_URL")
 
 	return cfg, nil
 }
