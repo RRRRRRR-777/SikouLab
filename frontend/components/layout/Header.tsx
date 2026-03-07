@@ -8,7 +8,9 @@ import { Menu, Search, X } from "lucide-react";
  * モバイルではハンバーガーメニューとタイトルを表示し、検索は右下のフローティングボタンで提供する。
  * デスクトップではヘッダー内に検索バーを表示する。
  *
- * @param setOpen - サイドバーの開閉状態を変更するコールバック
+ * @param setOpen - コンポーネントのプロパティ
+ * @param setOpen.setOpen - サイドバーの開閉状態を変更するコールバック
+ * @returns ヘッダーコンポーネント
  */
 export function Header({ setOpen }: { setOpen: (open: boolean) => void }) {
   const [searchOpen, setSearchOpen] = useState(false);

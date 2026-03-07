@@ -56,20 +56,6 @@ interface AuthContextValue {
 }
 
 /**
- * 認証コンテキストのデフォルト値
- */
-const defaultValue: AuthContextValue = {
-  user: null,
-  isAuthenticated: false,
-  isLoading: true,
-  loginWithGoogle: async () => {},
-  loginWithApple: async () => {},
-  loginWithX: async () => {},
-  logout: async () => {},
-  refresh: async () => {},
-};
-
-/**
  * 認証コンテキスト
  */
 const AuthContext = createContext<AuthContextValue | null>(null);

@@ -54,6 +54,9 @@ const MOCK_USER_ACTIVE = {
  *
  * UnivapayCheckout.create() と checkout.open() をモックし、
  * イベント発火をシミュレートする。
+ * @param page - Playwrightのページオブジェクト
+ * @param shouldSucceed - 決済成功をシミュレートするかどうか
+ * @returns モック初期化のPromise
  */
 function setupUnivapayMock(page: import("@playwright/test").Page, shouldSucceed: boolean = true) {
   return page.addInitScript(`

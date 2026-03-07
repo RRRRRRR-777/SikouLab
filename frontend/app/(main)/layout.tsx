@@ -7,6 +7,9 @@ import { Header } from "@/components/layout/Header";
 /**
  * 認証が必要なページの共通レイアウト。
  * サイドバーとヘッダーを含むメインレイアウトを提供する。
+ * @param root0 - コンポーネントのプロパティ
+ * @param root0.children - 子コンポーネント
+ * @returns メインレイアウト
  */
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);

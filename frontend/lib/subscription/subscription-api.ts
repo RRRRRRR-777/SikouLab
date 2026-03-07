@@ -26,11 +26,6 @@ export interface Plan {
 }
 
 /**
- * プラン一覧レスポンス（バックエンドはプラン配列を直接返す）
- */
-type PlansResponse = Plan[];
-
-/**
  * チェックアウトレスポンス
  */
 interface CheckoutResponse {

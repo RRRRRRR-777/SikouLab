@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";　
+import { describe, expect, it } from "vitest";
 import { NextRequest } from "next/server";
 
 import { __internal__, middleware } from "./middleware";

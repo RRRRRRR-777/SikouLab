@@ -39,6 +39,7 @@ vi.mock("next/link", () => ({
 
 // Next.js Imageのモック
 vi.mock("next/image", () => ({
+  // eslint-disable-next-line @next/next/no-img-element -- テストコード内のモック
   default: ({ src, alt }: { src: string; alt: string }) => <img src={src} alt={alt} />,
 }));
 

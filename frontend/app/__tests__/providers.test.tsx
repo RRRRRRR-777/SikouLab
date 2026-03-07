@@ -74,6 +74,9 @@ describe("Providers", () => {
     /**
      * Providers コンポーネント内で useAuth を呼び出したとき、
      * AuthProvider が内包されていれば onAuthStateChangedHelper が呼ばれ isLoading が false になる。
+     * @param root0 - コンポーネントのプロパティ
+     * @param root0.children - 子コンポーネント
+     * @returns Providersでラップされた子要素
      */
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <Providers>{children}</Providers>
@@ -92,6 +95,9 @@ describe("Providers", () => {
     /**
      * Providers コンポーネント内で TanStack Query の useQueryClient が利用可能なことを確認する。
      * QueryClientProvider は既に providers.tsx に含まれているため、このテストは通過する。
+     * @param root0 - コンポーネントのプロパティ
+     * @param root0.children - 子コンポーネント
+     * @returns Providersでラップされた子要素
      */
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <Providers>{children}</Providers>
